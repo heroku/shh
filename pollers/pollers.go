@@ -21,5 +21,5 @@ func Poll(now time.Time, measurements chan *mm.Measurement) {
 }
 
 func init() {
-	RegisterPoller("load", load.Poll)
+	RegisterPoller(load.Name, load.Poll)
 }

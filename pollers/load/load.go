@@ -8,6 +8,10 @@ import (
 	"time"
 )
 
+const (
+  Name string = "load"
+)
+
 func Poll(now time.Time, measurements chan *mm.Measurement) {
 	data, err := ioutil.ReadFile("/proc/loadavg")
 	if err != nil {
