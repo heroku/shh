@@ -9,7 +9,7 @@ import (
 )
 
 const (
-  Name string = "load"
+	Name string = "load"
 )
 
 func Poll(now time.Time, measurements chan *mm.Measurement) {
