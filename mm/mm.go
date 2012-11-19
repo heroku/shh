@@ -1,8 +1,8 @@
 package mm
 
 import (
-  "fmt"
-  "time"
+	"fmt"
+	"time"
 )
 
 type Measurement struct {
