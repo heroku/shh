@@ -7,9 +7,11 @@ import (
 	"time"
 )
 
-var pollers = make(map[string]func(no time.Time, measurements chan *mm.Measurement))
+type PollerFunc func(now time.Time, measurements chan *mm.Measurement)
 
-func RegisterPoller(name string, f func(now time.Time, measurements chan *mm.Measurement)) {
+var pollers = make(map[string]PollerFunc)
+
+func RegisterPoller(name string, f PollerFunc) {
 	pollers[name] = f
 }
 
