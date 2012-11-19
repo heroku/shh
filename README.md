@@ -13,6 +13,6 @@ This is mostly for me to learn some [Go](http://golang.org/).
 TODO
 -----
 
-* Interface/Types for collectors
+* Better types/interfaces for pollers
 * Config? (do I really want a config)
 * more collectors
