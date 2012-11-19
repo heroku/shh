@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"shh/mm"
 	"shh/pollers/load"
-  "shh/pollers/memory"
+	"shh/pollers/memory"
 	"time"
 )
 
@@ -25,5 +25,5 @@ func Poll(now time.Time, measurements chan *mm.Measurement) {
 
 func init() {
 	RegisterPoller(load.Name, load.Poll)
-  RegisterPoller(memory.Name, memory.Poll)
+	RegisterPoller(memory.Name, memory.Poll)
 }

@@ -1,12 +1,12 @@
 package memory
 
 import (
-  "time"
-  "shh/mm"
+	"shh/mm"
+	"time"
 )
 
 const (
-  Name string = "memory"
+	Name string = "memory"
 )
 
 func Poll(now time.Time, measurements chan *mm.Measurement) {
