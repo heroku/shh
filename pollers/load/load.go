@@ -25,5 +25,4 @@ func Poll(now time.Time, measurements chan *mm.Measurement) {
 	measurements <- &mm.Measurement{now, "scheduling.entities.executing", entities[0]}
 	measurements <- &mm.Measurement{now, "scheduling.entities.total", entities[1]}
 	measurements <- &mm.Measurement{now, "pid.last", fields[4]}
-	return
 }
