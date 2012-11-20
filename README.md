@@ -9,6 +9,11 @@ Use something like [log-shuttle](https://github.com/ryandotsmith/log-shuttle) to
 
 This is mostly for me to learn some [Go](http://golang.org/).
 
+## Install
+
+    go get github.com/freeformz/shh
+
+
 
 TODO
 -----
