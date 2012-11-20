@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"shh/mm"
-	"shh/pollers"
+	"github.com/freeformz/shh/mm"
+	"github.com/freeformz/shh/pollers"
 	"time"
 )
 

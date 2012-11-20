@@ -2,9 +2,9 @@ package pollers
 
 import (
 	"bytes"
+	"github.com/freeformz/shh/mm"
 	"io/ioutil"
 	"log"
-	"shh/mm"
 	"time"
 )
 

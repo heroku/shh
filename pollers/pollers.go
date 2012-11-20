@@ -2,7 +2,7 @@ package pollers
 
 import (
 	"fmt"
-	"shh/mm"
+	"github.com/freeformz/shh/mm"
 	"time"
 )
 
