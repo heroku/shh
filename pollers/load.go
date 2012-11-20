@@ -1,4 +1,4 @@
-package load
+package pollers
 
 import (
 	"bytes"
@@ -8,11 +8,9 @@ import (
 	"time"
 )
 
-const (
-	Name string = "load"
-)
+type Load struct{}
 
-func Poll(now time.Time, measurements chan *mm.Measurement) {
+func (poller Load) Poll(now time.Time, measurements chan *mm.Measurement) {
 	data, err := ioutil.ReadFile("/proc/loadavg")
 	if err != nil {
 		log.Fatal(err)
@@ -25,4 +23,8 @@ func Poll(now time.Time, measurements chan *mm.Measurement) {
 	measurements <- &mm.Measurement{now, "scheduling.entities.executing", entities[0]}
 	measurements <- &mm.Measurement{now, "scheduling.entities.total", entities[1]}
 	measurements <- &mm.Measurement{now, "pid.last", fields[4]}
+}
+
+func (poller Load) Name() string {
+	return "load"
 }

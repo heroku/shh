@@ -3,27 +3,31 @@ package pollers
 import (
 	"fmt"
 	"shh/mm"
-	"shh/pollers/load"
-	"shh/pollers/memory"
 	"time"
 )
 
 type PollerFunc func(now time.Time, measurements chan *mm.Measurement)
 
-var pollers = make(map[string]PollerFunc)
-
-func RegisterPoller(name string, f PollerFunc) {
-	pollers[name] = f
+type Poller interface {
+	Name() string
+	Poll(now time.Time, measurements chan *mm.Measurement)
 }
 
-func Poll(now time.Time, measurements chan *mm.Measurement) {
-	for name, pollerFunc := range pollers {
+func NewMultiPoller() Multi {
+	return Multi{pollers: make(map[string]Poller)}
+}
+
+type Multi struct {
+	pollers map[string]Poller
+}
+
+func (p Multi) RegisterPoller(poller Poller) {
+	p.pollers[poller.Name()] = poller
+}
+
+func (p Multi) Poll(now time.Time, measurements chan *mm.Measurement) {
+	for name, poller := range p.pollers {
 		measurements <- &mm.Measurement{now, fmt.Sprintf("ticking.%s", name), []byte("true")}
-		go pollerFunc(now, measurements)
+		go poller.Poll(now, measurements)
 	}
-}
-
-func init() {
-	RegisterPoller(load.Name, load.Poll)
-	RegisterPoller(memory.Name, memory.Poll)
 }

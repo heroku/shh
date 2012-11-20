@@ -18,8 +18,12 @@ func main() {
 	duration, _ := time.ParseDuration("5s")
 	ticks := time.Tick(duration)
 	go writeOut(measurements)
+
+	mp := pollers.NewMultiPoller()
+	mp.RegisterPoller(pollers.Load{})
+
 	for now := range ticks {
 		measurements <- &mm.Measurement{now, "tick", []byte("true")}
-		pollers.Poll(now, measurements)
+		go mp.Poll(now, measurements)
 	}
 }
