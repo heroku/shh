@@ -19,5 +19,12 @@ TODO
 -----
 
 * Better types/interfaces for pollers
-* Config? (do I really want a config)
 * more collectors
+    * cpu (idle/interrupt/nice/softirq/steal/system/user/wait)
+    * disk free/used
+    * disk merged/octets/ops/time
+    * memory buffered/cached/free/used
+    * net tx/rx errors/octets/packets
+    * processes blocked/fork_rate/paging/running/sleeping/stopped/zombies
+    * swap cached/free/in/out/used
+* small plugin interface for writing Exec'able plugins in any language
