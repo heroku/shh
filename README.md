@@ -20,6 +20,7 @@ TODO
 
 * Better types/interfaces for pollers
 * more collectors
+    * conntrack connections
     * cpu (idle/interrupt/nice/softirq/steal/system/user/wait)
     * disk free/used
     * disk merged/octets/ops/time
