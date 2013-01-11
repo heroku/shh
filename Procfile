@@ -1,1 +1,1 @@
-web: python -m SimpleHTTPServer $PORT
+web: make & ; python -m SimpleHTTPServer $PORT
