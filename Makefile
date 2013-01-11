@@ -38,7 +38,9 @@ build: $(buildpackpath)/bin
 $(buildpackcache):
 	mkdir -p $(buildpath)
 	mkdir -p $(buildpackcache)
-	wget -P $(buildpath) http://codon-buildpacks.s3.amazonaws.com/buildpacks/fabiokung/go-git-only.tgz
+	pushd $(buildpath)
+	curl -O http://codon-buildpacks.s3.amazonaws.com/buildpacks/fabiokung/go-git-only.tgz
+	popd
 
 $(buildpackpath)/bin: $(buildpackcache)
 	mkdir -p $(buildpackpath)
