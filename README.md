@@ -13,7 +13,16 @@ This is mostly for me to learn some [Go](http://golang.org/).
 
     go get github.com/freeformz/shh
 
+Building Debs on Heroku
+---------------------------
 
+```bash
+heroku apps:create freeformz-build-shh --buildpack git://github.com/kr/heroku-buildpack-go.git
+git push heroku
+heroku open
+```
+
+Wait for the deb to be available, download and do what you want with it.
 
 TODO
 -----
