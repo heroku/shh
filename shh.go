@@ -62,9 +62,13 @@ func main() {
 	mp.RegisterPoller(pollers.Load{})
 	mp.RegisterPoller(pollers.Cpu{})
 
+	// do a tick at start
+	go mp.Poll(time.Now(), measurements)
+
 	ticks := time.Tick(duration)
 	for now := range ticks {
 		measurements <- &mm.Measurement{now, "tick", []byte("true")}
 		go mp.Poll(now, measurements)
 	}
+
 }
