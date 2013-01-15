@@ -21,6 +21,7 @@ func main() {
 
 	mp := pollers.NewMultiPoller()
 	mp.RegisterPoller(pollers.Load{})
+	mp.RegisterPoller(pollers.Cpu{})
 
 	for now := range ticks {
 		measurements <- &mm.Measurement{now, "tick", []byte("true")}
