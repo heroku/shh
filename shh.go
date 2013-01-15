@@ -36,10 +36,10 @@ func getDuration() time.Duration {
 }
 
 func main() {
-	measurements := make(chan *mm.Measurement, 100)
-
 	duration := getDuration()
-	fmt.Sprintf("duration=%s", duration)
+	fmt.Printf("duration=%s", duration)
+
+	measurements := make(chan *mm.Measurement, 100)
 	ticks := time.Tick(duration)
 
 	go writeOut(measurements)
