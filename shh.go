@@ -6,11 +6,16 @@ import (
 	"github.com/freeformz/shh/pollers"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 )
 
 const (
 	DefaultInterval = "10s"
+)
+
+var (
+	start = time.Now()
 )
 
 func writeOut(measurements chan *mm.Measurement) {
@@ -35,19 +40,29 @@ func getDuration() time.Duration {
 	return duration
 }
 
+func init() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for sig := range c {
+			fmt.Printf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(start))
+			os.Exit(1)
+		}
+	}()
+}
+
 func main() {
 	duration := getDuration()
-	fmt.Printf("duration=%s", duration)
+	fmt.Printf("shh_start=true at=%s interval=%s\n", start.Format(time.RFC3339Nano), duration)
 
 	measurements := make(chan *mm.Measurement, 100)
-	ticks := time.Tick(duration)
-
 	go writeOut(measurements)
 
 	mp := pollers.NewMultiPoller()
 	mp.RegisterPoller(pollers.Load{})
 	mp.RegisterPoller(pollers.Cpu{})
 
+	ticks := time.Tick(duration)
 	for now := range ticks {
 		measurements <- &mm.Measurement{now, "tick", []byte("true")}
 		go mp.Poll(now, measurements)
