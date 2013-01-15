@@ -20,7 +20,7 @@ func writeOut(measurements chan *mm.Measurement) {
 }
 
 func getDuration() time.Duration {
-	interval := os.Getenv("SSH_INTERVAL")
+	interval := os.Getenv("SHH_INTERVAL")
 
 	if interval == "" {
 		interval = DefaultInterval
