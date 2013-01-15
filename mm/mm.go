@@ -12,5 +12,5 @@ type Measurement struct {
 }
 
 func (m *Measurement) String() string {
-	return fmt.Sprintf("when=%s what=%s value=%s", m.When.Format(time.RFC3339Nano), m.What, m.Value)
+	return fmt.Sprintf("when=%s measure=%s val=%s", m.When.Format(time.RFC3339Nano), m.What, m.Value)
 }
