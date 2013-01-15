@@ -6,11 +6,11 @@ import (
 	"time"
 )
 
-type PollerFunc func(now time.Time, measurements chan *mm.Measurement)
+type PollerFunc func(tick time.Time, measurements chan *mm.Measurement)
 
 type Poller interface {
 	Name() string
-	Poll(now time.Time, measurements chan *mm.Measurement)
+	Poll(tick time.Time, measurements chan *mm.Measurement)
 }
 
 func NewMultiPoller() Multi {
@@ -25,9 +25,9 @@ func (p Multi) RegisterPoller(poller Poller) {
 	p.pollers[poller.Name()] = poller
 }
 
-func (p Multi) Poll(now time.Time, measurements chan *mm.Measurement) {
+func (p Multi) Poll(tick time.Time, measurements chan *mm.Measurement) {
 	for name, poller := range p.pollers {
-		measurements <- &mm.Measurement{now, fmt.Sprintf("ticking.%s", name), []byte("true")}
-		go poller.Poll(now, measurements)
+		measurements <- &mm.Measurement{tick, fmt.Sprintf("ticking.%s", name), []byte("true")}
+		go poller.Poll(tick, measurements)
 	}
 }
