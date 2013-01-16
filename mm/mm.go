@@ -2,7 +2,12 @@ package mm
 
 import (
 	"fmt"
+	"os"
 	"time"
+)
+
+var (
+	source = os.Getenv("SHH_SOURCE")
 )
 
 type Measurement struct {
@@ -12,5 +17,9 @@ type Measurement struct {
 }
 
 func (m *Measurement) String() string {
-	return fmt.Sprintf("when=%s measure=%s val=%s", m.When.Format(time.RFC3339Nano), m.What, m.Value)
+	msg := fmt.Sprintf("when=%s measure=%s val=%s", m.When.Format(time.RFC3339Nano), m.What, m.Value)
+	if source != "" {
+		return fmt.Sprintf("%s source=%s", msg, source)
+	}
+	return msg
 }
