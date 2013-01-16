@@ -13,8 +13,12 @@ This is mostly for me to learn some [Go](http://golang.org/).
 
     go get github.com/freeformz/shh
 
-Building Debs on Heroku
----------------------------
+## environment variables
+
+    SHH_INTERVAL: The interval at which to poll. Defaults to "10s". See: http://golang.org/pkg/time/#ParseDuration
+    SHH_SOURCE: The source for the metric if you want sources. No source is included if this isn't set.
+
+## Building Debs on Heroku
 
 ```bash
 heroku apps:create freeformz-build-shh --buildpack git://github.com/kr/heroku-buildpack-go.git
@@ -24,8 +28,7 @@ heroku open
 
 Wait for the deb to be available, download and do what you want with it.
 
-TODO
------
+## TODO
 
 * Better types/interfaces for pollers
 * more collectors
