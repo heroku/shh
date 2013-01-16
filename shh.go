@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -42,7 +43,8 @@ func getDuration() time.Duration {
 
 func init() {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
+	signal.Notify(c, syscall.SIGINT)
+	signal.Notify(c, syscall.SIGTERM)
 	go func() {
 		for sig := range c {
 			fmt.Printf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(start))
