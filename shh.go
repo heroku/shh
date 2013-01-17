@@ -65,12 +65,13 @@ func main() {
 	mp.RegisterPoller(pollers.Cpu{})
 
 	// do a tick at start
-	go mp.Poll(time.Now(), measurements)
+	go mp.Poll(measurements)
 
 	ticks := time.Tick(duration)
-	for now := range ticks {
-		measurements <- &mm.Measurement{now, "tick", "true"}
-		go mp.Poll(now, measurements)
+	for {
+		select {
+		case <-ticks:
+			go mp.Poll(measurements)
+		}
 	}
-
 }

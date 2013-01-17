@@ -3,7 +3,7 @@ package mm
 import (
 	"fmt"
 	"os"
-	"time"
+	"strings"
 )
 
 var (
@@ -11,13 +11,13 @@ var (
 )
 
 type Measurement struct {
-	When  time.Time
-	What  string
-	Value string
+	Poller string
+	What   []string
+	Value  string
 }
 
 func (m *Measurement) String() string {
-	msg := fmt.Sprintf("when=%s measure=%s val=%s", m.When.Format(time.RFC3339Nano), m.What, m.Value)
+	msg := fmt.Sprintf("measure=%s.%s val=%s", m.Poller, strings.Join(m.What, "."), m.Value)
 	if source != "" {
 		return fmt.Sprintf("%s source=%s", msg, source)
 	}

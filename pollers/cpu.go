@@ -7,12 +7,11 @@ import (
 	"log"
 	"os"
 	"strings"
-	"time"
 )
 
 type Cpu struct{}
 
-func (poller Cpu) Poll(tick time.Time, measurements chan *mm.Measurement) {
+func (poller Cpu) Poll(measurements chan<- *mm.Measurement) {
 	file, err := os.Open("/proc/stat")
 	if err != nil {
 		log.Fatal(err)
@@ -32,15 +31,15 @@ func (poller Cpu) Poll(tick time.Time, measurements chan *mm.Measurement) {
 		if strings.HasPrefix(line, "cpu") {
 			fields := strings.Fields(line)
 			cpu := fields[0]
-			measurements <- &mm.Measurement{tick, cpu + ".user", fields[1]}
-			measurements <- &mm.Measurement{tick, cpu + ".nice", fields[2]}
-			measurements <- &mm.Measurement{tick, cpu + ".system", fields[3]}
-			measurements <- &mm.Measurement{tick, cpu + ".idle", fields[4]}
-			measurements <- &mm.Measurement{tick, cpu + ".iowait", fields[5]}
-			measurements <- &mm.Measurement{tick, cpu + ".irq", fields[6]}
-			measurements <- &mm.Measurement{tick, cpu + ".softirq", fields[7]}
-			measurements <- &mm.Measurement{tick, cpu + ".steal", fields[8]}
-			measurements <- &mm.Measurement{tick, cpu + ".guest", fields[9]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "user"}, fields[1]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "nice"}, fields[2]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "system"}, fields[3]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "idle"}, fields[4]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "iowait"}, fields[5]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "irq"}, fields[6]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "softirq"}, fields[7]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "steal"}, fields[8]}
+			measurements <- &mm.Measurement{poller.Name(), []string{cpu, "guest"}, fields[9]}
 		}
 	}
 }
