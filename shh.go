@@ -63,6 +63,7 @@ func main() {
 	mp := pollers.NewMultiPoller()
 	mp.RegisterPoller(pollers.Load{})
 	mp.RegisterPoller(pollers.Cpu{})
+	mp.RegisterPoller(pollers.Df{})
 
 	// do a tick at start
 	go mp.Poll(measurements)
