@@ -13,7 +13,7 @@ var (
 type Measurement struct {
 	When  time.Time
 	What  string
-	Value []byte
+	Value string
 }
 
 func (m *Measurement) String() string {

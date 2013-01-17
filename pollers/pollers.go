@@ -27,7 +27,7 @@ func (p Multi) RegisterPoller(poller Poller) {
 
 func (p Multi) Poll(tick time.Time, measurements chan *mm.Measurement) {
 	for name, poller := range p.pollers {
-		measurements <- &mm.Measurement{tick, fmt.Sprintf("ticking.%s", name), []byte("true")}
+		measurements <- &mm.Measurement{tick, fmt.Sprintf("ticking.%s", name), "true"}
 		go poller.Poll(tick, measurements)
 	}
 }

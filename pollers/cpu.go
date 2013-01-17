@@ -2,11 +2,11 @@ package pollers
 
 import (
 	"bufio"
-	"bytes"
 	"github.com/freeformz/shh/mm"
 	"io"
 	"log"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -17,10 +17,11 @@ func (poller Cpu) Poll(tick time.Time, measurements chan *mm.Measurement) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer file.Close()
 
 	reader := bufio.NewReader(file)
 	for {
-		line, err := reader.ReadBytes('\n')
+		line, err := reader.ReadString('\n')
 		if err != nil {
 			if err == io.EOF {
 				break
@@ -28,9 +29,9 @@ func (poller Cpu) Poll(tick time.Time, measurements chan *mm.Measurement) {
 			log.Fatal(err)
 		}
 
-		if bytes.HasPrefix(line, []byte("cpu")) {
-			fields := bytes.Fields(line)
-			cpu := string(fields[0])
+		if strings.HasPrefix(line, "cpu") {
+			fields := strings.Fields(line)
+			cpu := fields[0]
 			measurements <- &mm.Measurement{tick, cpu + ".user", fields[1]}
 			measurements <- &mm.Measurement{tick, cpu + ".nice", fields[2]}
 			measurements <- &mm.Measurement{tick, cpu + ".system", fields[3]}

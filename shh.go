@@ -69,7 +69,7 @@ func main() {
 
 	ticks := time.Tick(duration)
 	for now := range ticks {
-		measurements <- &mm.Measurement{now, "tick", []byte("true")}
+		measurements <- &mm.Measurement{now, "tick", "true"}
 		go mp.Poll(now, measurements)
 	}
 
