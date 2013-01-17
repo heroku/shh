@@ -33,7 +33,6 @@ Wait for the deb to be available, download and do what you want with it.
 * Better types/interfaces for pollers
 * more collectors
     * conntrack connections
-    * disk free/used
     * disk merged/octets/ops/time
     * memory buffered/cached/free/used
     * net tx/rx errors/octets/packets
