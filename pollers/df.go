@@ -27,6 +27,9 @@ func init() {
 		typesEnv = TYPES_DEFAULTS
 	}
 	types = strings.Split(typesEnv, ",")
+	if !sort.StringsAreSorted(types) {
+		sort.Strings(types)
+	}
 }
 
 type Df struct{}
