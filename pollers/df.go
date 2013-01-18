@@ -31,7 +31,32 @@ func init() {
 
 type Df struct{}
 
-func massagePath(path string) string {
+func (poller Df) Poll(measurements chan<- *mm.Measurement) {
+	buf := new(syscall.Statfs_t)
+	mountpoints := make(chan string)
+
+	go feedMountpoints(mountpoints)
+
+	for mp := range mountpoints {
+		err := syscall.Statfs(mp, buf)
+		if err != nil {
+			log.Fatal(err)
+		}
+		mmp := massageMountPoint(mp)
+		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "total_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Blocks)}
+		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "free_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bfree)}
+		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "avail_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bavail)}
+		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "total_inodes"}, utils.Ui64toa(buf.Files)}
+		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "free_inodes"}, utils.Ui64toa(buf.Ffree)}
+	}
+}
+
+func (poller Df) Name() string {
+	return "df"
+}
+
+// Utility functions
+func massageMountPoint(path string) string {
 	switch path {
 	case "/":
 		return "root"
@@ -43,7 +68,8 @@ func massagePath(path string) string {
 	return path
 }
 
-func (poller Df) Poll(measurements chan<- *mm.Measurement) {
+func feedMountpoints(mountpoints chan<- string) {
+	defer close(mountpoints)
 	file, err := os.Open("/proc/mounts")
 	if err != nil {
 		log.Fatal(err)
@@ -51,6 +77,7 @@ func (poller Df) Poll(measurements chan<- *mm.Measurement) {
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
+
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
@@ -59,28 +86,11 @@ func (poller Df) Poll(measurements chan<- *mm.Measurement) {
 			}
 			log.Fatal(err)
 		}
-
-		buf := new(syscall.Statfs_t)
-
 		fields := strings.Fields(line)
 		fsType := fields[2]
 		i := sort.SearchStrings(types, fsType)
 		if i < len(types) && types[i] == fsType {
-			path := fields[1]
-			err := syscall.Statfs(path, buf)
-			if err != nil {
-				log.Fatal(err)
-			}
-			massagedPath := massagePath(path)
-			measurements <- &mm.Measurement{poller.Name(), []string{massagedPath, "total_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Blocks)}
-			measurements <- &mm.Measurement{poller.Name(), []string{massagedPath, "free_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bfree)}
-			measurements <- &mm.Measurement{poller.Name(), []string{massagedPath, "avail_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bavail)}
-			measurements <- &mm.Measurement{poller.Name(), []string{massagedPath, "total_inodes"}, utils.Ui64toa(buf.Files)}
-			measurements <- &mm.Measurement{poller.Name(), []string{massagedPath, "free_inodes"}, utils.Ui64toa(buf.Ffree)}
+			mountpoints <- fields[1]
 		}
 	}
-}
-
-func (poller Df) Name() string {
-	return "df"
 }
