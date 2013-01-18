@@ -64,6 +64,7 @@ func main() {
 	mp.RegisterPoller(pollers.Load{})
 	mp.RegisterPoller(pollers.Cpu{})
 	mp.RegisterPoller(pollers.Df{})
+	mp.RegisterPoller(pollers.Disk{})
 
 	// do a tick at start
 	go mp.Poll(measurements)
