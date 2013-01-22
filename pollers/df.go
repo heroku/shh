@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"syscall"
+	"time"
 )
 
 const (
@@ -32,9 +33,15 @@ func init() {
 	}
 }
 
-type Df struct{}
+type Df struct {
+	measurements chan<- *mm.Measurement
+}
 
-func (poller Df) Poll(measurements chan<- *mm.Measurement) {
+func NewDfPoller(measurements chan<- *mm.Measurement) Df {
+	return Df{measurements: measurements}
+}
+
+func (poller Df) Poll(tick time.Time) {
 	buf := new(syscall.Statfs_t)
 	mountpoints := make(chan string)
 
@@ -46,11 +53,11 @@ func (poller Df) Poll(measurements chan<- *mm.Measurement) {
 			log.Fatal(err)
 		}
 		mmp := massageMountPoint(mp)
-		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "total_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Blocks)}
-		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "free_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bfree)}
-		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "avail_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bavail)}
-		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "total_inodes"}, utils.Ui64toa(buf.Files)}
-		measurements <- &mm.Measurement{poller.Name(), []string{mmp, "free_inodes"}, utils.Ui64toa(buf.Ffree)}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Blocks), mm.GAUGE}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bfree), mm.GAUGE}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "avail_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bavail), mm.GAUGE}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_inodes"}, utils.Ui64toa(buf.Files), mm.GAUGE}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_inodes"}, utils.Ui64toa(buf.Ffree), mm.GAUGE}
 	}
 }
 

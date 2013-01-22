@@ -9,16 +9,23 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
 	SYS = "/sys/block/"
 )
 
-type Disk struct{}
+type Disk struct {
+	measurements chan<- *mm.Measurement
+}
+
+func NewDiskPoller(measurements chan<- *mm.Measurement) Disk {
+	return Disk{measurements: measurements}
+}
 
 // http://www.kernel.org/doc/Documentation/block/stat.txt
-func (poller Disk) Poll(measurements chan<- *mm.Measurement) {
+func (poller Disk) Poll(tick time.Time) {
 	devices := make(chan string)
 	go feedDevices(devices)
 
@@ -29,19 +36,19 @@ func (poller Disk) Poll(measurements chan<- *mm.Measurement) {
 		}
 
 		fields := strings.Fields(string(statBytes))
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "read", "requests"}, fields[0]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "read", "merges"}, fields[1]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "read", "sectors"}, fields[2]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "read", "ticks"}, fields[3]}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "requests"}, fields[0], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "merges"}, fields[1], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "sectors"}, fields[2], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "ticks"}, fields[3], mm.COUNTER}
 
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "write", "requests"}, fields[4]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "write", "merges"}, fields[5]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "write", "sectors"}, fields[6]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "write", "ticks"}, fields[7]}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "requests"}, fields[4], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "merges"}, fields[5], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "sectors"}, fields[6], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "ticks"}, fields[7], mm.COUNTER}
 
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "in_flight", "requests"}, fields[8]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "io", "ticks"}, fields[9]}
-		measurements <- &mm.Measurement{poller.Name(), []string{device, "queue", "time"}, fields[10]}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "in_flight", "requests"}, fields[8], mm.GAUGE}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "io", "ticks"}, fields[9], mm.COUNTER}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "queue", "time"}, fields[10], mm.COUNTER}
 	}
 }
 
