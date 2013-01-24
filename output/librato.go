@@ -1,4 +1,4 @@
-package outputters
+package output
 
 import (
 	"bytes"

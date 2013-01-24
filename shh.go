@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"github.com/freeformz/shh/mm"
-	"github.com/freeformz/shh/outputters"
+	"github.com/freeformz/shh/output"
 	"github.com/freeformz/shh/pollers"
 	"github.com/freeformz/shh/utils"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -13,12 +14,14 @@ import (
 )
 
 const (
-	DEFAULT_INTERVAL = "10s" // Default tick interval for pollers
+	DEFAULT_INTERVAL  = "10s"            // Default tick interval for pollers
+	DEFAULT_OUTPUTTER = "stdoutl2metder" // Default outputter
 )
 
 var (
-	Interval = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
-	Start    = time.Now()                                                        // Start time
+	Interval  = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
+	Outputter = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)       // Outputter
+	Start     = time.Now()                                                        // Start time
 )
 
 func init() {
@@ -27,7 +30,7 @@ func init() {
 	signal.Notify(c, syscall.SIGTERM)
 	go func() {
 		for sig := range c {
-			fmt.Printf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(Start))
+			log.Fatalf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(Start))
 			os.Exit(1)
 		}
 	}()
@@ -44,7 +47,10 @@ func main() {
 	mp.RegisterPoller(pollers.NewDfPoller(measurements))
 	mp.RegisterPoller(pollers.NewDiskPoller(measurements))
 
-	outputter := outputters.NewLibratoOutputter(measurements)
+	outputter, err := output.NewOutputter(Outputter, measurements)
+	if err != nil {
+		log.Fatal(err)
+	}
 	outputter.Start()
 
 	// poll at start

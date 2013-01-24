@@ -11,6 +11,14 @@ func Ui64toa(val uint64) string {
 	return strconv.FormatUint(val, 10)
 }
 
+func Atouint64(s string) uint64 {
+	val, err := strconv.ParseUint(s, 10, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return val
+}
+
 // Checks to see if a path exists or not
 func Exists(path string) bool {
 	_, err := os.Stat(path)

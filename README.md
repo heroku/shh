@@ -15,8 +15,22 @@ This is mostly for me to learn some [Go](http://golang.org/).
 
 ## environment variables
 
+### General
+
     SHH_INTERVAL: The interval at which to poll. Defaults to "10s". See: http://golang.org/pkg/time/#ParseDuration
     SHH_SOURCE: The source for the metric if you want sources. No source is included if this isn't set.
+
+### Outputter related
+
+    SHH_OUTPUTTER: The output module to use. Defaults to: "stdoutl2metder". Other choices are: "stdoutl2metraw" & "librato"
+    SHH_LIBRATO_USER: When using the librato outputter, this is the librato username.
+    SHH_LIBRATO_TOKEN: When using the librato outputter, this is the librato API token.
+    SHH_LIBRATO_BATCH_SIZE: When using the librato outputter, this is the metric batch size for each POST. Defaults to: "50"
+    SHH_LIBRATO_BATCH_TIMEOUT: When using the librato outputter, this is the timeout for a batch. Defaults to: "500ms"
+
+### Poller related
+
+    SHH_DF_TYPES: A comma seperated list of filesystem types (ext3, btrfs, tmpfs, etc) to return disk usage stats for. Defaults to: "btrfs,ext3,ext4,tmpfs,xfs"
 
 ## Building Debs on Heroku
 
