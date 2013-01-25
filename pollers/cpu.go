@@ -45,6 +45,8 @@ func calcPercent(val, total float64) string {
 }
 
 func (poller Cpu) Poll(tick time.Time) {
+  var current, last CpuValues
+
 	file, err := os.Open("/proc/stat")
 	if err != nil {
 		log.Fatal(err)
@@ -65,7 +67,7 @@ func (poller Cpu) Poll(tick time.Time) {
 			fields := strings.Fields(line)
 			cpu := fields[0]
 
-			var current = CpuValues{}
+			current = CpuValues{}
 
 			current.User = utils.Atofloat64(fields[1])
 			current.Nice = utils.Atofloat64(fields[2])
@@ -77,7 +79,7 @@ func (poller Cpu) Poll(tick time.Time) {
 			current.Steal = utils.Atofloat64(fields[8])
 			current.Guest = utils.Atofloat64(fields[9])
 
-			var last = poller.last[cpu]
+			last = poller.last[cpu]
 
 			if last.Total() != 0 {
 				cTotal := current.Total() - last.Total()
