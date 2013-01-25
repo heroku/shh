@@ -47,10 +47,10 @@ func NewLibratoOutputter(measurements <-chan *mm.Measurement) Librato {
 
 func (out Librato) Start() {
 	go out.deliver()
-	go out.Output()
+	go out.batch()
 }
 
-func (out Librato) Output() {
+func (out Librato) batch() {
 	ticker := time.Tick(batchTimeout)
 	batch := makeBatch()
 	for {
