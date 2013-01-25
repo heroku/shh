@@ -11,6 +11,14 @@ func Ui64toa(val uint64) string {
 	return strconv.FormatUint(val, 10)
 }
 
+func Atofloat64(s string) float64 {
+	val, err := strconv.ParseFloat(s, 64)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return val
+}
+
 func Atouint64(s string) uint64 {
 	val, err := strconv.ParseUint(s, 10, 0)
 	if err != nil {
