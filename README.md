@@ -1,13 +1,7 @@
-Shh
+System Heuristics Herald (aka Shh)
 ----
 
-System metric collection and reporting to STDOUT.
-
-The general idea is that delivery should be seperated from collection.
-
-Use something like [log-shuttle](https://github.com/ryandotsmith/log-shuttle) to deliver the metrics somewhere else.
-
-This is mostly for me to learn some [Go](http://golang.org/).
+Gather and relay system metrics
 
 ## Install
 
@@ -44,7 +38,6 @@ Wait for the deb to be available, download and do what you want with it.
 
 ## TODO
 
-* Better types/interfaces for pollers
 * more collectors
     * conntrack connections
     * disk merged/octets/ops/time
