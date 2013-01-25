@@ -18,15 +18,11 @@ const (
 )
 
 var (
-	typesEnv = os.Getenv("SHH_DF_TYPES")
+	typesEnv = utils.GetEnvWithDefault("SHH_DF_TYPES", TYPES_DEFAULTS)
 	types    []string
 )
 
 func init() {
-	// Nothing set, so defaults!
-	if typesEnv == "" {
-		typesEnv = TYPES_DEFAULTS
-	}
 	types = strings.Split(typesEnv, ",")
 	if !sort.StringsAreSorted(types) {
 		sort.Strings(types)
