@@ -7,7 +7,6 @@ import (
 
 type Outputter interface {
 	Start()
-	Output()
 }
 
 //
