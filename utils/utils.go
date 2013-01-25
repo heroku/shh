@@ -19,6 +19,10 @@ func Atofloat64(s string) float64 {
 	return val
 }
 
+func PercentFormat(val float64) string {
+	return strconv.FormatFloat(val, 'f', 2, 64)
+}
+
 func Atouint64(s string) uint64 {
 	val, err := strconv.ParseUint(s, 10, 0)
 	if err != nil {

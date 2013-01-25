@@ -28,6 +28,24 @@ func (cv CpuValues) Total() float64 {
 	return cv.User + cv.Nice + cv.System + cv.Idle + cv.Iowait + cv.Irq + cv.Softirq + cv.Steal + cv.Guest
 }
 
+func (cv CpuValues) DiffPercent(last CpuValues) CpuValues {
+	totalDifference := cv.Total() - last.Total()
+	if totalDifference == 0 {
+		return CpuValues{}
+	}
+	return CpuValues{
+		User:    (cv.User - last.User) / totalDifference * 100,
+		Nice:    (cv.Nice - last.Nice) / totalDifference * 100,
+		System:  (cv.System - last.System) / totalDifference * 100,
+		Idle:    (cv.Idle - last.Idle) / totalDifference * 100,
+		Iowait:  (cv.Iowait - last.Iowait) / totalDifference * 100,
+		Irq:     (cv.Irq - last.Irq) / totalDifference * 100,
+		Softirq: (cv.Softirq - last.Softirq) / totalDifference * 100,
+		Steal:   (cv.Steal - last.Steal) / totalDifference * 100,
+		Guest:   (cv.Guest - last.Guest) / totalDifference * 100,
+	}
+}
+
 type Cpu struct {
 	measurements chan<- *mm.Measurement
 	last         map[string]CpuValues
@@ -37,15 +55,8 @@ func NewCpuPoller(measurements chan<- *mm.Measurement) Cpu {
 	return Cpu{measurements: measurements, last: make(map[string]CpuValues)}
 }
 
-func calcPercent(val, total float64) string {
-	if total == 0 {
-		return "0"
-	}
-	return strconv.FormatFloat(val/total*100, 'f', 2, 64)
-}
-
 func (poller Cpu) Poll(tick time.Time) {
-  var current, last CpuValues
+	var current, last, percent CpuValues
 
 	file, err := os.Open("/proc/stat")
 	if err != nil {
@@ -67,41 +78,32 @@ func (poller Cpu) Poll(tick time.Time) {
 			fields := strings.Fields(line)
 			cpu := fields[0]
 
-			current = CpuValues{}
-
-			current.User = utils.Atofloat64(fields[1])
-			current.Nice = utils.Atofloat64(fields[2])
-			current.System = utils.Atofloat64(fields[3])
-			current.Idle = utils.Atofloat64(fields[4])
-			current.Iowait = utils.Atofloat64(fields[5])
-			current.Irq = utils.Atofloat64(fields[6])
-			current.Softirq = utils.Atofloat64(fields[7])
-			current.Steal = utils.Atofloat64(fields[8])
-			current.Guest = utils.Atofloat64(fields[9])
+			current = CpuValues{
+				User:    utils.Atofloat64(fields[1]),
+				Nice:    utils.Atofloat64(fields[2]),
+				System:  utils.Atofloat64(fields[3]),
+				Idle:    utils.Atofloat64(fields[4]),
+				Iowait:  utils.Atofloat64(fields[5]),
+				Irq:     utils.Atofloat64(fields[6]),
+				Softirq: utils.Atofloat64(fields[7]),
+				Steal:   utils.Atofloat64(fields[8]),
+				Guest:   utils.Atofloat64(fields[9]),
+			}
 
 			last = poller.last[cpu]
 
 			if last.Total() != 0 {
-				cTotal := current.Total() - last.Total()
-				cUser := current.User - last.User
-				cNice := current.Nice - last.Nice
-				cSystem := current.System - last.System
-				cIdle := current.Idle - last.Idle
-				cIowait := current.Iowait - last.Iowait
-				cIrq := current.Irq - last.Irq
-				cSoftirq := current.Softirq - last.Softirq
-				cSteal := current.Steal - last.Steal
-				cGuest := current.Guest - last.Guest
+				percent = current.DiffPercent(last)
 
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "user"}, calcPercent(cUser, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "nice"}, calcPercent(cNice, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "system"}, calcPercent(cSystem, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "idle"}, calcPercent(cIdle, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "iowait"}, calcPercent(cIowait, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "irq"}, calcPercent(cIrq, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "softirq"}, calcPercent(cSoftirq, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "steal"}, calcPercent(cSteal, cTotal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "guest"}, calcPercent(cGuest, cTotal), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "user"}, utils.PercentFormat(percent.User), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "nice"}, utils.PercentFormat(percent.Nice), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "system"}, utils.PercentFormat(percent.System), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "idle"}, utils.PercentFormat(percent.Idle), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "iowait"}, utils.PercentFormat(percent.Iowait), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "irq"}, utils.PercentFormat(percent.Irq), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "softirq"}, utils.PercentFormat(percent.Softirq), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "steal"}, utils.PercentFormat(percent.Steal), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "guest"}, utils.PercentFormat(percent.Guest), mm.GAUGE}
 			}
 
 			poller.last[cpu] = current
