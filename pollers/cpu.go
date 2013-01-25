@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -95,15 +94,15 @@ func (poller Cpu) Poll(tick time.Time) {
 			if last.Total() != 0 {
 				percent = current.DiffPercent(last)
 
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "user"}, utils.PercentFormat(percent.User), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "nice"}, utils.PercentFormat(percent.Nice), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "system"}, utils.PercentFormat(percent.System), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "idle"}, utils.PercentFormat(percent.Idle), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "iowait"}, utils.PercentFormat(percent.Iowait), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "irq"}, utils.PercentFormat(percent.Irq), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "softirq"}, utils.PercentFormat(percent.Softirq), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "steal"}, utils.PercentFormat(percent.Steal), mm.GAUGE}
-				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "guest"}, utils.PercentFormat(percent.Guest), mm.GAUGE}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "user"}, percent.User}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "nice"}, percent.Nice}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "system"}, percent.System}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "idle"}, percent.Idle}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "iowait"}, percent.Iowait}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "irq"}, percent.Irq}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "softirq"}, percent.Softirq}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "steal"}, percent.Steal}
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "guest"}, percent.Guest}
 			}
 
 			poller.last[cpu] = current

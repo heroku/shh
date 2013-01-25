@@ -25,11 +25,11 @@ func (out StdOutL2MetRaw) Output() {
 
 type StdOutL2MetDer struct {
 	incoming <-chan *mm.Measurement
-	last     map[string]string
+	last     map[string]*mm.Measurement
 }
 
 func NewStdOutL2MetDer(measurements <-chan *mm.Measurement) StdOutL2MetDer {
-	return StdOutL2MetDer{measurements, make(map[string]string)}
+	return StdOutL2MetDer{measurements, make(map[string]*mm.Measurement)}
 }
 
 func (out StdOutL2MetDer) Start() {
@@ -38,23 +38,20 @@ func (out StdOutL2MetDer) Start() {
 
 func (out StdOutL2MetDer) Output() {
 	for measurement := range out.incoming {
-		switch measurement.Type {
-		case mm.GAUGE:
+		switch measurement.Value.(type) {
+		case float64:
 			{
 				fmt.Println(measurement)
 			}
-		case mm.COUNTER:
+		case uint64:
 			{
 				key := measurement.Measured()
 				last := out.last[key]
-				if last != "" {
-					out := fmt.Sprintf("when=%s measure=%s val=%s", measurement.Timestamp(), key, measurement.Difference(last))
-					if measurement.Source() != "" {
-						out = fmt.Sprintf("%s source=%s", out, measurement.Source())
-					}
-					fmt.Println(out)
+				if last != nil {
+					tmp := &mm.Measurement{measurement.When, measurement.Poller, measurement.What, measurement.Difference(last)}
+					fmt.Println(tmp)
 				}
-				out.last[key] = measurement.Value
+				out.last[key] = measurement
 			}
 		}
 	}

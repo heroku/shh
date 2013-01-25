@@ -2,7 +2,6 @@ package pollers
 
 import (
 	"github.com/freeformz/shh/mm"
-	"strconv"
 	"time"
 )
 
@@ -12,13 +11,13 @@ type Poller interface {
 }
 
 func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
-	return Multi{pollers: make(map[string]Poller), measurements: measurements, counts: make(map[string]int)}
+	return Multi{pollers: make(map[string]Poller), measurements: measurements, counts: make(map[string]uint64)}
 }
 
 type Multi struct {
 	measurements chan<- *mm.Measurement
 	pollers      map[string]Poller
-	counts       map[string]int
+	counts       map[string]uint64
 }
 
 func (p Multi) RegisterPoller(poller Poller) {
@@ -28,8 +27,10 @@ func (p Multi) RegisterPoller(poller Poller) {
 
 func (p Multi) Poll(tick time.Time) {
 	for name, poller := range p.pollers {
-		p.counts[name] += 1
-		p.measurements <- &mm.Measurement{tick, p.Name(), []string{"ticks", name, "count"}, strconv.Itoa(p.counts[name]), mm.COUNTER}
+		count := p.counts[name]
+		count += 1
+		p.counts[name] = count
+		p.measurements <- &mm.Measurement{tick, p.Name(), []string{"ticks", name, "count"}, count}
 		go poller.Poll(tick)
 	}
 }

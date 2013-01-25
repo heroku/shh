@@ -49,11 +49,11 @@ func (poller Df) Poll(tick time.Time) {
 			log.Fatal(err)
 		}
 		mmp := massageMountPoint(mp)
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Blocks), mm.GAUGE}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bfree), mm.GAUGE}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "avail_bytes"}, utils.Ui64toa(uint64(buf.Bsize) * buf.Bavail), mm.GAUGE}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_inodes"}, utils.Ui64toa(buf.Files), mm.GAUGE}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_inodes"}, utils.Ui64toa(buf.Ffree), mm.GAUGE}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_bytes"}, float64(uint64(buf.Bsize) * buf.Blocks)}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_bytes"}, float64(uint64(buf.Bsize) * buf.Bfree)}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "avail_bytes"}, float64(uint64(buf.Bsize) * buf.Bavail)}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_inodes"}, float64(buf.Files)}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_inodes"}, float64(buf.Ffree)}
 	}
 }
 

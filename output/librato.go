@@ -14,10 +14,10 @@ import (
 )
 
 type LibratoMetric struct {
-	Name   string `json:"name"`
-	Value  string `json:"value"`
-	When   int64  `json:"measure_time"`
-	Source string `json:"source,omitempty"`
+	Name   string      `json:"name"`
+	Value  interface{} `json:"value"`
+	When   int64       `json:"measure_time"`
+	Source string      `json:"source,omitempty"`
 }
 
 type PostBody struct {
@@ -80,10 +80,10 @@ func (out Librato) deliver() {
 		counters := make([]LibratoMetric, 0, len(batch))
 		for _, metric := range batch {
 			libratoMetric := LibratoMetric{metric.Measured(), metric.Value, metric.When.Unix(), metric.Source()}
-			switch metric.Type {
-			case mm.COUNTER:
+			switch metric.Value.(type) {
+			case uint64:
 				counters = append(counters, libratoMetric)
-			case mm.GAUGE:
+			case float64:
 				gauges = append(gauges, libratoMetric)
 			}
 		}

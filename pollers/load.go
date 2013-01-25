@@ -3,6 +3,7 @@ package pollers
 import (
 	"bufio"
 	"github.com/freeformz/shh/mm"
+	"github.com/freeformz/shh/utils"
 	"log"
 	"os"
 	"strings"
@@ -30,13 +31,13 @@ func (poller Load) Poll(tick time.Time) {
 		log.Fatal(err)
 	}
 	fields := strings.Fields(line)
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"1m"}, fields[0], mm.GAUGE}
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"5m"}, fields[1], mm.GAUGE}
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"15m"}, fields[2], mm.GAUGE}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"1m"}, utils.Atofloat64(fields[0])}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"5m"}, utils.Atofloat64(fields[1])}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"15m"}, utils.Atofloat64(fields[2])}
 	entities := strings.Split(fields[3], "/")
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"scheduling", "entities", "executing"}, entities[0], mm.GAUGE}
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"scheduling", "entities", "total"}, entities[1], mm.GAUGE}
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"pid", "last"}, fields[4], mm.GAUGE}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"scheduling", "entities", "executing"}, utils.Atofloat64(entities[0])}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"scheduling", "entities", "total"}, utils.Atofloat64(entities[1])}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"pid", "last"}, utils.Atofloat64(fields[4])}
 }
 
 func (poller Load) Name() string {
