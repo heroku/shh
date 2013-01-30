@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	SYS = "/sys/block/"
+	SYS         = "/sys/block/"
+	SECTOR_SIZE = 512
 )
 
 type Disk struct {
@@ -38,12 +39,12 @@ func (poller Disk) Poll(tick time.Time) {
 		fields := strings.Fields(string(statBytes))
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "requests"}, utils.Atouint64(fields[0])}
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "merges"}, utils.Atouint64(fields[1])}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "sectors"}, utils.Atouint64(fields[2])}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "bytes"}, utils.Atouint64(fields[2]) * SECTOR_SIZE}
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "read", "ticks"}, utils.Atouint64(fields[3])}
 
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "requests"}, utils.Atouint64(fields[4])}
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "merges"}, utils.Atouint64(fields[5])}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "sectors"}, utils.Atouint64(fields[6])}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "bytes"}, utils.Atouint64(fields[6]) * SECTOR_SIZE}
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "write", "ticks"}, utils.Atouint64(fields[7])}
 
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "in_flight", "requests"}, utils.Atofloat64(fields[8])}
