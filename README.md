@@ -45,4 +45,7 @@ Wait for the deb to be available, download and do what you want with it.
     * net tx/rx errors/octets/packets
     * processes blocked/fork_rate/paging/running/sleeping/stopped/zombies
     * swap cached/free/in/out/used
+    * ntp stats
+    * nagios 3 stats
+    * process statistics
 * small plugin interface for writing Exec'able plugins in any language
