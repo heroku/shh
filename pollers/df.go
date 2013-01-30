@@ -49,11 +49,15 @@ func (poller Df) Poll(tick time.Time) {
 			log.Fatal(err)
 		}
 		mmp := massageMountPoint(mp)
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_bytes"}, float64(uint64(buf.Bsize) * buf.Blocks)}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_bytes"}, float64(uint64(buf.Bsize) * buf.Bfree)}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "avail_bytes"}, float64(uint64(buf.Bsize) * buf.Bavail)}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_inodes"}, float64(buf.Files)}
-		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free_inodes"}, float64(buf.Ffree)}
+		total_bytes := float64(uint64(buf.Bsize) * buf.Blocks)
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total_bytes"}, total_bytes}
+		user_free_bytes := float64(uint64(buf.Bsize) * buf.Bavail)
+		root_free_bytes := float64(uint64(buf.Bsize)*buf.Bfree) - user_free_bytes
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "root", "free", "bytes"}, root_free_bytes}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "user", "free", "bytes"}, user_free_bytes}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "used", "bytes"}, total_bytes - root_free_bytes - user_free_bytes}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "total", "inodes"}, float64(buf.Files)}
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{mmp, "free", "inodes"}, float64(buf.Ffree)}
 	}
 }
 
