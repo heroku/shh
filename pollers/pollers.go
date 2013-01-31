@@ -2,8 +2,23 @@ package pollers
 
 import (
 	"github.com/freeformz/shh/mm"
+	"github.com/freeformz/shh/utils"
+	"strings"
 	"time"
 )
+
+const (
+	DEFAULT_POLLERS = "load,cpu,df,disk" // Default pollers
+)
+
+var (
+	pollersEnv = utils.GetEnvWithDefault("SHH_POLLERS", DEFAULT_POLLERS)
+	pollers    []string
+)
+
+func init() {
+	pollers = strings.Split(pollersEnv, ",")
+}
 
 type Poller interface {
 	Name() string
@@ -11,7 +26,22 @@ type Poller interface {
 }
 
 func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
-	return Multi{pollers: make(map[string]Poller), measurements: measurements, counts: make(map[string]uint64)}
+	mp := Multi{pollers: make(map[string]Poller), measurements: measurements, counts: make(map[string]uint64)}
+
+	for _, poller := range pollers {
+		switch poller {
+		case "load":
+			mp.RegisterPoller(NewLoadPoller(measurements))
+		case "cpu":
+			mp.RegisterPoller(NewCpuPoller(measurements))
+		case "df":
+			mp.RegisterPoller(NewDfPoller(measurements))
+		case "disk":
+			mp.RegisterPoller(NewDiskPoller(measurements))
+		}
+	}
+
+	return mp
 }
 
 type Multi struct {

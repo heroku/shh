@@ -42,10 +42,6 @@ func main() {
 	measurements := make(chan *mm.Measurement, 100)
 
 	mp := pollers.NewMultiPoller(measurements)
-	mp.RegisterPoller(pollers.NewLoadPoller(measurements))
-	mp.RegisterPoller(pollers.NewCpuPoller(measurements))
-	mp.RegisterPoller(pollers.NewDfPoller(measurements))
-	mp.RegisterPoller(pollers.NewDiskPoller(measurements))
 
 	outputter, err := output.NewOutputter(Outputter, measurements)
 	if err != nil {
