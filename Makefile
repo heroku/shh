@@ -1,6 +1,6 @@
 #!/usr/bin/env make -f
 
-VERSION := 0.0.10
+VERSION := 0.0.11
 
 tempdir        := $(shell mktemp -d)
 controldir     := $(tempdir)/DEBIAN
