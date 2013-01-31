@@ -39,14 +39,4 @@ Wait for the deb to be available, download and do what you want with it.
 
 ## TODO
 
-* more collectors
-    * conntrack connections
-    * disk merged/octets/ops/time
-    * memory buffered/cached/free/used
-    * net tx/rx errors/octets/packets
-    * processes blocked/fork_rate/paging/running/sleeping/stopped/zombies
-    * swap cached/free/in/out/used
-    * ntp stats
-    * nagios 3 stats
-    * process statistics
-* small plugin interface for writing Exec'able plugins in any language
+See [Github Issues](https://github.com/freeformz/shh/issues)
