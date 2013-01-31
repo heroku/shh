@@ -45,7 +45,7 @@ func (current *Measurement) Difference(last *Measurement) uint64 {
 	// what the max value is (32, 64 or 128 bit)
 	// Leads to a little, loss, but should be minimal overall
 	cv := current.Value.(uint64)
-	lv := current.Value.(uint64)
+	lv := last.Value.(uint64)
 	if cv < lv {
 		return cv
 	}
