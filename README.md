@@ -13,6 +13,7 @@ Gather and relay system metrics
 
     SHH_INTERVAL: The interval at which to poll. Defaults to "10s". See: http://golang.org/pkg/time/#ParseDuration
     SHH_SOURCE: The source for the metric if you want sources. No source is included if this isn't set.
+    SHH_POLLERS: A comma seperated list of pollers to run. Defaults to "load,cpu,df,disk"
 
 ### Outputter related
 
