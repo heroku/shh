@@ -28,7 +28,7 @@ func PercentFormat(val float64) string {
 }
 
 func Atouint64(s string) uint64 {
-	val, err := strconv.ParseUint(s, 10, 0)
+	val, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
 		log.Fatal(err)
 	}
