@@ -18,16 +18,8 @@ const (
 )
 
 var (
-	typesEnv = utils.GetEnvWithDefault("SHH_DF_TYPES", TYPES_DEFAULTS)
-	types    []string
+	types = utils.GetEnvWithDefaultStrings("SHH_DF_TYPES", TYPES_DEFAULTS)
 )
-
-func init() {
-	types = strings.Split(typesEnv, ",")
-	if !sort.StringsAreSorted(types) {
-		sort.Strings(types)
-	}
-}
 
 type Df struct {
 	measurements chan<- *mm.Measurement

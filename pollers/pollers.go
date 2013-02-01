@@ -3,7 +3,6 @@ package pollers
 import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"strings"
 	"time"
 )
 
@@ -12,13 +11,8 @@ const (
 )
 
 var (
-	pollersEnv = utils.GetEnvWithDefault("SHH_POLLERS", DEFAULT_POLLERS)
-	pollers    []string
+	pollers = utils.GetEnvWithDefaultStrings("SHH_POLLERS", DEFAULT_POLLERS)
 )
-
-func init() {
-	pollers = strings.Split(pollersEnv, ",")
-}
 
 type Poller interface {
 	Name() string

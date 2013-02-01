@@ -1,14 +1,14 @@
 package pollers
 
 import (
-	"bufio"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"io"
-	"log"
-	"os"
 	"strings"
 	"time"
+)
+
+const (
+	CPU_DATA = "/proc/stat"
 )
 
 type CpuValues struct {
@@ -55,24 +55,9 @@ func NewCpuPoller(measurements chan<- *mm.Measurement) Cpu {
 }
 
 func (poller Cpu) Poll(tick time.Time) {
-	var current, last, percent CpuValues
+	var current, percent CpuValues
 
-	file, err := os.Open("/proc/stat")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	reader := bufio.NewReader(file)
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
-			}
-			log.Fatal(err)
-		}
-
+	for line := range utils.FileLineChannel(CPU_DATA) {
 		if strings.HasPrefix(line, "cpu") {
 			fields := strings.Fields(line)
 			cpu := fields[0]
@@ -89,9 +74,9 @@ func (poller Cpu) Poll(tick time.Time) {
 				Guest:   utils.Atofloat64(fields[9]),
 			}
 
-			last = poller.last[cpu]
+			last, exists := poller.last[cpu]
 
-			if last.Total() != 0 {
+			if exists {
 				percent = current.DiffPercent(last)
 
 				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{cpu, "user"}, percent.User}

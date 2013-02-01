@@ -1,9 +1,13 @@
 package utils
 
 import (
+	"bufio"
+	"io"
 	"log"
 	"os"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -78,4 +82,42 @@ func GetEnvWithDefaultDuration(env string, def string) time.Duration {
 	}
 
 	return d
+}
+
+// Returns a slice of sorted strings from the environment or default split on ,
+// So "foo,bar" returns ["bar","foo"]
+func GetEnvWithDefaultStrings(env string, def string) []string {
+	tmp := strings.Split(GetEnvWithDefault(env, def), ",")
+	if !sort.StringsAreSorted(tmp) {
+		sort.Strings(tmp)
+	}
+	return tmp
+}
+
+// Returns a channeel that streams the lines from the file at fpath
+func FileLineChannel(fpath string) <-chan string {
+	c := make(chan string)
+
+	go func(fpath string, cs chan<- string) {
+		defer close(cs)
+		file, err := os.Open(fpath)
+		if err == nil {
+			defer file.Close()
+			buf := bufio.NewReader(file)
+
+			for {
+				line, err := buf.ReadString('\n')
+				switch err {
+				case io.EOF:
+					break
+				case nil:
+					cs <- line
+				default:
+					log.Fatal(err)
+				}
+			}
+		}
+	}(fpath, c)
+
+	return c
 }
