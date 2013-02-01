@@ -1,13 +1,9 @@
 package pollers
 
 import (
-	"bufio"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"io"
 	"log"
-	"os"
-	"sort"
 	"strings"
 	"syscall"
 	"time"
@@ -31,11 +27,8 @@ func NewDfPoller(measurements chan<- *mm.Measurement) Df {
 
 func (poller Df) Poll(tick time.Time) {
 	buf := new(syscall.Statfs_t)
-	mountpoints := make(chan string)
 
-	go feedMountpoints(mountpoints)
-
-	for mp := range mountpoints {
+	for mp := range mountpointChannel() {
 		err := syscall.Statfs(mp, buf)
 		if err != nil {
 			log.Fatal(err)
@@ -58,6 +51,8 @@ func (poller Df) Name() string {
 }
 
 // Utility functions
+// Massages the mount point so that "/" == "root" and
+// other substitutions
 func massageMountPoint(path string) string {
 	switch path {
 	case "/":
@@ -70,29 +65,23 @@ func massageMountPoint(path string) string {
 	return path
 }
 
-func feedMountpoints(mountpoints chan<- string) {
-	defer close(mountpoints)
-	file, err := os.Open("/proc/mounts")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+// Returns a channel on which you can receive the mountspoints we care about
+func mountpointChannel() <-chan string {
+	c := make(chan string)
 
-	reader := bufio.NewReader(file)
+	go func(mountpoints chan<- string) {
+		defer close(mountpoints)
 
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
+		for line := range utils.FileLineChannel("/proc/mounts") {
+
+			fields := strings.Fields(line)
+			fsType := fields[2]
+
+			if utils.SliceContainsString(types, fsType) {
+				mountpoints <- fields[1]
 			}
-			log.Fatal(err)
 		}
-		fields := strings.Fields(line)
-		fsType := fields[2]
-		i := sort.SearchStrings(types, fsType)
-		if i < len(types) && types[i] == fsType {
-			mountpoints <- fields[1]
-		}
-	}
+	}(c)
+
+	return c
 }

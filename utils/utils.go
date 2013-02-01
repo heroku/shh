@@ -11,6 +11,24 @@ import (
 	"time"
 )
 
+func Fields(line string) []string {
+	return strings.FieldsFunc(line, func(s rune) bool {
+		switch s {
+		case ':', ' ', '\n':
+			return true
+		}
+		return false
+	})
+}
+
+func SliceContainsString(ss []string, s string) bool {
+	idx := sort.SearchStrings(ss, s)
+	if idx < len(ss) && ss[idx] == s {
+		return true
+	}
+	return false
+}
+
 func Ui64toa(val uint64) string {
 	return strconv.FormatUint(val, 10)
 }

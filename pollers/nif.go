@@ -3,8 +3,6 @@ package pollers
 import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"sort"
-	"strings"
 	"time"
 )
 
@@ -29,16 +27,10 @@ func NewNetworkInterfacePoller(measurements chan<- *mm.Measurement) NetworkInter
 func (poller NetworkInterface) Poll(tick time.Time) {
 
 	for line := range utils.FileLineChannel(DEVICE_FILE) {
-		fields := strings.FieldsFunc(line, func(s rune) bool {
-      if s == ':' || s == ' '  || s == '\n' {
-				return true
-			}
-			return false
-		})
-
+		fields := utils.Fields(line)
 		device := fields[0]
-		idx := sort.SearchStrings(devices, device)
-		if idx < len(devices) && devices[idx] == device {
+
+		if utils.SliceContainsString(devices, device) {
 			// It's a device we want to gather metrics for
 
 			poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "receive", "bytes"}, utils.Atouint64(fields[1])}

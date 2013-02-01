@@ -1,13 +1,10 @@
 package pollers
 
 import (
-	"bufio"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"io"
 	"io/ioutil"
 	"log"
-	"os"
 	"strings"
 	"time"
 )
@@ -27,10 +24,8 @@ func NewDiskPoller(measurements chan<- *mm.Measurement) Disk {
 
 // http://www.kernel.org/doc/Documentation/block/stat.txt
 func (poller Disk) Poll(tick time.Time) {
-	devices := make(chan string)
-	go feedDevices(devices)
 
-	for device := range devices {
+	for device := range deviceChannel() {
 		statBytes, err := ioutil.ReadFile(SYS + device + "/stat")
 		if err != nil {
 			log.Fatal(err)
@@ -51,40 +46,31 @@ func (poller Disk) Poll(tick time.Time) {
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "io", "ticks"}, utils.Atouint64(fields[9])}
 		poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "queue", "time"}, utils.Atouint64(fields[10])}
 	}
+
 }
 
 func (poller Disk) Name() string {
 	return "disk"
 }
 
-func feedDevices(devices chan<- string) {
-	defer close(devices)
-	file, err := os.Open("/proc/partitions")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
+func deviceChannel() <-chan string {
+	c := make(chan string)
 
-	reader := bufio.NewReader(file)
+	go func(devices chan<- string) {
+		for line := range utils.FileLineChannel("/proc/partitions") {
 
-	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			if err == io.EOF {
-				break
+			fields := strings.Fields(line)
+			if len(fields) == 0 || fields[0] == "major" {
+				continue
 			}
-			log.Fatal(err)
-		}
 
-		fields := strings.Fields(line)
-		if len(fields) == 0 || fields[0] == "major" {
-			continue
+			if utils.Exists(SYS + fields[3]) {
+				devices <- fields[3]
+			} else {
+				continue
+			}
 		}
+	}(c)
 
-		if utils.Exists(SYS + fields[3]) {
-			devices <- fields[3]
-		} else {
-			continue
-		}
-	}
+	return c
 }
