@@ -30,7 +30,7 @@ func (poller NetworkInterface) Poll(tick time.Time) {
 
 	for line := range utils.FileLineChannel(DEVICE_FILE) {
 		fields := strings.FieldsFunc(line, func(s rune) bool {
-			if s == ':' || s == ' ' {
+      if s == ':' || s == ' '  || s == '\n' {
 				return true
 			}
 			return false
