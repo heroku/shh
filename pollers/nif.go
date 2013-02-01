@@ -10,7 +10,7 @@ import (
 
 const (
 	DEVICE_FILE     = "/proc/net/dev"
-	DEFAULT_DEVICES = "lo,eth0"
+	DEFAULT_DEVICES = "eth0,lo"
 )
 
 var (
