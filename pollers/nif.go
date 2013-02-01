@@ -34,7 +34,7 @@ func (poller NetworkInterface) Poll(tick time.Time) {
 			device := fields[0]
 			nakedDevice := device[:len(device)-1]
 			idx := sort.SearchStrings(devices, nakedDevice)
-			if idx < len(devices) && fields[idx] == device {
+			if idx < len(devices) && devices[idx] == nakedDevice {
 				// It's a device we want to gather metrics for
 
 				poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{nakedDevice, "receive", "bytes"}, utils.Atouint64(fields[1])}
