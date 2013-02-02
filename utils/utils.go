@@ -125,13 +125,14 @@ func FileLineChannel(fpath string) <-chan string {
 
 			for {
 				line, err := buf.ReadString('\n')
-				switch err {
-				case io.EOF:
-					break
-				case nil:
+				if err == nil {
 					cs <- line
-				default:
-					log.Fatal(err)
+				} else {
+					if err == io.EOF {
+						break
+					} else {
+						log.Fatal(err)
+					}
 				}
 			}
 		}
