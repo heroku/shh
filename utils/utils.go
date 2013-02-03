@@ -140,3 +140,11 @@ func FileLineChannel(fpath string) <-chan string {
 
 	return c
 }
+
+func FixUpName(name string) []string {
+	name = strings.ToLower(name)
+	name = strings.Replace(name, "(", ".", -1)
+	name = strings.Replace(name, ")", "", -1)
+	name = strings.Replace(name, "_", ".", -1)
+	return strings.Split(name, ".")
+}
