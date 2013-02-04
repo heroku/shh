@@ -18,7 +18,7 @@ func NewMemoryPoller(measurements chan<- *mm.Measurement) Memory {
 	return Memory{measurements: measurements}
 }
 
-// http://www.kernel.org/doc/Documentation/filesystems/proc.txt (section 1.4)
+// http://www.kernel.org/doc/Documentation/filesystems/proc.txt
 func (poller Memory) Poll(tick time.Time) {
 
 	for line := range utils.FileLineChannel(MEMORY_FILE) {
