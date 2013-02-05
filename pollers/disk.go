@@ -57,6 +57,8 @@ func deviceChannel() <-chan string {
 	c := make(chan string)
 
 	go func(devices chan<- string) {
+		defer close(devices)
+
 		for line := range utils.FileLineChannel("/proc/partitions") {
 
 			fields := strings.Fields(line)
