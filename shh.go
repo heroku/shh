@@ -7,6 +7,8 @@ import (
 	"github.com/freeformz/shh/pollers"
 	"github.com/freeformz/shh/utils"
 	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,9 +21,10 @@ const (
 )
 
 var (
-	Interval  = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
-	Outputter = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)       // Outputter
-	Start     = time.Now()                                                        // Start time
+	Interval    = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
+	Outputter   = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)       // Outputter
+	Start       = time.Now()                                                        // Start time
+	ProfilePort = utils.GetEnvWithDefault("SHH_PROFILE_PORT", "0")                  // Profile Port
 )
 
 func init() {
@@ -37,6 +40,12 @@ func init() {
 }
 
 func main() {
+	if ProfilePort != "0" {
+		go func() {
+			log.Println(http.ListenAndServe("localhost:"+ProfilePort, nil))
+		}()
+	}
+
 	fmt.Printf("shh_start=true at=%s interval=%s\n", Start.Format(time.RFC3339Nano), Interval)
 
 	measurements := make(chan *mm.Measurement, 100)
