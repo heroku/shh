@@ -105,7 +105,11 @@ func GetEnvWithDefaultDuration(env string, def string) time.Duration {
 // Returns a slice of sorted strings from the environment or default split on ,
 // So "foo,bar" returns ["bar","foo"]
 func GetEnvWithDefaultStrings(env string, def string) []string {
-	tmp := strings.Split(GetEnvWithDefault(env, def), ",")
+	env = GetEnvWithDefault(env, def)
+	if env == "" {
+		return make([]string, 0)
+	}
+	tmp := strings.Split(env, ",")
 	if !sort.StringsAreSorted(tmp) {
 		sort.Strings(tmp)
 	}

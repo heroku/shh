@@ -1,6 +1,9 @@
 package utils
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 func ExampleFields_basic() {
 	fmt.Println(Fields("  eth0: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0"))
@@ -33,4 +36,30 @@ func ExampleSliceContainsString() {
 	// true
 	// false
 	// false
+}
+
+func ExampleGetEnvWithDefaultStrings_empty() {
+	os.Setenv("SHH_TEST_ENV", "")
+	fmt.Println(len(GetEnvWithDefaultStrings("SHH_TEST_ENV", "")))
+	// Output: 0
+}
+
+func ExampleGetEnvWithDefaultStrings_single() {
+	os.Setenv("SHH_TEST_ENV", "foo")
+	v := GetEnvWithDefaultStrings("SHH_TEST_ENV", "")
+	fmt.Println(len(v))
+	fmt.Println(v[0])
+	// Output: 1
+	// foo
+}
+
+func ExampleGetEnvWithDefaultStrings_multiple() {
+	os.Setenv("SHH_TEST_ENV", "foo,bar")
+	v := GetEnvWithDefaultStrings("SHH_TEST_ENV", "")
+	fmt.Println(len(v))
+	fmt.Println(v[0])
+	fmt.Println(v[1])
+	// Output: 2
+	// bar
+	// foo
 }
