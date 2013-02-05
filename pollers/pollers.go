@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	DEFAULT_POLLERS = "load,cpu,df,disk,nif,mem" // Default pollers
+	DEFAULT_POLLERS = "load,cpu,df,disk,nif,mem,ntpdate" // Default pollers
 )
 
 var (
@@ -36,6 +36,8 @@ func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
 			mp.RegisterPoller(NewNetworkInterfacePoller(measurements))
 		case "mem":
 			mp.RegisterPoller(NewMemoryPoller(measurements))
+		case "ntpdate":
+			mp.RegisterPoller(NewNtpdatePoller(measurements))
 		}
 	}
 
