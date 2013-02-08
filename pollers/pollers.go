@@ -3,6 +3,7 @@ package pollers
 import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
+	"sync"
 	"time"
 )
 
@@ -45,6 +46,7 @@ func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
 }
 
 type Multi struct {
+	sync.WaitGroup
 	measurements chan<- *mm.Measurement
 	pollers      map[string]Poller
 	counts       map[string]uint64
@@ -61,8 +63,13 @@ func (p Multi) Poll(tick time.Time) {
 		count += 1
 		p.counts[name] = count
 		p.measurements <- &mm.Measurement{tick, p.Name(), []string{"ticks", name, "count"}, count}
-		go poller.Poll(tick)
+		p.Add(1)
+		go func() {
+			poller.Poll(tick)
+			p.Done()
+		}()
 	}
+	p.Wait()
 }
 
 func (p Multi) Name() string {
