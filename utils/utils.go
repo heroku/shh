@@ -1,8 +1,7 @@
 package utils
 
 import (
-	"bufio"
-	"io"
+	"github.com/freeformz/filechan"
 	"log"
 	"os"
 	"sort"
@@ -116,31 +115,13 @@ func GetEnvWithDefaultStrings(env string, def string) []string {
 	return tmp
 }
 
-// Returns a channeel that streams the lines from the file at fpath
+// Small wrapper to handle errors on open
 func FileLineChannel(fpath string) <-chan string {
-	c := make(chan string)
+	c, err := filechan.FileLineChannel(fpath)
 
-	go func(fpath string, cs chan<- string) {
-		defer close(cs)
-		file, err := os.Open(fpath)
-		if err == nil {
-			defer file.Close()
-			buf := bufio.NewReader(file)
-
-			for {
-				line, err := buf.ReadString('\n')
-				if err == nil {
-					cs <- line
-				} else {
-					if err == io.EOF {
-						break
-					} else {
-						log.Fatal(err)
-					}
-				}
-			}
-		}
-	}(fpath, c)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	return c
 }
