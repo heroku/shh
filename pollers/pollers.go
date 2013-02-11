@@ -64,10 +64,10 @@ func (p Multi) Poll(tick time.Time) {
 		p.counts[name] = count
 		p.measurements <- &mm.Measurement{tick, p.Name(), []string{"ticks", name, "count"}, count}
 		p.Add(1)
-		go func() {
+		go func(poller Poller) {
 			poller.Poll(tick)
 			p.Done()
-		}()
+		}(poller)
 	}
 	p.Wait()
 }
