@@ -32,9 +32,16 @@ func (poller Ntpdate) Poll(tick time.Time) {
 		if err != nil {
 			log.Fatal(err)
 		}
+
 		if err := cmd.Start(); err != nil {
 			log.Fatal(err)
 		}
+
+		defer func() {
+			if err := cmd.Wait(); err != nil {
+				log.Fatal(err)
+			}
+		}()
 
 		buf := bufio.NewReader(stdout)
 
