@@ -11,10 +11,18 @@ import (
 )
 
 func Fields(line string) []string {
+	var insideParens = false
+
 	return strings.FieldsFunc(line, func(s rune) bool {
 		switch s {
-		case ':', ' ', '\n':
+		case '(':
+			insideParens = true
 			return true
+		case ')':
+			insideParens = false
+			return true
+		case ':', ' ', '\n':
+			return insideParens == false
 		}
 		return false
 	})
