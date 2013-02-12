@@ -54,26 +54,38 @@ type Multi struct {
 	counts       map[string]uint64
 }
 
-func (p Multi) RegisterPoller(poller Poller) {
-	p.pollers[poller.Name()] = poller
-	p.counts[poller.Name()] = 0
+func (mp Multi) RegisterPoller(poller Poller) {
+	mp.pollers[poller.Name()] = poller
+	mp.counts[poller.Name()] = 0
 }
 
-func (p Multi) Poll(tick time.Time) {
-	for name, poller := range p.pollers {
-		count := p.counts[name]
-		count += 1
-		p.counts[name] = count
-		p.measurements <- &mm.Measurement{tick, p.Name(), []string{"ticks", name, "count"}, count}
-		p.Add(1)
+func (mp Multi) durationMetric(tick time.Time, name string, start time.Time) {
+	mp.measurements <- &mm.Measurement{tick, mp.Name(), []string{"duration", name, "seconds"}, time.Since(start).Seconds()}
+}
+
+func (mp Multi) incrementCount(pname string) uint64 {
+	count := mp.counts[pname]
+	count++
+	mp.counts[pname] = count
+	return count
+}
+
+func (mp Multi) Poll(tick time.Time) {
+	start := time.Now()
+	for name, poller := range mp.pollers {
+		mp.measurements <- &mm.Measurement{tick, mp.Name(), []string{"ticks", name, "count"}, mp.incrementCount(name)}
+		mp.Add(1)
 		go func(poller Poller) {
+			start := time.Now()
 			poller.Poll(tick)
-			p.Done()
+			mp.Done()
+			mp.durationMetric(tick, poller.Name(), start)
 		}(poller)
 	}
-	p.Wait()
+	mp.Wait()
+	mp.durationMetric(tick, "all", start)
 }
 
-func (p Multi) Name() string {
+func (mp Multi) Name() string {
 	return "multi_poller"
 }
