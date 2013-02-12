@@ -19,6 +19,7 @@ func NewSelfPoller(measurements chan<- *mm.Measurement) Self {
 func (poller Self) Poll(tick time.Time) {
 	runtime.ReadMemStats(&poller.stats)
 
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"measurements", "length"}, float64(len(poller.measurements))}
 	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"memstats", "general", "alloc", "inuse", "bytes"}, float64(poller.stats.Alloc)} // GUAGE
 	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"memstats", "general", "alloc", "bytes"}, poller.stats.TotalAlloc}              // COUNTER
 	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"memstats", "general", "sys", "bytes"}, float64(poller.stats.Sys)}              // GUAGE
