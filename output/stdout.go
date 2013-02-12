@@ -25,34 +25,35 @@ func (out StdOutL2MetRaw) Output() {
 
 type StdOutL2MetDer struct {
 	incoming <-chan *mm.Measurement
+	outgoing chan<- *mm.Measurement
 	last     map[string]*mm.Measurement
+	raw      StdOutL2MetRaw
 }
 
 func NewStdOutL2MetDer(measurements <-chan *mm.Measurement) StdOutL2MetDer {
-	return StdOutL2MetDer{measurements, make(map[string]*mm.Measurement)}
+	plex := make(chan *mm.Measurement)
+	return StdOutL2MetDer{measurements, plex, make(map[string]*mm.Measurement), StdOutL2MetRaw{plex}}
 }
 
 func (out StdOutL2MetDer) Start() {
 	go out.Output()
+	go out.raw.Output()
 }
 
 func (out StdOutL2MetDer) Output() {
 	for measurement := range out.incoming {
 		switch measurement.Value.(type) {
-		case float64:
-			{
-				fmt.Println(measurement)
-			}
 		case uint64:
 			{
 				key := measurement.Measured()
-				last := out.last[key]
-				if last != nil {
-					tmp := &mm.Measurement{measurement.When, measurement.Poller, measurement.What, measurement.Difference(last)}
-					fmt.Println(tmp)
+				last, found := out.last[key]
+				if found {
+					out.outgoing <- &mm.Measurement{measurement.When, measurement.Poller, measurement.What, measurement.Difference(last)}
 				}
 				out.last[key] = measurement
 			}
+		default:
+			out.outgoing <- measurement
 		}
 	}
 }
