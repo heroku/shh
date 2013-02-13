@@ -28,10 +28,23 @@ func Fields(line string) []string {
 	})
 }
 
+func LinearSliceContainsString(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
 func SliceContainsString(ss []string, s string) bool {
-	idx := sort.SearchStrings(ss, s)
-	if idx < len(ss) && ss[idx] == s {
-		return true
+	if sort.StringsAreSorted(ss) {
+		idx := sort.SearchStrings(ss, s)
+		if idx < len(ss) && ss[idx] == s {
+			return true
+		}
+	} else {
+		return LinearSliceContainsString(ss, s)
 	}
 	return false
 }
