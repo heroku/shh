@@ -152,5 +152,6 @@ func FixUpName(name string) []string {
 	name = strings.Replace(name, "(", ".", -1)
 	name = strings.Replace(name, ")", "", -1)
 	name = strings.Replace(name, "_", ".", -1)
+	name = strings.TrimLeft(name, ".")
 	return strings.Split(name, ".")
 }
