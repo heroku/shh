@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DEFAULT_POLLERS = "load,cpu,df,disk,listen,mem,nif,ntpdate,processes,self" // Default pollers
+	DEFAULT_POLLERS = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
 )
 
 var (
@@ -46,6 +46,8 @@ func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
 			mp.RegisterPoller(NewProcessesPoller(measurements))
 		case "self":
 			mp.RegisterPoller(NewSelfPoller(measurements))
+		case "conntrack":
+			mp.RegisterPoller(NewConntrackPoller(measurements))
 		}
 	}
 
