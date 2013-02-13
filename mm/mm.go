@@ -2,13 +2,9 @@ package mm
 
 import (
 	"fmt"
-	"os"
+	"github.com/freeformz/shh/config"
 	"strings"
 	"time"
-)
-
-var (
-	source = os.Getenv("SHH_SOURCE")
 )
 
 type Measurement struct {
@@ -26,8 +22,8 @@ func (m *Measurement) String() string {
 	case uint64:
 		msg = fmt.Sprintf("%s val=%d", msg, m.Value.(uint64))
 	}
-	if source != "" {
-		return fmt.Sprintf("%s source=%s", msg, source)
+	if config.Source != "" {
+		return fmt.Sprintf("%s source=%s", msg, config.Source)
 	}
 	return msg
 }
@@ -37,7 +33,7 @@ func (m *Measurement) Measured() string {
 }
 
 func (m *Measurement) Source() string {
-	return source
+	return config.Source
 }
 
 func (current *Measurement) Difference(last *Measurement) uint64 {
