@@ -2,9 +2,9 @@ package pollers
 
 /*
 
-Simple External Poller Integration: If you can oepn a socket, you can write a poller.
+Simple External Poller Integration: If you can open a socket, you can write a poller.
 
-Format: <when> <what> <value>
+Format: <RFC3339 date stamp> <what> <value>\n
 
 The exact interpretation of these depends on the Outputter in use.
 
@@ -29,35 +29,6 @@ import (
 	"time"
 )
 
-type ListenStats struct {
-	sync.RWMutex
-	connectionCount float64
-}
-
-func (ls *ListenStats) IncrementConnectionCount() {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.connectionCount++
-}
-
-func (ls *ListenStats) DecrementConnectionCount() {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.connectionCount--
-}
-
-func (ls *ListenStats) ConnectionCount() float64 {
-	ls.RLock()
-	defer ls.RUnlock()
-	return ls.connectionCount
-}
-
-type Listen struct {
-	measurements chan<- *mm.Measurement
-	listener     net.Listener
-	stats        *ListenStats
-}
-
 const (
 	DEFAULT_INTERVAL = "10s" // Default tick interval for pollers
 )
@@ -68,6 +39,83 @@ var (
 	listenNet   string
 	listenLaddr string
 )
+
+// Used to track global listen stats
+type ListenStats struct {
+	sync.RWMutex
+	counts map[string]interface{}
+}
+
+func (ls *ListenStats) New(what string, initialValue interface{}) {
+	ls.Lock()
+	defer ls.Unlock()
+	switch initialValue.(type) {
+	case float64, uint64:
+		ls.counts[what] = initialValue
+	case int:
+		ls.counts[what] = uint64(initialValue.(int))
+	}
+}
+
+func (ls *ListenStats) Increment(what string) {
+	ls.Lock()
+	defer ls.Unlock()
+	v := ls.counts[what]
+	switch v.(type) {
+	case float64:
+		tmp := v.(float64)
+		tmp++
+		ls.counts[what] = tmp
+	case uint64, int:
+		tmp := v.(uint64)
+		tmp++
+		ls.counts[what] = tmp
+	}
+}
+
+func (ls *ListenStats) Decrement(what string) {
+	ls.Lock()
+	defer ls.Unlock()
+	v := ls.counts[what]
+	switch v.(type) {
+	case float64:
+		tmp := v.(float64)
+		tmp--
+		ls.counts[what] = tmp
+	case uint64, int:
+		tmp := v.(uint64)
+		tmp--
+		ls.counts[what] = tmp
+	}
+}
+
+func (ls *ListenStats) CountOf(what string) interface{} {
+	ls.RLock()
+	defer ls.RUnlock()
+	return ls.counts[what]
+}
+
+func (ls *ListenStats) Keys() <-chan string {
+	ls.RLock()
+
+	c := make(chan string)
+
+	go func(c chan<- string) {
+		defer ls.RUnlock()
+		defer close(c)
+		for k, _ := range ls.counts {
+			c <- k
+		}
+	}(c)
+
+	return c
+}
+
+type Listen struct {
+	measurements chan<- *mm.Measurement
+	listener     net.Listener
+	stats        *ListenStats
+}
 
 func init() {
 	tmp := strings.Split(listen, ",")
@@ -95,7 +143,13 @@ func NewListenPoller(measurements chan<- *mm.Measurement) Listen {
 		log.Fatal(err)
 	}
 
-	poller := Listen{measurements: measurements, listener: listener, stats: &ListenStats{}}
+	ls := &ListenStats{counts: make(map[string]interface{})}
+	ls.New("connection.count", 0.0)
+	ls.New("time.parse.errors", 0)
+	ls.New("value.parse.errors", 0)
+	ls.New("metrics", 0)
+
+	poller := Listen{measurements: measurements, listener: listener, stats: ls}
 
 	go func(poller *Listen) {
 		for {
@@ -113,7 +167,9 @@ func NewListenPoller(measurements chan<- *mm.Measurement) Listen {
 }
 
 func (poller Listen) Poll(tick time.Time) {
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"connection", "count"}, poller.stats.ConnectionCount()}
+	for k := range poller.stats.Keys() {
+		poller.measurements <- &mm.Measurement{tick, poller.Name(), strings.Split("stats."+k, "."), poller.stats.CountOf(k)}
+	}
 }
 
 func handleListenConnection(poller *Listen, conn net.Conn) {
@@ -121,8 +177,8 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 
 	var value interface{}
 
-	poller.stats.IncrementConnectionCount()
-	defer poller.stats.DecrementConnectionCount()
+	poller.stats.Increment("connection.count")
+	defer poller.stats.Decrement("connection.count")
 
 	r := bufio.NewReader(conn)
 
@@ -137,15 +193,19 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 		if len(fields) == 3 {
 			when, err := time.Parse(time.RFC3339, fields[0])
 			if err != nil {
+				poller.stats.Increment("time.parse.errors")
 				break
 			}
 			value, err = strconv.ParseUint(fields[2], 10, 64)
 			if err != nil {
 				value, err = strconv.ParseFloat(fields[2], 64)
 				if err != nil {
+					poller.stats.Increment("value.parse.errors")
 					break
 				}
 			}
+
+			poller.stats.Increment("metrics")
 
 			poller.measurements <- &mm.Measurement{when, poller.Name(), strings.Fields(fields[1]), value}
 		}
