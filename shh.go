@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/output"
 	"github.com/freeformz/shh/pollers"
-	"github.com/freeformz/shh/utils"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -15,18 +15,8 @@ import (
 	"time"
 )
 
-const (
-	VERSION           = "0.0.23"
-	DEFAULT_INTERVAL  = "10s"            // Default tick interval for pollers
-	DEFAULT_OUTPUTTER = "stdoutl2metder" // Default outputter
-)
-
 var (
-	Interval      = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
-	Outputter     = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)       // Outputter
-	Start         = time.Now()                                                        // Start time
-	ProfilePort   = utils.GetEnvWithDefault("SHH_PROFILE_PORT", "0")                  // Profile Port
-	SignalChannel = make(chan os.Signal, 1)
+	signalChannel = make(chan os.Signal, 1)
 )
 
 func main() {
@@ -34,25 +24,25 @@ func main() {
 
 	mp := pollers.NewMultiPoller(measurements)
 
-	signal.Notify(SignalChannel, syscall.SIGINT)
-	signal.Notify(SignalChannel, syscall.SIGTERM)
+	signal.Notify(signalChannel, syscall.SIGINT)
+	signal.Notify(signalChannel, syscall.SIGTERM)
 
 	go func() {
-		for sig := range SignalChannel {
+		for sig := range signalChannel {
 			mp.Exit()
-			log.Fatalf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(Start))
+			log.Fatalf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(config.Start))
 		}
 	}()
 
-	if ProfilePort != "0" {
+	if config.ProfilePort != config.DEFAULT_PROFILE_PORT {
 		go func() {
-			log.Println(http.ListenAndServe("localhost:"+ProfilePort, nil))
+			log.Println(http.ListenAndServe("localhost:"+config.ProfilePort, nil))
 		}()
 	}
 
-	fmt.Printf("shh_start=true at=%s interval=%s\n", Start.Format(time.RFC3339Nano), Interval)
+	fmt.Printf("shh_start=true at=%s interval=%s\n", config.Start.Format(time.RFC3339Nano), config.Interval)
 
-	outputter, err := output.NewOutputter(Outputter, measurements)
+	outputter, err := output.NewOutputter(config.Outputter, measurements)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,7 +51,7 @@ func main() {
 	// poll at start
 	go mp.Poll(time.Now())
 
-	ticks := time.Tick(Interval)
+	ticks := time.Tick(config.Interval)
 	for {
 		select {
 		case tick := <-ticks:

@@ -1,18 +1,10 @@
 package pollers
 
 import (
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
-	"github.com/freeformz/shh/utils"
 	"sync"
 	"time"
-)
-
-const (
-	DEFAULT_POLLERS = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
-)
-
-var (
-	pollers = utils.GetEnvWithDefaultStrings("SHH_POLLERS", DEFAULT_POLLERS)
 )
 
 type Poller interface {
@@ -24,7 +16,7 @@ type Poller interface {
 func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
 	mp := Multi{pollers: make(map[string]Poller), measurements: measurements, counts: make(map[string]uint64)}
 
-	for _, poller := range pollers {
+	for _, poller := range config.Pollers {
 		switch poller {
 		case "load":
 			mp.RegisterPoller(NewLoadPoller(measurements))

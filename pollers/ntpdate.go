@@ -2,6 +2,7 @@ package pollers
 
 import (
 	"bufio"
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"io"
@@ -9,10 +10,6 @@ import (
 	"os/exec"
 	"strings"
 	"time"
-)
-
-var (
-	servers = utils.GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", "0.pool.ntp.org,1.pool.ntp.org")
 )
 
 type Ntpdate struct {
@@ -25,9 +22,9 @@ func NewNtpdatePoller(measurements chan<- *mm.Measurement) Ntpdate {
 
 //FIXME: Timeout
 func (poller Ntpdate) Poll(tick time.Time) {
-	if len(servers) > 0 {
+	if len(config.NtpdateServers) > 0 {
 		cmd := exec.Command("ntpdate", "-q", "-u")
-		cmd.Args = append(cmd.Args, servers...)
+		cmd.Args = append(cmd.Args, config.NtpdateServers...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			log.Fatal(err)

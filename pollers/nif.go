@@ -1,18 +1,14 @@
 package pollers
 
 import (
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"time"
 )
 
 const (
-	DEVICE_FILE     = "/proc/net/dev"
-	DEFAULT_DEVICES = "eth0,lo"
-)
-
-var (
-	devices = utils.GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_DEVICES)
+	DEVICE_FILE = "/proc/net/dev"
 )
 
 type NetworkInterface struct {
@@ -30,7 +26,7 @@ func (poller NetworkInterface) Poll(tick time.Time) {
 		fields := utils.Fields(line)
 		device := fields[0]
 
-		if utils.SliceContainsString(devices, device) {
+		if utils.SliceContainsString(config.NifDevices, device) {
 			// It's a device we want to gather metrics for
 
 			poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{device, "receive", "bytes"}, utils.Atouint64(fields[1])}

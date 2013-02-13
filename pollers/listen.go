@@ -19,8 +19,8 @@ In a different terminal:
 */
 import (
 	"bufio"
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
-	"github.com/freeformz/shh/utils"
 	"log"
 	"net"
 	"strconv"
@@ -29,16 +29,29 @@ import (
 	"time"
 )
 
-const (
-	DEFAULT_INTERVAL = "10s" // Default tick interval for pollers
-)
-
 var (
-	listen      = utils.GetEnvWithDefault("SHH_LISTEN", "unix,/tmp/shh")
-	interval    = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL)
 	listenNet   string
 	listenLaddr string
 )
+
+func init() {
+	tmp := strings.Split(config.Listen, ",")
+
+	if len(tmp) != 2 {
+		log.Fatal("SHH_LISTEN is not in the format: 'unix,/tmp/shh'")
+	}
+
+	listenNet = tmp[0]
+	listenLaddr = tmp[1]
+
+	switch listenNet {
+	case "tcp", "tcp4", "tcp6", "unix", "unixpacket":
+		break
+	default:
+		log.Fatalf("SHH_LISTEN format (%s,%s) is not correct", listenNet, listenLaddr)
+	}
+
+}
 
 // Used to track global listen stats
 type ListenStats struct {
@@ -117,25 +130,6 @@ type Listen struct {
 	stats        *ListenStats
 }
 
-func init() {
-	tmp := strings.Split(listen, ",")
-
-	if len(tmp) != 2 {
-		log.Fatal("SHH_LISTEN is not in the format: 'unix,/tmp/shh'")
-	}
-
-	listenNet = tmp[0]
-	listenLaddr = tmp[1]
-
-	switch listenNet {
-	case "tcp", "tcp4", "tcp6", "unix", "unixpacket":
-		break
-	default:
-		log.Fatalf("SHH_LISTEN format (%s,%s) is not correct", listenNet, listenLaddr)
-	}
-
-}
-
 func NewListenPoller(measurements chan<- *mm.Measurement) Listen {
 	listener, err := net.Listen(listenNet, listenLaddr)
 
@@ -183,7 +177,7 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 	r := bufio.NewReader(conn)
 
 	for {
-		conn.SetDeadline(time.Now().Add(interval).Add(interval))
+		conn.SetDeadline(time.Now().Add(config.Interval).Add(config.Interval))
 		line, err := r.ReadString('\n')
 		if err != nil {
 			break

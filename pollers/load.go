@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+const (
+	LOAD_DATA = "/proc/loadavg"
+)
+
 type Load struct {
 	measurements chan<- *mm.Measurement
 }
@@ -19,7 +23,7 @@ func NewLoadPoller(measurements chan<- *mm.Measurement) Load {
 }
 
 func (poller Load) Poll(tick time.Time) {
-	file, err := os.Open("/proc/loadavg")
+	file, err := os.Open(LOAD_DATA)
 	if err != nil {
 		log.Fatal(err)
 	}

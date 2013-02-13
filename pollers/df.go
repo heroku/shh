@@ -1,20 +1,13 @@
 package pollers
 
 import (
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"log"
 	"strings"
 	"syscall"
 	"time"
-)
-
-const (
-	TYPES_DEFAULTS = "btrfs,ext3,ext4,tmpfs,xfs"
-)
-
-var (
-	types = utils.GetEnvWithDefaultStrings("SHH_DF_TYPES", TYPES_DEFAULTS)
 )
 
 type Df struct {
@@ -78,7 +71,7 @@ func mountpointChannel() <-chan string {
 			fields := strings.Fields(line)
 			fsType := fields[2]
 
-			if utils.SliceContainsString(types, fsType) {
+			if utils.SliceContainsString(config.DfTypes, fsType) {
 				mountpoints <- fields[1]
 			}
 		}
