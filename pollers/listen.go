@@ -1,5 +1,22 @@
 package pollers
 
+/*
+
+Simple External Poller Integration: If you can oepn a socket, you can write a poller.
+
+Format: <when> <what> <value>
+
+The exact interpretation of these depends on the Outputter in use.
+
+Example
+
+In terminal A:
+  SHH_POLLERS=listen ./shh
+
+In a different terminal: 
+  (while true; do echo $(date "+%Y-%m-%dT%H:%M:%SZ") memfree $(grep MemFree /proc/meminfo | awk '{print $2}').0; sleep 5; done) | nc -U /tmp/shh
+
+*/
 import (
 	"bufio"
 	"github.com/freeformz/shh/mm"
