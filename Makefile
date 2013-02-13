@@ -1,6 +1,6 @@
 #!/usr/bin/env make -f
 
-VERSION := $(shell cat shh.go | grep VERSION | cut -d \" -f 2)
+VERSION := $(shell cat config/config.go  | grep VERSION | cut -d \" -f 2)
 
 tempdir        := $(shell mktemp -d)
 controldir     := $(tempdir)/DEBIAN
