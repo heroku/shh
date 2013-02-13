@@ -3,6 +3,7 @@ package pollers
 import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
+	"strings"
 	"time"
 )
 
@@ -22,7 +23,7 @@ func NewMemoryPoller(measurements chan<- *mm.Measurement) Memory {
 func (poller Memory) Poll(tick time.Time) {
 
 	for line := range utils.FileLineChannel(MEMORY_FILE) {
-		fields := utils.Fields(line)
+		fields := strings.Fields(line)
 		fixed_names := utils.FixUpName(fields[0])
 		value := utils.Atofloat64(fields[1])
 		if len(fields) == 3 && fields[2] == "kB" {

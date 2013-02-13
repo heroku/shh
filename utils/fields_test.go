@@ -20,6 +20,14 @@ func ExampleFields_parens() {
 	// Output: [372 kworker/2:1 S 2 0 0 0 -1 69238880 0 0 0 0 0 17293 0 0 20 0 1 0 40 0 0 18446744073709551615 0 0 0 0 0 0 0 2147483647 0 18446744073709551615 0 0 17 2 0 0 0 0 0 0 0 0 0 0 0 0 0]
 }
 
+func ExampleFields_parens2() {
+	f := Fields("Active(anon):      42384 kB")
+	fmt.Println(f)
+	fmt.Println(len(f))
+	// Output: [Active anon 42384 kB]
+	// 4
+}
+
 func ExampleAtouint64_small() {
 	fmt.Println(Atouint64("0"))
 	// Output: 0
