@@ -52,6 +52,7 @@ func (poller Disk) Poll(tick time.Time) {
 func (poller Disk) Name() string {
 	return "disk"
 }
+func (poller Disk) Exit() {}
 
 func deviceChannel() <-chan string {
 	c := make(chan string)

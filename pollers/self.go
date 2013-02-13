@@ -52,3 +52,5 @@ func (poller Self) Poll(tick time.Time) {
 func (poller Self) Name() string {
 	return "self"
 }
+
+func (poller Self) Exit() {}

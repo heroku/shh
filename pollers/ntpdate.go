@@ -71,3 +71,5 @@ func (poller Ntpdate) Poll(tick time.Time) {
 func (poller Ntpdate) Name() string {
 	return "ntpdate"
 }
+
+func (poller Ntpdate) Exit() {}

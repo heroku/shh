@@ -99,3 +99,5 @@ func (poller Cpu) Poll(tick time.Time) {
 func (poller Cpu) Name() string {
 	return "cpu"
 }
+
+func (poller Cpu) Exit() {}

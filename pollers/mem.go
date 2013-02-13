@@ -35,3 +35,5 @@ func (poller Memory) Poll(tick time.Time) {
 func (poller Memory) Name() string {
 	return "mem"
 }
+
+func (poller Memory) Exit() {}

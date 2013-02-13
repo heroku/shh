@@ -77,6 +77,8 @@ func (poller Processes) Name() string {
 	return "processes"
 }
 
+func (poller Processes) Exit() {}
+
 func ProcessState(pid int) string {
 
 	statFile := fmt.Sprintf("%s/%d/stat", PROC, pid)

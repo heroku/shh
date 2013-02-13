@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	DEFAULT_POLLERS = "load,cpu,df,disk,nif,mem,ntpdate,processes,self" // Default pollers
+	DEFAULT_POLLERS = "load,cpu,df,disk,listen,mem,nif,ntpdate,processes,self" // Default pollers
 )
 
 var (
@@ -17,6 +17,7 @@ var (
 
 type Poller interface {
 	Name() string
+	Exit()
 	Poll(tick time.Time)
 }
 
@@ -33,10 +34,12 @@ func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
 			mp.RegisterPoller(NewDfPoller(measurements))
 		case "disk":
 			mp.RegisterPoller(NewDiskPoller(measurements))
-		case "nif":
-			mp.RegisterPoller(NewNetworkInterfacePoller(measurements))
+		case "listen":
+			mp.RegisterPoller(NewListenPoller(measurements))
 		case "mem":
 			mp.RegisterPoller(NewMemoryPoller(measurements))
+		case "nif":
+			mp.RegisterPoller(NewNetworkInterfacePoller(measurements))
 		case "ntpdate":
 			mp.RegisterPoller(NewNtpdatePoller(measurements))
 		case "processes":
@@ -90,4 +93,10 @@ func (mp Multi) Poll(tick time.Time) {
 
 func (mp Multi) Name() string {
 	return "multi_poller"
+}
+
+func (mp Multi) Exit() {
+	for _, poller := range mp.pollers {
+		poller.Exit()
+	}
 }

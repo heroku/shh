@@ -43,3 +43,5 @@ func (poller Load) Poll(tick time.Time) {
 func (poller Load) Name() string {
 	return "load"
 }
+
+func (poller Load) Exit() {}

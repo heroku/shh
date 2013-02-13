@@ -49,6 +49,7 @@ func (poller Df) Poll(tick time.Time) {
 func (poller Df) Name() string {
 	return "df"
 }
+func (poller Df) Exit() {}
 
 // Utility functions
 // Massages the mount point so that "/" == "root" and

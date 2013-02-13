@@ -58,3 +58,5 @@ func (poller NetworkInterface) Poll(tick time.Time) {
 func (poller NetworkInterface) Name() string {
 	return "nif"
 }
+
+func (poller NetworkInterface) Exit() {}

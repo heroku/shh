@@ -22,25 +22,28 @@ const (
 )
 
 var (
-	Interval    = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
-	Outputter   = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)       // Outputter
-	Start       = time.Now()                                                        // Start time
-	ProfilePort = utils.GetEnvWithDefault("SHH_PROFILE_PORT", "0")                  // Profile Port
+	Interval      = utils.GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL) // Polling Interval
+	Outputter     = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)       // Outputter
+	Start         = time.Now()                                                        // Start time
+	ProfilePort   = utils.GetEnvWithDefault("SHH_PROFILE_PORT", "0")                  // Profile Port
+	SignalChannel = make(chan os.Signal, 1)
 )
 
-func init() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGINT)
-	signal.Notify(c, syscall.SIGTERM)
+func main() {
+	measurements := make(chan *mm.Measurement, 100)
+
+	mp := pollers.NewMultiPoller(measurements)
+
+	signal.Notify(SignalChannel, syscall.SIGINT)
+	signal.Notify(SignalChannel, syscall.SIGTERM)
+
 	go func() {
-		for sig := range c {
+		for sig := range SignalChannel {
+			mp.Exit()
 			log.Fatalf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(Start))
-			os.Exit(1)
 		}
 	}()
-}
 
-func main() {
 	if ProfilePort != "0" {
 		go func() {
 			log.Println(http.ListenAndServe("localhost:"+ProfilePort, nil))
@@ -48,10 +51,6 @@ func main() {
 	}
 
 	fmt.Printf("shh_start=true at=%s interval=%s\n", Start.Format(time.RFC3339Nano), Interval)
-
-	measurements := make(chan *mm.Measurement, 100)
-
-	mp := pollers.NewMultiPoller(measurements)
 
 	outputter, err := output.NewOutputter(Outputter, measurements)
 	if err != nil {
