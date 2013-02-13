@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	CONNTRACK_DATA = "/proc/net/ip_conntrack_sdfsfd"
+	CONNTRACK_DATA = "/proc/net/ip_conntrack"
 )
 
 type Conntrack struct {
