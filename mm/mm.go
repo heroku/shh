@@ -29,7 +29,11 @@ func (m *Measurement) String() string {
 }
 
 func (m *Measurement) Measured() string {
-	return fmt.Sprintf("%s.%s", m.Poller, strings.Join(m.What, "."))
+	v := fmt.Sprintf("%s.%s", m.Poller, strings.Join(m.What, "."))
+	if config.Prefix != "" {
+		v = fmt.Sprintf("%s.%s", config.Prefix, v)
+	}
+	return v
 }
 
 func (m *Measurement) Source() string {

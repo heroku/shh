@@ -20,6 +20,7 @@ var (
 	Outputter      = utils.GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)                            // Outputter
 	Pollers        = utils.GetEnvWithDefaultStrings("SHH_POLLERS", DEFAULT_POLLERS)                         // Pollers to poll
 	Source         = utils.GetEnvWithDefault("SHH_SOURCE", "")                                              // Source to emit
+	Prefix         = utils.GetEnvWithDefault("SHH_PREFIX", "")                                              // Metric prefix to use
 	ProfilePort    = utils.GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                      // Profile Port
 	DfTypes        = utils.GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                       // Default DF types
 	Listen         = utils.GetEnvWithDefault("SHH_LISTEN", "unix,/tmp/shh")                                 // Default network socket info for listen
