@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
-	"github.com/freeformz/shh/utils"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"time"
 )
 
@@ -30,11 +29,7 @@ const (
 )
 
 var (
-	user         string                 = os.Getenv("SHH_LIBRATO_USER")
-	token        string                 = os.Getenv("SHH_LIBRATO_TOKEN")
-	batchLength  int                    = utils.GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 50)
-	batchTimeout time.Duration          = utils.GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", "500ms")
-	batches      chan []*mm.Measurement = make(chan []*mm.Measurement, 4)
+	batches chan []*mm.Measurement = make(chan []*mm.Measurement, 4)
 )
 
 type Librato struct {
@@ -51,7 +46,7 @@ func (out Librato) Start() {
 }
 
 func (out Librato) batch() {
-	ticker := time.Tick(batchTimeout)
+	ticker := time.Tick(config.LibratoBatchTimeout)
 	batch := makeBatch()
 	for {
 		select {
@@ -71,7 +66,7 @@ func (out Librato) batch() {
 }
 
 func makeBatch() []*mm.Measurement {
-	return make([]*mm.Measurement, 0, batchLength)
+	return make([]*mm.Measurement, 0, config.LibratoBatchSize)
 }
 
 func (out Librato) deliver() {
@@ -102,7 +97,7 @@ func (out Librato) deliver() {
 		}
 
 		req.Header.Add("Content-Type", "application/json")
-		req.SetBasicAuth(user, token)
+		req.SetBasicAuth(config.LibratoUser, config.LibratoToken)
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
