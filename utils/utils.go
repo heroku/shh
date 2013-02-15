@@ -17,10 +17,8 @@ func Fields(line string) []string {
 		switch s {
 		case '(':
 			insideParens = true
-			return true
 		case ')':
 			insideParens = false
-			return true
 		case ':', ' ', '\n':
 			return insideParens == false
 		}
