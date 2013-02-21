@@ -23,7 +23,7 @@ var (
 	Prefix              = utils.GetEnvWithDefault("SHH_PREFIX", "")                                              // Metric prefix to use
 	ProfilePort         = utils.GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                      // Profile Port
 	DfTypes             = utils.GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                       // Default DF types
-	Listen              = utils.GetEnvWithDefault("SHH_LISTEN", "unix,/tmp/shh")                                 // Default network socket info for listen
+	Listen              = utils.GetEnvWithDefault("SHH_LISTEN", "unix,#shh")                                     // Default network socket info for listen
 	NifDevices          = utils.GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                 // Devices to poll
 	NtpdateServers      = utils.GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", "0.pool.ntp.org,1.pool.ntp.org") // NTP Servers
 	LibratoUser         = utils.GetEnvWithDefault("SHH_LIBRATO_USER", "")                                        // The Librato API User

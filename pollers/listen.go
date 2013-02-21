@@ -17,12 +17,15 @@ In a different terminal:
   (while true; do echo $(date "+%Y-%m-%dT%H:%M:%SZ") memfree $(grep MemFree /proc/meminfo | awk '{print $2}').0; sleep 5; done) | nc -U /tmp/shh
 
 */
+
 import (
 	"bufio"
 	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
+	"github.com/freeformz/shh/utils"
 	"log"
 	"net"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -38,7 +41,7 @@ func init() {
 	tmp := strings.Split(config.Listen, ",")
 
 	if len(tmp) != 2 {
-		log.Fatal("SHH_LISTEN is not in the format: 'unix,/tmp/shh'")
+		log.Fatal("SHH_LISTEN is not in the format: 'unix,#shh")
 	}
 
 	listenNet = tmp[0]
@@ -49,6 +52,14 @@ func init() {
 		break
 	default:
 		log.Fatalf("SHH_LISTEN format (%s,%s) is not correct", listenNet, listenLaddr)
+	}
+
+	// If this is a path, remove it
+	if listenNet == "unix" && utils.Exists(listenLaddr) {
+		err := os.Remove(listenLaddr)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 }
