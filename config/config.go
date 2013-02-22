@@ -10,9 +10,9 @@ const (
 	DEFAULT_INTERVAL     = "10s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER    = "stdoutl2metder"                                                   // Default outputter
 	DEFAULT_POLLERS      = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
-	DEFAULT_PROFILE_PORT = "0"
-	DEFAULT_DF_TYPES     = "btrfs,ext3,ext4,tmpfs,xfs"
-	DEFAULT_NIF_DEVICES  = "eth0,lo"
+	DEFAULT_PROFILE_PORT = "0"                                                                // Default profile port, 0 disables
+	DEFAULT_DF_TYPES     = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
+	DEFAULT_NIF_DEVICES  = "eth0,lo"                                                          // Default interfaces to report stats for
 )
 
 var (
