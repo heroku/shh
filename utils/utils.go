@@ -1,14 +1,58 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/freeformz/filechan"
 	"log"
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"time"
 )
+
+var (
+	NonWord = regexp.MustCompile("[^0-9A-Za-z_]")
+)
+
+type Slog map[string]interface{}
+
+func (s Slog) String() string {
+	var sv string
+	parts := make([]string, 0, len(s))
+
+	for k, v := range s {
+		switch v.(type) {
+		case time.Time: // Format times the way we want them
+			sv = v.(time.Time).Format(time.RFC3339Nano)
+		default: // Let Go figure out the representation
+			sv = fmt.Sprintf("%v", v)
+		}
+		// If there is a NonWord character then need to quote the value
+		if NonWord.MatchString(sv) {
+			sv = fmt.Sprintf("%q", sv)
+		}
+		// Assemble the final part and append it to the array
+		parts = append(parts, fmt.Sprintf("%s=%s", k, sv))
+	}
+	sort.Strings(parts)
+	return strings.Join(parts, " ")
+}
+
+func (s Slog) FatalError(err error, msg interface{}) {
+	s.Error(err, msg)
+	os.Exit(1)
+}
+
+func (s Slog) Error(err error, msg interface{}) {
+	s["at"] = time.Now()
+	s["error"] = err
+	s["message"] = msg
+	fmt.Println(s)
+	delete(s, "error")
+	delete(s, "message")
+}
 
 func Fields(line string) []string {
 	var insideParens = false
@@ -54,7 +98,7 @@ func Ui64toa(val uint64) string {
 func Atofloat64(s string) float64 {
 	val, err := strconv.ParseFloat(s, 64)
 	if err != nil {
-		log.Fatal(err)
+		Slog{"fn": "Atofloat64", "input": s}.FatalError(err, "converting string to float64")
 	}
 	return val
 }
@@ -66,6 +110,7 @@ func PercentFormat(val float64) string {
 func Atouint64(s string) uint64 {
 	val, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {
+		Slog{"fn": "Atouint64", "input": s}.FatalError(err, "converting string to uint64")
 		log.Fatal(err)
 	}
 	return val
@@ -98,7 +143,7 @@ func GetEnvWithDefaultInt(env string, def int) int {
 
 	i, err := strconv.Atoi(tmp)
 	if err != nil {
-		log.Fatal(err)
+		Slog{"fn": "GetEnvWithDefaultInt", "env": env, "def": def}.FatalError(err, "converting atoi")
 	}
 	return i
 }
@@ -113,8 +158,7 @@ func GetEnvWithDefaultDuration(env string, def string) time.Duration {
 	d, err := time.ParseDuration(tmp)
 
 	if err != nil {
-		log.Printf("$%s is not a valid duration\n", env)
-		log.Fatal(err)
+		Slog{"fn": "GetEnvWithDefaultDuration", "env": env, "def": def}.FatalError(err, "not a valid duration")
 	}
 
 	return d
@@ -139,7 +183,7 @@ func FileLineChannel(fpath string) <-chan string {
 	c, err := filechan.FileLineChannel(fpath)
 
 	if err != nil {
-		log.Fatal(err)
+		Slog{"fn": "FileLineChannel", "fpath": fpath}.FatalError(err, "creating FileLineChannel")
 	}
 
 	return c

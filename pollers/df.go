@@ -4,7 +4,6 @@ import (
 	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"log"
 	"strings"
 	"syscall"
 	"time"
@@ -19,12 +18,15 @@ func NewDfPoller(measurements chan<- *mm.Measurement) Df {
 }
 
 func (poller Df) Poll(tick time.Time) {
+	ctx := utils.Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+
 	buf := new(syscall.Statfs_t)
 
 	for mp := range mountpointChannel() {
 		err := syscall.Statfs(mp, buf)
 		if err != nil {
-			log.Fatal(err)
+			ctx["mountpoint"] = mp
+			ctx.FatalError(err, "calling Statfs")
 		}
 		mmp := massageMountPoint(mp)
 		total_bytes := float64(uint64(buf.Bsize) * buf.Blocks)

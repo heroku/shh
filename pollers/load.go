@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -23,16 +22,18 @@ func NewLoadPoller(measurements chan<- *mm.Measurement) Load {
 }
 
 func (poller Load) Poll(tick time.Time) {
+	ctx := utils.Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+
 	file, err := os.Open(LOAD_DATA)
 	if err != nil {
-		log.Fatal(err)
+		ctx.FatalError(err, "opening "+LOAD_DATA)
 	}
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
 	line, err := reader.ReadString('\n')
 	if err != nil {
-		log.Fatal(err)
+		ctx.FatalError(err, "reading line from "+LOAD_DATA)
 	}
 	fields := strings.Fields(line)
 	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"1m"}, utils.Atofloat64(fields[0])}

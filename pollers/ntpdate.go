@@ -6,7 +6,6 @@ import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"io"
-	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -22,21 +21,23 @@ func NewNtpdatePoller(measurements chan<- *mm.Measurement) Ntpdate {
 
 //FIXME: Timeout
 func (poller Ntpdate) Poll(tick time.Time) {
+	ctx := utils.Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+
 	if len(config.NtpdateServers) > 0 {
 		cmd := exec.Command("ntpdate", "-q", "-u")
 		cmd.Args = append(cmd.Args, config.NtpdateServers...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			log.Fatal(err)
+			ctx.FatalError(err, "creating stdout pipe")
 		}
 
 		if err := cmd.Start(); err != nil {
-			log.Fatal(err)
+			ctx.FatalError(err, "starting sub command")
 		}
 
 		defer func() {
 			if err := cmd.Wait(); err != nil {
-				log.Fatal(err)
+				ctx.FatalError(err, "waiting for subcommand to end")
 			}
 		}()
 
@@ -57,7 +58,7 @@ func (poller Ntpdate) Poll(tick time.Time) {
 				if err == io.EOF {
 					break
 				} else {
-					log.Fatal(err)
+					ctx.FatalError(err, "unknown error reading data from subcommand")
 				}
 			}
 		}

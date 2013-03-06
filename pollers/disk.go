@@ -4,7 +4,6 @@ import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"io/ioutil"
-	"log"
 	"strings"
 	"time"
 )
@@ -24,11 +23,13 @@ func NewDiskPoller(measurements chan<- *mm.Measurement) Disk {
 
 // http://www.kernel.org/doc/Documentation/block/stat.txt
 func (poller Disk) Poll(tick time.Time) {
+	ctx := utils.Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	for device := range deviceChannel() {
-		statBytes, err := ioutil.ReadFile(SYS + device + "/stat")
+		target := SYS + device + "/stat"
+		statBytes, err := ioutil.ReadFile(target)
 		if err != nil {
-			log.Fatal(err)
+			ctx.FatalError(err, "reading "+target)
 		}
 
 		fields := strings.Fields(string(statBytes))

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
+	"github.com/freeformz/shh/utils"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 )
@@ -70,6 +70,8 @@ func makeBatch() []*mm.Measurement {
 }
 
 func (out Librato) deliver() {
+	ctx := utils.Slog{"fn": "deliver", "outputter": "librato"}
+
 	for batch := range batches {
 		gauges := make([]LibratoMetric, 0, len(batch))
 		counters := make([]LibratoMetric, 0, len(batch))
@@ -87,13 +89,13 @@ func (out Librato) deliver() {
 
 		j, err := json.Marshal(payload)
 		if err != nil {
-			log.Fatal(err)
+			ctx.FatalError(err, "marshaling json")
 		}
 
 		body := bytes.NewBuffer(j)
 		req, err := http.NewRequest("POST", LIBRATO_URL, body)
 		if err != nil {
-			log.Fatal(err)
+			ctx.FatalError(err, "creating new request")
 		}
 
 		req.Header.Add("Content-Type", "application/json")
@@ -101,12 +103,16 @@ func (out Librato) deliver() {
 
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
-			log.Fatal(err)
+			ctx.FatalError(err, "doing request")
 		}
 
 		if resp.StatusCode/100 != 2 {
 			b, _ := ioutil.ReadAll(resp.Body)
-			fmt.Printf("%s\n", b)
+			ctx["body"] = b
+			ctx["code"] = resp.StatusCode
+			fmt.Println(ctx)
+			delete(ctx, "body")
+			delete(ctx, "code")
 		}
 		resp.Body.Close()
 	}

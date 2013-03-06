@@ -6,6 +6,7 @@ import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/output"
 	"github.com/freeformz/shh/pollers"
+	"github.com/freeformz/shh/utils"
 	"log"
 	"net/http"
 	_ "net/http/pprof"
@@ -30,7 +31,7 @@ func main() {
 	go func() {
 		for sig := range signalChannel {
 			mp.Exit()
-			log.Fatalf("signal=%s finished=%s duration=%s\n", sig, time.Now().Format(time.RFC3339Nano), time.Since(config.Start))
+			log.Fatal(utils.Slog{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
 		}
 	}()
 
@@ -40,11 +41,12 @@ func main() {
 		}()
 	}
 
-	fmt.Printf("shh_start=true at=%s interval=%s\n", config.Start.Format(time.RFC3339Nano), config.Interval)
+	ctx := utils.Slog{"shh_start": true, "at": config.Start.Format(time.RFC3339Nano), "interval": config.Interval}
+	fmt.Println(ctx)
 
 	outputter, err := output.NewOutputter(config.Outputter, measurements)
 	if err != nil {
-		log.Fatal(err)
+		ctx.FatalError(err, "creating outputter")
 	}
 	outputter.Start()
 

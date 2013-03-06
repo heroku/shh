@@ -5,7 +5,6 @@ import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"time"
@@ -24,17 +23,18 @@ func NewProcessesPoller(measurements chan<- *mm.Measurement) Processes {
 }
 
 func (poller Processes) Poll(tick time.Time) {
+	ctx := utils.Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	dir, err := os.Open(PROC)
 	if err != nil {
-		log.Fatal(err)
+		ctx.FatalError(err, "opening "+PROC)
 	}
 
 	defer dir.Close()
 
 	dirs, err := dir.Readdirnames(0)
 	if err != nil {
-		log.Fatal(err)
+		ctx.FatalError(err, "reading dir names")
 	}
 
 	var running, sleeping, waiting, zombie, stopped, paging float64
