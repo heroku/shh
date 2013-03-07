@@ -70,19 +70,18 @@ func (mp Multi) incrementCount(pname string) uint64 {
 }
 
 func (mp Multi) Poll(tick time.Time) {
-	start := time.Now()
+	defer mp.durationMetric(tick, "all", time.Now())
+	defer mp.Wait()
+
 	for name, poller := range mp.pollers {
 		mp.measurements <- &mm.Measurement{tick, mp.Name(), []string{"ticks", name, "count"}, mp.incrementCount(name)}
 		mp.Add(1)
 		go func(poller Poller) {
-			start := time.Now()
+			defer mp.durationMetric(tick, poller.Name(), time.Now())
+			defer mp.Done()
 			poller.Poll(tick)
-			mp.Done()
-			mp.durationMetric(tick, poller.Name(), start)
 		}(poller)
 	}
-	mp.Wait()
-	mp.durationMetric(tick, "all", start)
 }
 
 func (mp Multi) Name() string {
