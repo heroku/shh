@@ -15,17 +15,21 @@ type Measurement struct {
 }
 
 func (m *Measurement) String() string {
-	msg := fmt.Sprintf("when=%s measure=%s", m.Timestamp(), m.Measured())
-	switch m.Value.(type) {
-	case float64:
-		msg = fmt.Sprintf("%s val=%f", msg, m.Value.(float64))
-	case uint64:
-		msg = fmt.Sprintf("%s val=%d", msg, m.Value.(uint64))
-	}
+	msg := fmt.Sprintf("when=%s measure=%s val=%s", m.Timestamp(), m.Measured(), m.SValue())
 	if config.Source != "" {
 		return fmt.Sprintf("%s source=%s", msg, config.Source)
 	}
 	return msg
+}
+
+func (m *Measurement) SValue() string {
+	switch m.Value.(type) {
+	case float64:
+		return fmt.Sprintf("%f", m.Value.(float64))
+	case uint64:
+		return fmt.Sprintf("%d", m.Value.(uint64))
+	}
+	return ""
 }
 
 func (m *Measurement) Measured() string {
@@ -54,4 +58,8 @@ func (current *Measurement) Difference(last *Measurement) uint64 {
 
 func (m *Measurement) Timestamp() string {
 	return m.When.Format(time.RFC3339)
+}
+
+func (m *Measurement) UnixNano() int64 {
+	return m.When.UnixNano()
 }
