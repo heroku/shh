@@ -30,6 +30,7 @@ var (
 	LibratoToken        = utils.GetEnvWithDefault("SHH_LIBRATO_TOKEN", "")                                       // The Librato API TOken
 	LibratoBatchSize    = utils.GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 50)                               // The max number of metrics to submit in a single request
 	LibratoBatchTimeout = utils.GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", "500ms")                  // The max time metrics will sit un-delivered
+	CarbonHost          = utils.GetEnvWithDefault("SHH_CARBON_HOST", "")                                         // Where the Carbon Outputter sends it's data
 
 	Start = time.Now() // Start time
 )

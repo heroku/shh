@@ -25,6 +25,11 @@ func NewOutputter(name string, measurements <-chan *mm.Measurement) (Outputter, 
 		{
 			return NewLibratoOutputter(measurements), nil
 		}
+	case "carbon":
+		{
+			return NewCarbonOutputter(measurements), nil
+		}
+
 	}
 
 	return nil, errors.New("unknown outputter")
