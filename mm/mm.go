@@ -63,3 +63,7 @@ func (m *Measurement) Timestamp() string {
 func (m *Measurement) UnixNano() int64 {
 	return m.When.UnixNano()
 }
+
+func (m *Measurement) Unix() int64 {
+	return m.When.Unix()
+}
