@@ -57,7 +57,7 @@ func main() {
 	for {
 		select {
 		case tick := <-ticks:
-			go mp.Poll(tick)
+			mp.Poll(tick)
 		}
 	}
 }
