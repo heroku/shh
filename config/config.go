@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	VERSION              = "0.2.1"
+	VERSION              = "0.2.2"
 	DEFAULT_INTERVAL     = "10s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER    = "stdoutl2metder"                                                   // Default outputter
 	DEFAULT_POLLERS      = "cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self"           // Default pollers
