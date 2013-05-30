@@ -1,11 +1,10 @@
 package pollers
 
 import (
-	"github.com/freeformz/filechan"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"time"
-	"ioutil"
+	"io/ioutil"
 )
 
 const (
@@ -28,7 +27,7 @@ func (poller Conntrack) Poll(tick time.Time) {
 		ctx.Error(err, "reading "+CONNTRACK_DATA)
 	}
 
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"count"}, tcp}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"count"}, utils.Atouint64(string(count))}
 }
 
 func (poller Conntrack) Name() string {
