@@ -1,10 +1,11 @@
 package pollers
 
 import (
+	"bytes"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
-	"time"
 	"io/ioutil"
+	"time"
 )
 
 const (
@@ -27,7 +28,7 @@ func (poller Conntrack) Poll(tick time.Time) {
 		ctx.Error(err, "reading "+CONNTRACK_DATA)
 	}
 
-	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"count"}, utils.Atouint64(string(count))}
+	poller.measurements <- &mm.Measurement{tick, poller.Name(), []string{"count"}, utils.Atouint64(string(bytes.TrimSpace(count)))}
 }
 
 func (poller Conntrack) Name() string {
