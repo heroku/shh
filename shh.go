@@ -50,14 +50,8 @@ func main() {
 	}
 	outputter.Start()
 
-	// poll at start
-	go mp.Poll(time.Now())
-
-	ticks := time.Tick(config.Interval)
-	for {
-		select {
-		case tick := <-ticks:
-			mp.Poll(tick)
-		}
+	ticker := time.Tick(config.Interval)
+	for tick := range ticker {
+		mp.Poll(tick)
 	}
 }
