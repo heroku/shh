@@ -45,7 +45,7 @@ func (m *Measurement) Source() string {
 }
 
 func (current *Measurement) Difference(last *Measurement) uint64 {
-	// This is a crappy way to handle wraps and resets when we don't know 
+	// This is a crappy way to handle wraps and resets when we don't know
 	// what the max value is (32, 64 or 128 bit)
 	// Leads to a little, loss, but should be minimal overall
 	cv := current.Value.(uint64)
