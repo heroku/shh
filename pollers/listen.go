@@ -13,7 +13,7 @@ Example
 In terminal A:
   SHH_POLLERS=listen ./shh
 
-In a different terminal: 
+In a different terminal:
   (while true; do echo $(date "+%Y-%m-%dT%H:%M:%SZ") memfree $(grep MemFree /proc/meminfo | awk '{print $2}').0; sleep 5; done) | nc -U \#shh
 
 */

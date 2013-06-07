@@ -16,7 +16,8 @@ func ExampleGetEnvWithDefault_notSet() {
 func ExampleGetEnvWithDefault_empty() {
 	os.Setenv("SHH_TEST_ENV", "")
 	fmt.Println(GetEnvWithDefault("SHH_TEST_ENV", "bar"))
-	// Output: 
+	// Output:
+	//bar
 }
 
 func ExampleGetEnvWithDefault_notDefault() {
