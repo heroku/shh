@@ -50,8 +50,17 @@ func main() {
 	}
 	outputter.Start()
 
-	ticks := utils.PreTick(config.Interval)
-	for tick := range ticks {
-		mp.Poll(tick)
+	start := make(chan time.Time, 1)
+	start <- time.Now()
+	ticks := time.Tick(config.Interval)
+
+	for {
+		select {
+		case tick := <-start:
+			mp.Poll(tick)
+			start = nil
+		case tick := <-ticks:
+			mp.Poll(tick)
+		}
 	}
 }
