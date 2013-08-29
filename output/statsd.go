@@ -46,7 +46,6 @@ func (out Statsd) Output() {
 	conn := out.Connect(config.StatsdHost)
 
 	for measurement := range out.measurements {
-		fmt.Println(out.Encode(measurement))
 		fmt.Fprintf(conn, out.Encode(measurement))
 	}
 }
