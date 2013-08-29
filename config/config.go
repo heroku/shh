@@ -31,6 +31,8 @@ var (
 	LibratoBatchSize    = utils.GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 50)                               // The max number of metrics to submit in a single request
 	LibratoBatchTimeout = utils.GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", "500ms")                  // The max time metrics will sit un-delivered
 	CarbonHost          = utils.GetEnvWithDefault("SHH_CARBON_HOST", "")                                         // Where the Carbon Outputter sends it's data
+	StatsdHost          = utils.GetEnvWithDefault("SHH_STATSD_HOST", "")                                         // Where the Statsd Outputter sends it's data
+	StatsdProto         = utils.GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                     // Whether the Stats Outputter uses TCP or UDP
 
 	Start = time.Now() // Start time
 )
