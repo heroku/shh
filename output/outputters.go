@@ -29,7 +29,10 @@ func NewOutputter(name string, measurements <-chan *mm.Measurement) (Outputter, 
 		{
 			return NewCarbonOutputter(measurements), nil
 		}
-
+	case "statsd":
+		{
+			return NewStatsdOutputter(measurements), nil
+		}
 	}
 
 	return nil, errors.New("unknown outputter")
