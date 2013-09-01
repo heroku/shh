@@ -71,7 +71,12 @@ func (poller Cpu) Poll(tick time.Time) {
 				Irq:     utils.Atofloat64(fields[6]),
 				Softirq: utils.Atofloat64(fields[7]),
 				Steal:   utils.Atofloat64(fields[8]),
-				Guest:   utils.Atofloat64(fields[9]),
+			}
+
+			if len(fields) > 8 {
+				current.Guest = utils.Atofloat64(fields[9])
+			} else {
+				current.Guest = 0
 			}
 
 			last, exists := poller.last[cpu]
