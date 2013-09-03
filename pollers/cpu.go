@@ -73,7 +73,7 @@ func (poller Cpu) Poll(tick time.Time) {
 				Steal:   utils.Atofloat64(fields[8]),
 			}
 
-			if len(fields) > 8 {
+			if len(fields) > 9 {
 				current.Guest = utils.Atofloat64(fields[9])
 			} else {
 				current.Guest = 0
