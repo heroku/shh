@@ -6,14 +6,16 @@ import (
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"net"
+	"strconv"
 )
 
 type Statsd struct {
 	measurements <-chan *mm.Measurement
+	last map[string]*mm.Measurement
 }
 
 func NewStatsdOutputter(measurements <-chan *mm.Measurement) Statsd {
-	return Statsd{measurements}
+	return Statsd{measurements, make(map[string]*mm.Measurement)}
 }
 
 func (out Statsd) Start() {
@@ -34,7 +36,12 @@ func (out Statsd) Connect(host string) net.Conn {
 func (s Statsd) Encode(measurement *mm.Measurement) string {
 	switch measurement.Value.(type) {
 	case uint64:
-		return fmt.Sprintf("%s:%s|c", measurement.Measured(), measurement.SValue())
+		key := measurement.Measured()
+		last, ok := s.last[key]
+		s.last[key] = measurement
+		if ok {
+			return fmt.Sprintf("%s:%s|c", key, strconv.FormatUint(measurement.Difference(last),10))
+		} 
 	case float64:
 		return fmt.Sprintf("%s:%s|g", measurement.Measured(), measurement.SValue())
 	}
