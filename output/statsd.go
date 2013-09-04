@@ -41,9 +41,7 @@ func (s Statsd) Encode(measurement *mm.Measurement) string {
 		s.last[key] = measurement
 		if ok {
 			return fmt.Sprintf("%s:%s|c", key, strconv.FormatUint(measurement.Difference(last),10))
-		} else {
-			return fmt.Sprintf("%s:0|c", key)
-		}
+		} 
 	case float64:
 		return fmt.Sprintf("%s:%s|g", measurement.Measured(), measurement.SValue())
 	}
