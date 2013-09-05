@@ -15,7 +15,7 @@ type Measurement struct {
 }
 
 func (m *Measurement) String() string {
-	msg := fmt.Sprintf("when=%s measure=%s val=%s", m.Timestamp(), m.Measured(), m.SValue())
+	msg := fmt.Sprintf("when=%s sample#%s=%s", m.Timestamp(), m.Measured(), m.SValue())
 	if config.Source != "" {
 		return fmt.Sprintf("%s source=%s", msg, config.Source)
 	}
