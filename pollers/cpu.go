@@ -1,6 +1,7 @@
 package pollers
 
 import (
+	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/utils"
 	"strings"
@@ -61,6 +62,10 @@ func (poller Cpu) Poll(tick time.Time) {
 		if strings.HasPrefix(line, "cpu") {
 			fields := strings.Fields(line)
 			cpu := fields[0]
+
+			if config.CpuOnlyAggregate && cpu != "cpu" {
+				continue
+			}
 
 			current = CpuValues{
 				User:    utils.Atofloat64(fields[1]),

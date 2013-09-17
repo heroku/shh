@@ -13,6 +13,7 @@ const (
 	DEFAULT_PROFILE_PORT = "0"                                                                // Default profile port, 0 disables
 	DEFAULT_DF_TYPES     = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
 	DEFAULT_NIF_DEVICES  = "eth0,lo"                                                          // Default interfaces to report stats for
+	DEFAULT_CPU_AGGR     = false                                                              // Default whether to only report aggregate CPU
 )
 
 var (
@@ -26,6 +27,7 @@ var (
 	Listen              = utils.GetEnvWithDefault("SHH_LISTEN", "unix,#shh")                                     // Default network socket info for listen
 	NifDevices          = utils.GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                 // Devices to poll
 	NtpdateServers      = utils.GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", "0.pool.ntp.org,1.pool.ntp.org") // NTP Servers
+	CpuOnlyAggregate    = utils.GetEnvWithDefaultBool("SHH_CPU_AGGR", false)                                     // Whether to only report aggregate CPU usage
 	LibratoUser         = utils.GetEnvWithDefault("SHH_LIBRATO_USER", "")                                        // The Librato API User
 	LibratoToken        = utils.GetEnvWithDefault("SHH_LIBRATO_TOKEN", "")                                       // The Librato API TOken
 	LibratoBatchSize    = utils.GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 50)                               // The max number of metrics to submit in a single request

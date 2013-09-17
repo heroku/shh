@@ -148,6 +148,21 @@ func GetEnvWithDefaultInt(env string, def int) int {
 	return i
 }
 
+// Returns the value of $env from the OS and if it's empty, returns def
+func GetEnvWithDefaultBool(env string, def bool) bool {
+	tmp := os.Getenv(env)
+
+	if tmp == "" {
+		return def
+	}
+
+	b, err := strconv.ParseBool(tmp)
+	if err != nil {
+		Slog{"fn": "GetEnvWithDefaultBool", "env": env, "def": def}.FatalError(err, "converting atob")
+	}
+	return b
+}
+
 func GetEnvWithDefaultDuration(env string, def string) time.Duration {
 	tmp := os.Getenv(env)
 
