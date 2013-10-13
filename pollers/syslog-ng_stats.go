@@ -1,9 +1,9 @@
 package pollers
 
 import (
-	"fmt"
 	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
+	"github.com/freeformz/shh/utils"
 	"net"
 	"time"
 	"bufio"
@@ -38,7 +38,8 @@ func (poller SyslogngStats) Poll(tick time.Time) {
 			if line == HEADER {
 				continue
 			} else {
-				fmt.Println(scanner.Text())
+				fields := utils.Fields(line)
+				poller.measurements <- &mm.Measurement{tick, poller.Name(), fields[:len(fields)-1], utils.Atouint64(fields[len(fields)-1])}
 			}
 		}
 	}

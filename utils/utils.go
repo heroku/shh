@@ -63,7 +63,7 @@ func Fields(line string) []string {
 			insideParens = true
 		case ')':
 			insideParens = false
-		case ':', ' ', '\n':
+		case ';', ':', ' ', '\n':
 			return insideParens == false
 		}
 		return false
