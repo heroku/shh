@@ -40,6 +40,8 @@ func NewMultiPoller(measurements chan<- *mm.Measurement) Multi {
 			mp.RegisterPoller(NewSelfPoller(measurements))
 		case "conntrack":
 			mp.RegisterPoller(NewConntrackPoller(measurements))
+		case "syslogngstats":
+			mp.RegisterPoller(NewSyslogngStatsPoller(measurements))
 		}
 	}
 
