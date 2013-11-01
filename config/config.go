@@ -6,14 +6,15 @@ import (
 )
 
 const (
-	VERSION              = "0.2.4"
-	DEFAULT_INTERVAL     = "10s"                                                              // Default tick interval for pollers
-	DEFAULT_OUTPUTTER    = "stdoutl2metder"                                                   // Default outputter
-	DEFAULT_POLLERS      = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
-	DEFAULT_PROFILE_PORT = "0"                                                                // Default profile port, 0 disables
-	DEFAULT_DF_TYPES     = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
-	DEFAULT_NIF_DEVICES  = "eth0,lo"                                                          // Default interfaces to report stats for
-	DEFAULT_CPU_AGGR     = false                                                              // Default whether to only report aggregate CPU
+	VERSION                 = "0.2.4"
+	DEFAULT_INTERVAL        = "10s"                                                              // Default tick interval for pollers
+	DEFAULT_OUTPUTTER       = "stdoutl2metder"                                                   // Default outputter
+	DEFAULT_POLLERS         = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
+	DEFAULT_PROFILE_PORT    = "0"                                                                // Default profile port, 0 disables
+	DEFAULT_DF_TYPES        = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
+	DEFAULT_NIF_DEVICES     = "eth0,lo"                                                          // Default interfaces to report stats for
+	DEFAULT_CPU_AGGR        = false                                                              // Default whether to only report aggregate CPU
+	DEFAULT_SYSLOGNG_SOCKET = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
 )
 
 var (
@@ -35,6 +36,7 @@ var (
 	CarbonHost          = utils.GetEnvWithDefault("SHH_CARBON_HOST", "")                                         // Where the Carbon Outputter sends it's data
 	StatsdHost          = utils.GetEnvWithDefault("SHH_STATSD_HOST", "")                                         // Where the Statsd Outputter sends it's data
 	StatsdProto         = utils.GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                     // Whether the Stats Outputter uses TCP or UDP
+	SyslogngSocket      = utils.GetEnvWithDefault("SHH_SYSLOGNG_SOCKET", DEFAULT_SYSLOGNG_SOCKET)                // The location of the syslog-ng socket
 
 	Start = time.Now() // Start time
 )

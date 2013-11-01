@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var (
+	MetricNameNormalizer = strings.NewReplacer("#","_","-","_")
+)
+
 type Measurement struct {
 	When   time.Time
 	Poller string
@@ -37,7 +41,7 @@ func (m *Measurement) Measured() string {
 	if config.Prefix != "" {
 		v = fmt.Sprintf("%s.%s", config.Prefix, v)
 	}
-	return v
+	return MetricNameNormalizer.Replace(v)
 }
 
 func (m *Measurement) Source() string {
