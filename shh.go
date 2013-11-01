@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/freeformz/shh/config"
 	"github.com/freeformz/shh/mm"
 	"github.com/freeformz/shh/output"
 	"github.com/freeformz/shh/pollers"
@@ -22,6 +21,7 @@ var (
 
 func main() {
 	measurements := make(chan *mm.Measurement, 100)
+	config := GetConfig()
 
 	mp := pollers.NewMultiPoller(measurements)
 
@@ -35,7 +35,7 @@ func main() {
 		}
 	}()
 
-	if config.ProfilePort != config.DEFAULT_PROFILE_PORT {
+	if config.ProfilePort != DEFAULT_PROFILE_PORT {
 		go func() {
 			log.Println(http.ListenAndServe("localhost:"+config.ProfilePort, nil))
 		}()
