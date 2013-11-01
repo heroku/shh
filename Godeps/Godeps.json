@@ -1,0 +1,14 @@
+{
+	"ImportPath": "_/Users/edwardam/devel/shh",
+	"GoVersion": "go1.2rc2",
+	"Deps": [
+		{
+			"ImportPath": "github.com/freeformz/filechan",
+			"Rev": "f0a3eeb53e2ed90ccb6da805949219cc36affdf1"
+		},
+		{
+			"ImportPath": "github.com/freeformz/shh/config",
+			"Rev": "2cecca13341bb6a9c0819701d21a17aba7a0cf3e"
+		}
+	]
+}
