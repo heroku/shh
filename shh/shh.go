@@ -17,10 +17,10 @@ var (
 )
 
 func main() {
-	measurements := make(chan *mm.Measurement, 100)
-	config := GetConfig()
+	measurements := make(chan *shh.Measurement, 100)
+	config := shh.GetConfig()
 
-	mp := pollers.NewMultiPoller(measurements)
+	mp := shh.NewMultiPoller(measurements, config)
 
 	signal.Notify(signalChannel, syscall.SIGINT)
 	signal.Notify(signalChannel, syscall.SIGTERM)
@@ -28,20 +28,20 @@ func main() {
 	go func() {
 		for sig := range signalChannel {
 			mp.Exit()
-			log.Fatal(utils.Slog{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
+			log.Fatal(shh.Slog{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
 		}
 	}()
 
-	if config.ProfilePort != DEFAULT_PROFILE_PORT {
+	if config.ProfilePort != shh.DEFAULT_PROFILE_PORT {
 		go func() {
 			log.Println(http.ListenAndServe("localhost:"+config.ProfilePort, nil))
 		}()
 	}
 
-	ctx := utils.Slog{"shh_start": true, "at": config.Start.Format(time.RFC3339Nano), "interval": config.Interval}
+	ctx := shh.Slog{"shh_start": true, "at": config.Start.Format(time.RFC3339Nano), "interval": config.Interval}
 	fmt.Println(ctx)
 
-	outputter, err := output.NewOutputter(config.Outputter, measurements)
+	outputter, err := shh.NewOutputter(config.Outputter, measurements, config)
 	if err != nil {
 		ctx.FatalError(err, "creating outputter")
 	}
