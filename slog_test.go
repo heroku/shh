@@ -45,7 +45,7 @@ func ExampleSlog_add() {
 }
 
 func ExampleSlog_time() {
-	fmt.Println(Slog{"now": time.Unix(0, 0)})
+	fmt.Println(Slog{"now": time.Unix(0, 0).UTC()})
 	//Output: now="1970-01-01T00:00:00Z"
 }
 
