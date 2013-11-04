@@ -6,7 +6,6 @@ tempdir        := $(shell mktemp -d)
 controldir     := $(tempdir)/DEBIAN
 installpath    := $(tempdir)/usr/bin
 buildpath      := .build
-buildpackpath  := $(buildpath)/pack
 buildpackcache := $(buildpath)/cache
 
 define DEB_CONTROL
@@ -20,7 +19,7 @@ Description: Systems statistics to formatted log lines
 endef
 export DEB_CONTROL
 
-deb: build
+deb: bin/shh
 	mkdir -p -m 0755 $(controldir)
 	echo "$$DEB_CONTROL" > $(controldir)/control
 	mkdir -p $(installpath)
@@ -32,15 +31,6 @@ clean:
 	rm -rf $(buildpath)
 	rm -f shh*.deb
 
-build: $(buildpackpath)/bin
-	$(buildpackpath)/bin/compile . $(buildpackcache)
-
-$(buildpackcache):
-	mkdir -p $(buildpath)
-	mkdir -p $(buildpackcache)
-	curl -O http://codon-buildpacks.s3.amazonaws.com/buildpacks/kr/go.tgz
-	mv go.tgz $(buildpath)
-
-$(buildpackpath)/bin: $(buildpackcache)
-	mkdir -p $(buildpackpath)
-	tar -C $(buildpackpath) -zxf $(buildpath)/go.tgz
+bin/shh:
+	git clone git://github.com/kr/heroku-buildpack-go.git $(buildpath)
+	$(buildpath)/bin/compile . $(buildpackcache)
