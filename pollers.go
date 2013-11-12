@@ -23,7 +23,7 @@ func NewMultiPoller(measurements chan<- *Measurement, config Config) Multi {
 		case "df":
 			mp.RegisterPoller(NewDfPoller(measurements, config))
 		case "disk":
-			mp.RegisterPoller(NewDiskPoller(measurements))
+			mp.RegisterPoller(NewDiskPoller(measurements, config))
 		case "listen":
 			mp.RegisterPoller(NewListenPoller(measurements, config))
 		case "mem":
