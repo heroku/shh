@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -13,17 +14,18 @@ const (
 
 type Disk struct {
 	measurements chan<- *Measurement
+	diskFilter   *regexp.Regexp
 }
 
-func NewDiskPoller(measurements chan<- *Measurement) Disk {
-	return Disk{measurements: measurements}
+func NewDiskPoller(measurements chan<- *Measurement, config Config) Disk {
+	return Disk{measurements: measurements, diskFilter: config.DiskFilter}
 }
 
 // http://www.kernel.org/doc/Documentation/block/stat.txt
 func (poller Disk) Poll(tick time.Time) {
 	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
-	for device := range deviceChannel() {
+	for device := range deviceChannel(poller.diskFilter) {
 		target := SYS + device + "/stat"
 		statBytes, err := ioutil.ReadFile(target)
 		if err != nil {
@@ -53,7 +55,7 @@ func (poller Disk) Name() string {
 }
 func (poller Disk) Exit() {}
 
-func deviceChannel() <-chan string {
+func deviceChannel(filter *regexp.Regexp) <-chan string {
 	c := make(chan string)
 
 	go func(devices chan<- string) {
@@ -66,7 +68,7 @@ func deviceChannel() <-chan string {
 				continue
 			}
 
-			if Exists(SYS + fields[3]) {
+			if Exists(SYS+fields[3]) && filter.MatchString(fields[3]) {
 				devices <- fields[3]
 			} else {
 				continue

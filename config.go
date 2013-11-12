@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"time"
 )
 
@@ -41,6 +42,7 @@ type Config struct {
 	StatsdProto         string
 	SyslogngSocket      string
 	Start               time.Time
+	DiskFilter          *regexp.Regexp
 }
 
 func GetConfig() (config Config) {
@@ -63,6 +65,8 @@ func GetConfig() (config Config) {
 	config.StatsdHost = GetEnvWithDefault("SHH_STATSD_HOST", "")                                             // Where the Statsd Outputter sends it's data
 	config.StatsdProto = GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                        // Whether the Stats Outputter uses TCP or UDP
 	config.SyslogngSocket = GetEnvWithDefault("SHH_SYSLOGNG_SOCKET", DEFAULT_SYSLOGNG_SOCKET)                // The location of the syslog-ng socket
-	config.Start = start                                                                                     // Start time
+	tmp := GetEnvWithDefault("SHH_DISK_FILTER", ".*")
+	config.DiskFilter = regexp.MustCompile(tmp)
+	config.Start = start // Start time
 	return
 }
