@@ -17,14 +17,6 @@ type Measurement struct {
 	Value  interface{}
 }
 
-func (m *Measurement) String() string {
-	msg := fmt.Sprintf("when=%s sample#%s=%s", m.Timestamp(), m.Measured(), m.SValue())
-	//if config.Source != "" {
-	//	return fmt.Sprintf("%s source=%s", msg, config.Source)
-	//}
-	return msg
-}
-
 func (m *Measurement) SValue() string {
 	switch m.Value.(type) {
 	case float64:
@@ -35,17 +27,12 @@ func (m *Measurement) SValue() string {
 	return ""
 }
 
-func (m *Measurement) Measured() string {
+func (m *Measurement) Measured(prefix string) string {
 	v := fmt.Sprintf("%s.%s", m.Poller, strings.Join(m.What, "."))
-	//if config.Prefix != "" {
-	//	v = fmt.Sprintf("%s.%s", config.Prefix, v)
-	//}
+	if prefix != "" {
+		v = fmt.Sprintf("%s.%s", prefix, v)
+	}
 	return MetricNameNormalizer.Replace(v)
-}
-
-func (m *Measurement) Source() string {
-	return ""
-	//return config.Source
 }
 
 func (current *Measurement) Difference(last *Measurement) uint64 {

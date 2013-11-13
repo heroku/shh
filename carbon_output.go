@@ -9,18 +9,19 @@ import (
 type Carbon struct {
 	measurements <-chan *Measurement
 	Host         string
-	Prefix       string
+	prefix       string
+	source       string
 }
 
-func NewCarbonOutputter(measurements <-chan *Measurement, config Config) Carbon {
-	return Carbon{measurements: measurements, Host: config.CarbonHost, Prefix: config.Prefix}
+func NewCarbonOutputter(measurements <-chan *Measurement, config Config) *Carbon {
+	return &Carbon{measurements: measurements, Host: config.CarbonHost, prefix: config.Prefix, source: config.Source}
 }
 
-func (out Carbon) Start() {
+func (out *Carbon) Start() {
 	go out.Output()
 }
 
-func (out Carbon) Connect(host string) net.Conn {
+func (out *Carbon) Connect(host string) net.Conn {
 	ctx := Slog{"fn": "Connect", "outputter": "carbon"}
 
 	conn, err := net.Dial("tcp", host)
@@ -31,23 +32,23 @@ func (out Carbon) Connect(host string) net.Conn {
 	return conn
 }
 
-func (out Carbon) Output() {
+func (out *Carbon) Output() {
 
 	conn := out.Connect(out.Host)
 
 	metric := make([]string, 0, 10)
 	var resetEnd int
 
-	if out.Prefix != "" {
+	if out.prefix != "" {
 		resetEnd = 1
-		metric = append(metric, out.Prefix)
+		metric = append(metric, out.prefix)
 	} else {
 		resetEnd = 0
 	}
 
 	for measurement := range out.measurements {
-		if source := measurement.Source(); source != "" {
-			metric = append(metric, source)
+		if out.source != "" {
+			metric = append(metric, out.source)
 		}
 		metric = append(metric, measurement.Poller)
 		metric = append(metric, measurement.What...)

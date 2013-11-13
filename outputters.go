@@ -14,11 +14,11 @@ func NewOutputter(name string, measurements <-chan *Measurement, config Config) 
 	switch name {
 	case "stdoutl2metraw":
 		{
-			return NewStdOutL2MetRaw(measurements), nil
+			return NewStdOutL2MetRaw(measurements, config), nil
 		}
 	case "stdoutl2metder":
 		{
-			return NewStdOutL2MetDer(measurements), nil
+			return NewStdOutL2MetDer(measurements, config), nil
 		}
 	case "librato":
 		{
