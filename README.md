@@ -25,13 +25,13 @@ Wait for the deb to be available, download and do what you want with it.
 
 ## 'Local' Development
 
-1) Obtain a Linux system (only really tested on Ubuntu ATM)
-2) Install Go v1.0.(2|3)
-3) Set GOPATH [appropriately](http://golang.org/doc/code.html)
-3) `go get github.com/freeformz/shh`
-4) cd $GOPATH/src/github.com/freeformz/shh
-5) go build
-6) ./shh
+1. Obtain a Linux system (only really tested on Ubuntu ATM)
+2. Install Go v1.0.(2|3)
+3. Set GOPATH [appropriately](http://golang.org/doc/code.html)
+3. `go get github.com/freeformz/shh`
+4. cd $GOPATH/src/github.com/freeformz/shh
+5. go build
+6. ./shh
 
 hack away
 
