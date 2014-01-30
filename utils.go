@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	NonWord = regexp.MustCompile("[^0-9A-Za-z_]")
+	NonWord = regexp.MustCompile("\\W")
 )
 
 type Slog map[string]interface{}
