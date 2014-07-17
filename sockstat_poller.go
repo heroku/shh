@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-var (
+const (
 	SOCKSTAT4 = "/proc/net/sockstat"
 	SOCKSTAT6 = "/proc/net/sockstat6"
 )
