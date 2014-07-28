@@ -15,6 +15,7 @@ const (
 	DEFAULT_NIF_DEVICES     = "eth0,lo"                                                          // Default interfaces to report stats for
 	DEFAULT_CPU_AGGR        = false                                                              // Default whether to only report aggregate CPU
 	DEFAULT_SYSLOGNG_SOCKET = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
+	DEFAULT_SOCKSTAT_PROTOS = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
 )
 
 var (
@@ -38,6 +39,7 @@ type Config struct {
 	LibratoBatchSize    int
 	LibratoBatchTimeout time.Duration
 	CarbonHost          string
+	SockStatProtos      []string
 	StatsdHost          string
 	StatsdProto         string
 	SyslogngSocket      string
@@ -62,6 +64,7 @@ func GetConfig() (config Config) {
 	config.LibratoBatchSize = GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 50)                             // The max number of metrics to submit in a single request
 	config.LibratoBatchTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", "500ms")             // The max time metrics will sit un-delivered
 	config.CarbonHost = GetEnvWithDefault("SHH_CARBON_HOST", "")                                             // Where the Carbon Outputter sends it's data
+	config.SockStatProtos = GetEnvWithDefaultStrings("SHH_SOCKSTAT_PROTOS", DEFAULT_SOCKSTAT_PROTOS)         // Protocols to report sockstats about
 	config.StatsdHost = GetEnvWithDefault("SHH_STATSD_HOST", "")                                             // Where the Statsd Outputter sends it's data
 	config.StatsdProto = GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                        // Whether the Stats Outputter uses TCP or UDP
 	config.SyslogngSocket = GetEnvWithDefault("SHH_SYSLOGNG_SOCKET", DEFAULT_SYSLOGNG_SOCKET)                // The location of the syslog-ng socket

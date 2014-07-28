@@ -40,6 +40,8 @@ func NewMultiPoller(measurements chan<- *Measurement, config Config) Multi {
 			mp.RegisterPoller(NewConntrackPoller(measurements))
 		case "syslogngstats":
 			mp.RegisterPoller(NewSyslogngStatsPoller(measurements, config))
+		case "sockstat":
+			mp.RegisterPoller(NewSockStatPoller(measurements, config))
 		}
 	}
 
