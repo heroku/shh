@@ -16,6 +16,7 @@ const (
 	DEFAULT_CPU_AGGR        = false                                                              // Default whether to only report aggregate CPU
 	DEFAULT_SYSLOGNG_SOCKET = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
 	DEFAULT_SOCKSTAT_PROTOS = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
+	DEFAULT_PERCENTAGES     = ""                                                                 // Default pollers where publishing perc metrics is allowed
 )
 
 var (
@@ -29,6 +30,7 @@ type Config struct {
 	Source              string
 	Prefix              string
 	ProfilePort         string
+	Percentages         []string
 	DfTypes             []string
 	Listen              string
 	NifDevices          []string
@@ -54,6 +56,7 @@ func GetConfig() (config Config) {
 	config.Source = GetEnvWithDefault("SHH_SOURCE", "")                                                      // Source to emit
 	config.Prefix = GetEnvWithDefault("SHH_PREFIX", "")                                                      // Metric prefix to use
 	config.ProfilePort = GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                         // Profile Port
+	config.Percentages = GetEnvWithDefaultStrings("SHH_PERCENTAGES", DEFAULT_PERCENTAGES)
 	config.DfTypes = GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                              // Default DF types
 	config.Listen = GetEnvWithDefault("SHH_LISTEN", "unix,#shh")                                             // Default network socket info for listen
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                     // Devices to poll
