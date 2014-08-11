@@ -27,7 +27,9 @@ func (poller Df) Poll(tick time.Time) {
 		err := syscall.Statfs(mp, buf)
 		if err != nil {
 			ctx["mountpoint"] = mp
-			ctx.FatalError(err, "calling Statfs")
+			ctx.Error(err, "calling Statfs")
+			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+			continue
 		}
 		mmp := massageMountPoint(mp)
 		total_bytes := float64(uint64(buf.Bsize) * buf.Blocks)

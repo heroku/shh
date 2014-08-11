@@ -31,7 +31,9 @@ func (poller Load) Poll(tick time.Time) {
 	reader := bufio.NewReader(file)
 	line, err := reader.ReadString('\n')
 	if err != nil {
-		ctx.FatalError(err, "reading line from "+LOAD_DATA)
+		ctx.Error(err, "reading line from "+LOAD_DATA)
+		poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+		return
 	}
 	fields := strings.Fields(line)
 	poller.measurements <- &Measurement{tick, poller.Name(), []string{"1m"}, Atofloat64(fields[0])}

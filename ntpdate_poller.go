@@ -29,16 +29,21 @@ func (poller Ntpdate) Poll(tick time.Time) {
 		cmd.Args = append(cmd.Args, poller.Servers...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			ctx.FatalError(err, "creating stdout pipe")
+			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+			ctx.Error(err, "creating stdout pipe")
+			return
 		}
 
 		if err := cmd.Start(); err != nil {
-			ctx.FatalError(err, "starting sub command")
+			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+			ctx.Error(err, "starting sub command")
+			return
 		}
 
 		defer func() {
 			if err := cmd.Wait(); err != nil {
-				ctx.FatalError(err, "waiting for subcommand to end")
+				poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+				ctx.Error(err, "waiting for subcommand to end")
 			}
 		}()
 
@@ -59,7 +64,9 @@ func (poller Ntpdate) Poll(tick time.Time) {
 				if err == io.EOF {
 					break
 				} else {
-					ctx.FatalError(err, "unknown error reading data from subcommand")
+					ctx.Error(err, "unknown error reading data from subcommand")
+					poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+					return
 				}
 			}
 		}
