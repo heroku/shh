@@ -193,7 +193,7 @@ func GetEnvWithDefaultStrings(env string, def string) []string {
 	return tmp
 }
 
-// Small pppwrapper to handle errors on open
+// Small wrapper to handle errors on open
 func FileLineChannel(fpath string) <-chan string {
 	c, err := filechan.FileLineChannel(fpath)
 

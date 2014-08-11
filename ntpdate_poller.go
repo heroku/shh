@@ -29,14 +29,14 @@ func (poller Ntpdate) Poll(tick time.Time) {
 		cmd.Args = append(cmd.Args, poller.Servers...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
 			ctx.Error(err, "creating stdout pipe")
+			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
 			return
 		}
 
 		if err := cmd.Start(); err != nil {
-			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
 			ctx.Error(err, "starting sub command")
+			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
 			return
 		}
 
