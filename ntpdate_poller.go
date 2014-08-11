@@ -42,8 +42,8 @@ func (poller Ntpdate) Poll(tick time.Time) {
 
 		defer func() {
 			if err := cmd.Wait(); err != nil {
-				poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
 				ctx.Error(err, "waiting for subcommand to end")
+				poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
 			}
 		}()
 
