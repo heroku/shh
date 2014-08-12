@@ -29,7 +29,9 @@ func (poller Disk) Poll(tick time.Time) {
 		target := SYS + device + "/stat"
 		statBytes, err := ioutil.ReadFile(target)
 		if err != nil {
-			ctx.FatalError(err, "reading "+target)
+			ctx.Error(err, "reading "+target)
+			poller.measurements <- &Measurement{tick, poller.Name(), []string{"error"}, float64(1)}
+			continue
 		}
 
 		fields := strings.Fields(string(statBytes))
