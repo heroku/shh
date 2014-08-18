@@ -49,10 +49,6 @@ Please file bug reports through
 [Github Issues](https://github.com/heroku/shh/issues). If you'd like
 to contribute changes, please fork and submit a pull request.
 
-## TODO
-
-See [Github Issues](https://github.com/freeformz/shh/issues)
-
 ## License
 
 Copyright 2013 - 2014, Edward Muller, and contributors
