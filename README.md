@@ -7,11 +7,51 @@ Gathers and relays system metrics
 
     go get github.com/heroku/shh
 
-## Environment Variables
+## Configuration
 
-These are set in the config package. To view take a look at the docs for that package:
+Configuration of shh doesn't use a config file, instead it uses environment variables.
 
-    go doc github.com/heroku/shh/config
+| Environment Var | Type | Explanation | Default |
+|:----------------|:-----|:------------|--------:|
+| `SHH_INTERVAL` | duration | Polling Interval | 10s |
+| `SHH_OUTPUTTER` | string | Outputter | stdoutl2metder |
+| `SHH_POLLERS` | list of string | Pollers to poll | conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self |
+| `SHH_SOURCE` | string | Source to emit | |
+| `SHH_PREFIX` | string | Metric prefix to use | |
+| `SHH_PROFILE_PORT` | string | Profile Port | 0 (off) |
+| `SHH_PERCENTAGES` | list of string | Default pollers which should report percentages when applicable | |
+| `SHH_DF_TYPES` | list of string | Default DF types | btrfs,ext3,ext4,tmpfs,xfs |
+| `SHH_LISTEN` | string | Default network socket info for listen | unix,#shh |
+| `SHH_NIF_DEVICES` | list of string | Devices to poll | eth0,lo |
+| `SHH_NTPDATE_SERVERS` | list of string | NTP Servers | 0.pool.ntp.org,1.pool.ntp.org |
+| `SHH_CPU_AGGR` | bool | Whether to only report aggregate CPU usage | false |
+| `SHH_LIBRATO_USER` | string | The Librato API User | |
+| `SHH_LIBRATO_TOKEN` | string | The Librato API TOken | |
+| `SHH_LIBRATO_BATCH_SIZE` | int | The max number of metrics to submit in a single request | 50 |
+| `SHH_LIBRATO_BATCH_TIMEOUT` | duration | The max time metrics will sit un-delivered | 500ms |
+| `SHH_CARBON_HOST` | string | Where the Carbon Outputter sends it's data | |
+| `SHH_SOCKSTAT_PROTOS` | list of string | Protocols to report sockstats about | TCP,UDP,TCP6,UDP6 |
+| `SHH_STATSD_HOST` | string | Where the Statsd Outputter sends it's data | |
+| `SHH_STATSD_PROTO` | string | Whether the Stats Outputter uses TCP or UDP | udp |
+| `SHH_SYSLOGNG_SOCKET` | string | The location of the syslog-ng socket | /var/lib/syslog-ng/syslog-ng.ctl |
+| `SHH_DISK_FILTER` | regexp | | .* |
+
+For more information on the duration type, see [time.ParseDuration](http://golang.org/pkg/time/#ParseDuration)
+
+The regexp type supports valid regexps documented [here](http://golang.org/pkg/regexp/).
+
+### A note about SHH_OUTPUTTER
+
+The SHH_OUTPUTTER variable *may* not be enough on it's own to get the desired result. For instance, the Librato outputter, requires that `SHH_LIBRATO_USER` and `SHH_LIBRATO_TOKEN` be set. 
+
+### A note about SHH_PERCENTAGES
+
+This variable works on "virtual" pollers and computes "percentage used", reporting as "<metric>.perc"
+
+* mem (from the mem poller)
+* swap (from the mem poller)
+* df (from the df_poller)
+
 
 ## Building Debs on Heroku
 
