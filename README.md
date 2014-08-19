@@ -12,7 +12,7 @@ Gathers and relays system metrics
 Configuration of shh doesn't use a config file, instead it uses environment variables.
 
 | Environment Var | Type | Explanation | Default |
-|:----------------|:-----|:------------|--------:|
+|:----------------|:-----|:------------|:--------|
 | `SHH_INTERVAL` | duration | Polling Interval | 10s |
 | `SHH_OUTPUTTER` | string | Outputter | stdoutl2metder |
 | `SHH_POLLERS` | list of string | Pollers to poll | conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self |
