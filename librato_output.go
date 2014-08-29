@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"net"
@@ -125,12 +124,14 @@ func (out *Librato) deliver() {
 
 		out.retry(j)
 	}
-}
+   }
 
 func (out *Librato) retry(payload []byte) bool {
 	ctx := Slog{"fn": "retry", "outputter": "librato"}
 	attempts := 0
 	bo := 0 * time.Millisecond
+	shouldBackoff := false
+
 	for attempts < LibratoMaxAttempts {
 		body := bytes.NewBuffer(payload)
 		req, err := http.NewRequest("POST", out.Url, body)
@@ -155,38 +156,44 @@ func (out *Librato) retry(payload []byte) bool {
 			}
 		}
 
-		if resp.StatusCode >= 500 {
-			ctx["backoff"] = bo
-			ctx["message"] = "Backing off due to server error"
-			fmt.Println(ctx)
-			bo = backoff(bo)
-		} else if resp.StatusCode >= 300 {
+		if resp.StatusCode >= 300 {
 			b, _ := ioutil.ReadAll(resp.Body)
-			ctx["body"] = b
+			ctx["body"] = string(b)
 			ctx["code"] = resp.StatusCode
-			ctx.Error(errors.New(resp.Status), "Client error")
+
+			if resp.StatusCode >= 500 {
+				shouldBackoff = true
+				ctx["message"] = "Backing off due to server error"
+				ctx["backoff"] = bo
+			} else {
+				ctx["message"] = "Client error"
+			}
+
+			resp.Body.Close()
+			fmt.Println(ctx)
+			delete(ctx, "backoff")
+			delete(ctx, "message")
 			delete(ctx, "body")
 			delete(ctx, "code")
-			resp.Body.Close()
-			return false
+
+			if shouldBackoff {
+				bo = backoff(bo)
+			} else {
+				return false
+			}
 		} else {
 			resp.Body.Close()
 			return true
 		}
 
-		resp.Body.Close()
 		attempts += 1
-		delete(ctx, "backoff")
-		delete(ctx, "message")
 	}
 
 	return false
 }
 
-// Sleeps `bo` and then returns double, unless 0, in which case 
+// Sleeps `bo` and then returns double, unless 0, in which case
 // returns the initial starting sleep time.
-//
-// `bo` is interpretted as Milliseconds
 func backoff(bo time.Duration) time.Duration {
 	if bo > 0 {
 		time.Sleep(bo)

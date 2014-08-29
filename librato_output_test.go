@@ -41,7 +41,7 @@ func (g *GrumpyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func TestLibratoTimeToHeaderTimeout(t *testing.T) {
+func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	handler := &SleepyHandler{2 * time.Second, -400 * time.Millisecond}
 	server := httptest.NewServer(handler)
 	defer server.Close()
@@ -60,7 +60,7 @@ func TestLibratoTimeToHeaderTimeout(t *testing.T) {
 	}
 }
 
-func TestLibratoServerError(t *testing.T) {
+func TestLibrato_ServerErrorBackoff(t *testing.T) {
 	handler := &GrumpyHandler{ResponseCodes: []int{503, 500, 200}}
 	server := httptest.NewServer(handler)
 	defer server.Close()
@@ -78,7 +78,7 @@ func TestLibratoServerError(t *testing.T) {
 	}
 }
 
-func TestLibratoIndefiniteBackoff(t *testing.T) {
+func TestLibrato_IndefiniteBackoff(t *testing.T) {
 	handler := &GrumpyHandler{ResponseCodes: []int{500}}
 	server := httptest.NewServer(handler)
 	defer server.Close()
@@ -96,7 +96,7 @@ func TestLibratoIndefiniteBackoff(t *testing.T) {
 	}
 }
 
-func TestLibratoClientError(t *testing.T) {
+func TestLibrato_ClientError(t *testing.T) {
 	handler := &GrumpyHandler{ResponseCodes: []int{401}}
 	server := httptest.NewServer(handler)
 	defer server.Close()
