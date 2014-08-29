@@ -26,9 +26,11 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_NTPDATE_SERVERS` | list of string | NTP Servers | 0.pool.ntp.org,1.pool.ntp.org |
 | `SHH_CPU_AGGR` | bool | Whether to only report aggregate CPU usage | false |
 | `SHH_LIBRATO_USER` | string | The Librato API User | |
-| `SHH_LIBRATO_TOKEN` | string | The Librato API TOken | |
+| `SHH_LIBRATO_TOKEN` | string | The Librato API Token | |
+| `SHH_LIBRATO_URL` | string | The Librato API User | https://metrics-api.librato.com/v1/metrics |
 | `SHH_LIBRATO_BATCH_SIZE` | int | The max number of metrics to submit in a single request | 50 |
 | `SHH_LIBRATO_BATCH_TIMEOUT` | duration | The max time metrics will sit un-delivered | 500ms |
+| `SHH_LIBRATO_NETWORK_TIMEOUT` | duration | Timeout til connect (will retry). And timeout to first header (will assume successful) | 2s |
 | `SHH_CARBON_HOST` | string | Where the Carbon Outputter sends it's data | |
 | `SHH_SOCKSTAT_PROTOS` | list of string | Protocols to report sockstats about | TCP,UDP,TCP6,UDP6 |
 | `SHH_STATSD_HOST` | string | Where the Statsd Outputter sends it's data | |
