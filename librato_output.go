@@ -24,8 +24,8 @@ type PostBody struct {
 }
 
 const (
-	LibratoBacklog = 8 // No more than N pending batches in-flight
-	LibratoMaxAttempts = 4 // Max attempts before dropping batch 
+	LibratoBacklog               = 8 // No more than N pending batches in-flight
+	LibratoMaxAttempts           = 4 // Max attempts before dropping batch
 	LibratoStartingBackoffMillis = 200 * time.Millisecond
 )
 
@@ -45,13 +45,14 @@ type Librato struct {
 func NewLibratoOutputter(measurements <-chan *Measurement, config Config) *Librato {
 	return &Librato{
 		measurements: measurements,
-	  batches:      make(chan []*Measurement, LibratoBacklog),
+		source:       config.Source,
+		batches:      make(chan []*Measurement, LibratoBacklog),
 		Timeout:      config.LibratoBatchTimeout,
 		BatchSize:    config.LibratoBatchSize,
 		User:         config.LibratoUser,
 		Token:        config.LibratoToken,
-	  Url:          config.LibratoUrl,
-	  client:       &http.Client{
+		Url:          config.LibratoUrl,
+		client: &http.Client{
 			Transport: &http.Transport{
 				ResponseHeaderTimeout: config.LibratoNetworkTimeout,
 				Dial: func(network, address string) (net.Conn, error) {
@@ -122,39 +123,58 @@ func (out *Librato) deliver() {
 			ctx.FatalError(err, "marshaling json")
 		}
 
-		out.retry(j)
+		out.sendWithBackoff(j)
 	}
-   }
+}
 
-func (out *Librato) retry(payload []byte) bool {
+func (out *Librato) sendWithBackoff(payload []byte) bool {
 	ctx := Slog{"fn": "retry", "outputter": "librato"}
 	attempts := 0
 	bo := 0 * time.Millisecond
-	shouldBackoff := false
 
 	for attempts < LibratoMaxAttempts {
-		body := bytes.NewBuffer(payload)
-		req, err := http.NewRequest("POST", out.Url, body)
-		if err != nil {
-			ctx.FatalError(err, "creating new request")
+		if retry, err := out.send(ctx, payload); retry {
+			ctx["backoff"] = bo
+			ctx["message"] = err
+			fmt.Println(ctx)
+			bo = backoff(bo)
+		} else if err != nil {
+			ctx["error"] = err
+			fmt.Println(ctx)
+			return false
+		} else {
+			return true
 		}
 
-		req.Header.Add("Content-Type", "application/json")
-		req.SetBasicAuth(out.User, out.Token)
+		resetCtx(ctx)
+		attempts++
+	}
+	return false
+}
 
-		resp, err := out.client.Do(req)
-		if err != nil {
-			if nerr, ok := err.(net.Error); ok && (nerr.Temporary() || nerr.Timeout()) {
-				ctx["backoff"] = bo
-				ctx["message"] = "Backing off due to transport error"
-				fmt.Println(ctx)
-				bo = backoff(bo)
-			} else if strings.Contains(err.Error(), "timeout awaiting response") {
-				return true
-			} else {
-				ctx.FatalError(err, "doing request")
-			}
+func (out *Librato) send(ctx Slog, payload []byte) (retry bool, e error) {
+	body := bytes.NewBuffer(payload)
+	req, err := http.NewRequest("POST", out.Url, body)
+	if err != nil {
+		ctx.FatalError(err, "creating new request")
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.SetBasicAuth(out.User, out.Token)
+
+	resp, err := out.client.Do(req)
+	if err != nil {
+		if nerr, ok := err.(net.Error); ok && (nerr.Temporary() || nerr.Timeout()) {
+			retry = true
+			e = fmt.Errorf("Backing off due to transport error")
+		} else if strings.Contains(err.Error(), "timeout awaiting response") {
+			retry = false
+			e = nil
+		} else {
+			ctx.FatalError(err, "doing request")
 		}
+	} else {
+		defer resp.Body.Close()
 
 		if resp.StatusCode >= 300 {
 			b, _ := ioutil.ReadAll(resp.Body)
@@ -162,34 +182,15 @@ func (out *Librato) retry(payload []byte) bool {
 			ctx["code"] = resp.StatusCode
 
 			if resp.StatusCode >= 500 {
-				shouldBackoff = true
-				ctx["message"] = "Backing off due to server error"
-				ctx["backoff"] = bo
+				retry = true
+				e = fmt.Errorf("Backing off due to server error")
 			} else {
-				ctx["message"] = "Client error"
+				e = fmt.Errorf("Client error")
 			}
-
-			resp.Body.Close()
-			fmt.Println(ctx)
-			delete(ctx, "backoff")
-			delete(ctx, "message")
-			delete(ctx, "body")
-			delete(ctx, "code")
-
-			if shouldBackoff {
-				bo = backoff(bo)
-			} else {
-				return false
-			}
-		} else {
-			resp.Body.Close()
-			return true
 		}
-
-		attempts += 1
 	}
 
-	return false
+	return
 }
 
 // Sleeps `bo` and then returns double, unless 0, in which case
@@ -201,4 +202,11 @@ func backoff(bo time.Duration) time.Duration {
 	} else {
 		return LibratoStartingBackoffMillis
 	}
+}
+
+func resetCtx(ctx Slog) {
+	delete(ctx, "backoff")
+	delete(ctx, "message")
+	delete(ctx, "body")
+	delete(ctx, "code")
 }
