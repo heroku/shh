@@ -55,7 +55,7 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	measurements := make(chan *Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if ! librato.retry([]byte(`{}`)) {
+	if ! librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Request should have completed successfully with a sleepy handler")
 	}
 }
@@ -73,7 +73,7 @@ func TestLibrato_ServerErrorBackoff(t *testing.T) {
 	measurements := make(chan *Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if ! librato.retry([]byte(`{}`)) {
+	if ! librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Request should have completed successfully with a grumpy handler")
 	}
 }
@@ -91,7 +91,7 @@ func TestLibrato_IndefiniteBackoff(t *testing.T) {
 	measurements := make(chan *Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if librato.retry([]byte(`{}`)) {
+	if librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Retry should have given up. This is an especially grumpy handler")
 	}
 }
@@ -109,7 +109,7 @@ func TestLibrato_ClientError(t *testing.T) {
 	measurements := make(chan *Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if librato.retry([]byte(`{}`)) {
+	if librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Retry should not have succeeded due to non-server error.")
 	}
 }
