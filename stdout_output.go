@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
+	"time"
 )
 
 type StdOutL2MetRaw struct {
-	measurements <-chan *Measurement
+	measurements <-chan Measurement
 	prefix       string
 	source       string
 }
 
-func NewStdOutL2MetRaw(measurements <-chan *Measurement, config Config) *StdOutL2MetRaw {
+func NewStdOutL2MetRaw(measurements <-chan Measurement, config Config) *StdOutL2MetRaw {
 	return &StdOutL2MetRaw{measurements: measurements, prefix: config.Prefix, source: config.Source}
 }
 
@@ -19,8 +20,8 @@ func (out *StdOutL2MetRaw) Start() {
 }
 
 func (out *StdOutL2MetRaw) Output() {
-	for measurement := range out.measurements {
-		msg := fmt.Sprintf("when=%s sample#%s=%s", measurement.Timestamp(), measurement.Measured(out.prefix), measurement.SValue())
+	for mm := range out.measurements {
+		msg := fmt.Sprintf("when=%s sample#%s=%s", mm.Time().Format(time.RFC3339), mm.Name(out.prefix), mm.StrValue())
 		if out.source != "" {
 			fmt.Println(fmt.Sprintf("%s source=%s", msg, out.source))
 			continue
@@ -30,19 +31,19 @@ func (out *StdOutL2MetRaw) Output() {
 }
 
 type StdOutL2MetDer struct {
-	incoming <-chan *Measurement
-	outgoing chan<- *Measurement
-	last     map[string]*Measurement
+	incoming <-chan Measurement
+	outgoing chan<- Measurement
+	last     map[string]*CounterMeasurement
 	raw      *StdOutL2MetRaw
 	prefix   string
 }
 
-func NewStdOutL2MetDer(measurements <-chan *Measurement, config Config) *StdOutL2MetDer {
-	plex := make(chan *Measurement)
+func NewStdOutL2MetDer(measurements <-chan Measurement, config Config) *StdOutL2MetDer {
+	plex := make(chan Measurement)
 	return &StdOutL2MetDer{
 		incoming: measurements,
 		outgoing: plex,
-		last:     make(map[string]*Measurement),
+		last:     make(map[string]*CounterMeasurement),
 		raw:      NewStdOutL2MetRaw(plex, config),
 		prefix:   config.Prefix,
 	}
@@ -54,19 +55,18 @@ func (out *StdOutL2MetDer) Start() {
 }
 
 func (out *StdOutL2MetDer) Output() {
-	for measurement := range out.incoming {
-		switch measurement.Value.(type) {
-		case uint64:
-			{
-				key := measurement.Measured(out.prefix)
-				last, found := out.last[key]
-				if found {
-					out.outgoing <- &Measurement{measurement.When, measurement.Poller, measurement.What, measurement.Difference(last)}
-				}
-				out.last[key] = measurement
+	for mm := range out.incoming {
+		switch mm.Type() {
+		case CounterType:
+			key := mm.Name(out.prefix)
+			last, found := out.last[key]
+			cm := mm.(*CounterMeasurement)
+			out.last[key] = cm
+			if found {
+				out.outgoing <- &CounterMeasurement{cm.time, cm.poller, cm.what, cm.Difference(last)}
 			}
 		default:
-			out.outgoing <- measurement
+			out.outgoing <- mm
 		}
 	}
 }

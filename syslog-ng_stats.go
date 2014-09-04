@@ -13,11 +13,11 @@ const (
 )
 
 type SyslogngStats struct {
-	measurements chan<- *Measurement
+	measurements chan<- Measurement
 	Socket       string
 }
 
-func NewSyslogngStatsPoller(measurements chan<- *Measurement, config Config) SyslogngStats {
+func NewSyslogngStatsPoller(measurements chan<- Measurement, config Config) SyslogngStats {
 	return SyslogngStats{
 		measurements: measurements,
 		Socket:       config.SyslogngSocket,
@@ -40,7 +40,7 @@ func (poller SyslogngStats) Poll(tick time.Time) {
 				continue
 			} else {
 				fields := Fields(line)
-				poller.measurements <- &Measurement{tick, poller.Name(), fields[:len(fields)-1], Atouint64(fields[len(fields)-1])}
+				poller.measurements <- &CounterMeasurement{tick, poller.Name(), fields[:len(fields)-1], Atouint64(fields[len(fields)-1])}
 			}
 		}
 	}

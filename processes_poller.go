@@ -13,10 +13,10 @@ const (
 )
 
 type Processes struct {
-	measurements chan<- *Measurement
+	measurements chan<- Measurement
 }
 
-func NewProcessesPoller(measurements chan<- *Measurement) Processes {
+func NewProcessesPoller(measurements chan<- Measurement) Processes {
 	return Processes{measurements: measurements}
 }
 
@@ -35,7 +35,7 @@ func (poller Processes) Poll(tick time.Time) {
 		ctx.FatalError(err, "reading dir names")
 	}
 
-	var running, sleeping, waiting, zombie, stopped, paging float64
+	var running, sleeping, waiting, zombie, stopped, paging uint64
 
 	for _, proc := range dirs {
 
@@ -62,12 +62,12 @@ func (poller Processes) Poll(tick time.Time) {
 		}
 	}
 
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"running", "count"}, running}
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"sleeping", "count"}, sleeping}
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"waiting", "count"}, waiting}
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"zombie", "count"}, zombie}
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"stopped", "count"}, stopped}
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"paging", "count"}, paging}
+	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"running", "count"}, running}
+	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"sleeping", "count"}, sleeping}
+	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"waiting", "count"}, waiting}
+	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"zombie", "count"}, zombie}
+	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"stopped", "count"}, stopped}
+	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"paging", "count"}, paging}
 
 }
 

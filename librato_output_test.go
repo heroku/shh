@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-type HappyHandler struct {}
+type HappyHandler struct{}
 
 func (s *HappyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
 type SleepyHandler struct {
-	Amt time.Duration
+	Amt     time.Duration
 	ReqIncr time.Duration
 }
 
@@ -29,7 +29,7 @@ func (s *SleepyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 type GrumpyHandler struct {
 	ResponseCodes []int
-	idx int
+	idx           int
 }
 
 func (g *GrumpyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -52,10 +52,10 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
-	measurements := make(chan *Measurement, 10)
+	measurements := make(chan Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if ! librato.sendWithBackoff([]byte(`{}`)) {
+	if !librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Request should have completed successfully with a sleepy handler")
 	}
 }
@@ -70,10 +70,10 @@ func TestLibrato_ServerErrorBackoff(t *testing.T) {
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
-	measurements := make(chan *Measurement, 10)
+	measurements := make(chan Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if ! librato.sendWithBackoff([]byte(`{}`)) {
+	if !librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Request should have completed successfully with a grumpy handler")
 	}
 }
@@ -88,7 +88,7 @@ func TestLibrato_IndefiniteBackoff(t *testing.T) {
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
-	measurements := make(chan *Measurement, 10)
+	measurements := make(chan Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
 	if librato.sendWithBackoff([]byte(`{}`)) {
@@ -106,11 +106,10 @@ func TestLibrato_ClientError(t *testing.T) {
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
-	measurements := make(chan *Measurement, 10)
+	measurements := make(chan Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
 	if librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Retry should not have succeeded due to non-server error.")
 	}
 }
-

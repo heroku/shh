@@ -11,12 +11,12 @@ const (
 )
 
 type SockStat struct {
-	measurements chan<- *Measurement
-	files []string
-	Protocols []string
+	measurements chan<- Measurement
+	files        []string
+	Protocols    []string
 }
 
-func NewSockStatPoller(measurements chan<- *Measurement, config Config) SockStat {
+func NewSockStatPoller(measurements chan<- Measurement, config Config) SockStat {
 	var includeV6, includeV4 bool
 	for _, proto := range config.SockStatProtos {
 		if strings.HasSuffix(proto, "6") {
@@ -37,7 +37,7 @@ func NewSockStatPoller(measurements chan<- *Measurement, config Config) SockStat
 	return SockStat{
 		measurements: measurements,
 		files:        filesToPoll,
-	  Protocols:    config.SockStatProtos,
+		Protocols:    config.SockStatProtos,
 	}
 }
 
@@ -50,7 +50,7 @@ func (poller SockStat) Poll(tick time.Time) {
 
 			if SliceContainsString(poller.Protocols, proto) && len(fields) > 1 {
 				for i := 1; i+1 < len(fields); i += 2 {
-					poller.measurements <- &Measurement{tick, poller.Name(), []string{proto, fields[i]}, Atouint64(fields[i+1])}
+					poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{proto, fields[i]}, Atouint64(fields[i+1])}
 				}
 			}
 		}

@@ -101,13 +101,13 @@ func (ls *ListenStats) Keys() <-chan string {
 }
 
 type Listen struct {
-	measurements chan<- *Measurement
+	measurements chan<- Measurement
 	listener     net.Listener
 	stats        *ListenStats
 	Interval     time.Duration
 }
 
-func NewListenPoller(measurements chan<- *Measurement, config Config) Listen {
+func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 	ctx := Slog{"poller": "listen", "fn": "NewListenPoller"}
 	tmp := strings.Split(config.Listen, ",")
 
@@ -174,7 +174,15 @@ func NewListenPoller(measurements chan<- *Measurement, config Config) Listen {
 
 func (poller Listen) Poll(tick time.Time) {
 	for k := range poller.stats.Keys() {
-		poller.measurements <- &Measurement{tick, poller.Name(), strings.Split("stats."+k, "."), poller.stats.CountOf(k)}
+		v := poller.stats.CountOf(k)
+		switch v.(type) {
+		case float64:
+			poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(float64)}
+		case uint64:
+			poller.measurements <- &CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(uint64)}
+		case int:
+			poller.measurements <- &CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), uint64(v.(int))}
+		}
 	}
 }
 
@@ -213,12 +221,13 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 					ctx.Error(err, "parsing float / int")
 					poller.stats.Increment("value.parse.errors")
 					break
+				} else {
+					poller.measurements <- &FloatGaugeMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(float64)}
 				}
+			} else {
+				poller.measurements <- &CounterMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(uint64)}
 			}
-
 			poller.stats.Increment("metrics")
-
-			poller.measurements <- &Measurement{when, poller.Name(), strings.Fields(fields[1]), value}
 		}
 	}
 }
