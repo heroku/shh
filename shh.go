@@ -16,7 +16,7 @@ var (
 )
 
 func main() {
-	measurements := make(chan *Measurement, 100)
+	measurements := make(chan Measurement, 100)
 	config := GetConfig()
 
 	mp := NewMultiPoller(measurements, config)

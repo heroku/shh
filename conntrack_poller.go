@@ -11,10 +11,10 @@ const (
 )
 
 type Conntrack struct {
-	measurements chan<- *Measurement
+	measurements chan<- Measurement
 }
 
-func NewConntrackPoller(measurements chan<- *Measurement) Conntrack {
+func NewConntrackPoller(measurements chan<- Measurement) Conntrack {
 	return Conntrack{measurements: measurements}
 }
 
@@ -26,7 +26,7 @@ func (poller Conntrack) Poll(tick time.Time) {
 		ctx.Error(err, "reading "+CONNTRACK_DATA)
 	}
 
-	poller.measurements <- &Measurement{tick, poller.Name(), []string{"count"}, Atofloat64(string(bytes.TrimSpace(count)))}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"count"}, Atouint64(string(bytes.TrimSpace(count)))}
 }
 
 func (poller Conntrack) Name() string {

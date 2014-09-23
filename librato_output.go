@@ -35,18 +35,18 @@ type Librato struct {
 	User         string
 	Token        string
 	Url          string
-	measurements <-chan *Measurement
-	batches      chan []*Measurement
+	measurements <-chan Measurement
+	batches      chan []Measurement
 	prefix       string
 	source       string
 	client       *http.Client
 }
 
-func NewLibratoOutputter(measurements <-chan *Measurement, config Config) *Librato {
+func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
 	return &Librato{
 		measurements: measurements,
 		source:       config.Source,
-		batches:      make(chan []*Measurement, LibratoBacklog),
+		batches:      make(chan []Measurement, LibratoBacklog),
 		Timeout:      config.LibratoBatchTimeout,
 		BatchSize:    config.LibratoBatchSize,
 		User:         config.LibratoUser,
@@ -68,8 +68,8 @@ func (out *Librato) Start() {
 	go out.batch()
 }
 
-func (out *Librato) makeBatch() []*Measurement {
-	return make([]*Measurement, 0, out.BatchSize)
+func (out *Librato) makeBatch() []Measurement {
+	return make([]Measurement, 0, out.BatchSize)
 }
 
 func (out *Librato) batch() {
@@ -105,14 +105,14 @@ func (out *Librato) batch() {
 func (out *Librato) deliver() {
 	ctx := Slog{"fn": "prepare", "outputter": "librato"}
 	for batch := range out.batches {
-		gauges := make([]LibratoMetric, 0, len(batch))
-		counters := make([]LibratoMetric, 0, len(batch))
-		for _, metric := range batch {
-			libratoMetric := LibratoMetric{metric.Measured(out.prefix), metric.Value, metric.When.Unix(), out.source}
-			switch metric.Value.(type) {
-			case uint64:
+		gauges := make([]LibratoMetric, 0)
+		counters := make([]LibratoMetric, 0)
+		for _, mm := range batch {
+			libratoMetric := LibratoMetric{mm.Name(out.prefix), mm.Value(), mm.Time().Unix(), out.source}
+			switch mm.Type() {
+			case CounterType:
 				counters = append(counters, libratoMetric)
-			case float64:
+			case GaugeType, FloatGaugeType:
 				gauges = append(gauges, libratoMetric)
 			}
 		}

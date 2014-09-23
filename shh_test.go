@@ -20,7 +20,7 @@ func BenchmarkSendingMeasurements(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		measurements <- Measurement{tick, "test", []string{"testing", "thing"}, 1.0}
+		measurements <- FloatGaugeMeasurement{tick, "test", []string{"testing", "thing"}, 1.0}
 	}
 	close(measurements)
 	wg.Wait()

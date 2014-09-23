@@ -68,7 +68,7 @@ func GetConfig() (config Config) {
 	config.LibratoUrl = GetEnvWithDefault("SHH_LIBRATO_URL", DEFAULT_LIBRATO_URL)                            // The Librato API End-Point
 	config.LibratoUser = GetEnvWithDefault("SHH_LIBRATO_USER", "")                                           // The Librato API User
 	config.LibratoToken = GetEnvWithDefault("SHH_LIBRATO_TOKEN", "")                                         // The Librato API TOken
-	config.LibratoBatchSize = GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 200)                             // The max number of metrics to submit in a single request
+	config.LibratoBatchSize = GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", 200)                            // The max number of metrics to submit in a single request
 	config.LibratoBatchTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", "500ms")             // The max time metrics will sit un-delivered
 	config.LibratoNetworkTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_NETWORK_TIMEOUT", "2s")            // The maximum time to wait for Librato to respond (for both dial and first header)
 	config.CarbonHost = GetEnvWithDefault("SHH_CARBON_HOST", "")                                             // Where the Carbon Outputter sends it's data

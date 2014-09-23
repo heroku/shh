@@ -10,7 +10,7 @@ type Outputter interface {
 
 //
 // FIXME: Any way to do this with reflect and a map?
-func NewOutputter(name string, measurements <-chan *Measurement, config Config) (Outputter, error) {
+func NewOutputter(name string, measurements <-chan Measurement, config Config) (Outputter, error) {
 	switch name {
 	case "stdoutl2metraw":
 		{

@@ -3,17 +3,16 @@ package main
 import (
 	"fmt"
 	"net"
-	"strings"
 )
 
 type Carbon struct {
-	measurements <-chan *Measurement
+	measurements <-chan Measurement
 	Host         string
 	prefix       string
 	source       string
 }
 
-func NewCarbonOutputter(measurements <-chan *Measurement, config Config) *Carbon {
+func NewCarbonOutputter(measurements <-chan Measurement, config Config) *Carbon {
 	return &Carbon{measurements: measurements, Host: config.CarbonHost, prefix: config.Prefix, source: config.Source}
 }
 
@@ -33,26 +32,20 @@ func (out *Carbon) Connect(host string) net.Conn {
 }
 
 func (out *Carbon) Output() {
+	var prefix string
 
 	conn := out.Connect(out.Host)
 
-	metric := make([]string, 0, 10)
-	var resetEnd int
-
-	if out.prefix != "" {
-		resetEnd = 1
-		metric = append(metric, out.prefix)
-	} else {
-		resetEnd = 0
+	if out.prefix != "" && out.source != "" {
+		prefix = fmt.Sprintf("%s.%s", out.prefix, out.source)
+	} else if out.prefix == "" {
+		prefix = out.source
+	} else if out.source == "" {
+		prefix = out.prefix
 	}
 
-	for measurement := range out.measurements {
-		if out.source != "" {
-			metric = append(metric, out.source)
-		}
-		metric = append(metric, measurement.Poller)
-		metric = append(metric, measurement.What...)
-		fmt.Fprintf(conn, "%s %s %d\n", strings.Join(metric, "."), measurement.SValue(), measurement.Unix())
-		metric = metric[0:resetEnd]
+	for mm := range out.measurements {
+		fmt.Fprintf(conn, "%s %s %d\n", mm.Name(prefix), mm.StrValue(), mm.Time().Unix())
 	}
+
 }

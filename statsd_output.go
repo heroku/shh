@@ -7,22 +7,22 @@ import (
 )
 
 type Statsd struct {
-	measurements <-chan *Measurement
-	last         map[string]*Measurement
+	measurements <-chan Measurement
+	last         map[string]*CounterMeasurement
 	Proto        string
 	Host         string
 	prefix       string
 	source       string
 }
 
-func NewStatsdOutputter(measurements <-chan *Measurement, config Config) *Statsd {
+func NewStatsdOutputter(measurements <-chan Measurement, config Config) *Statsd {
 	return &Statsd{
 		measurements: measurements,
-		last:         make(map[string]*Measurement),
+		last:         make(map[string]*CounterMeasurement),
 		Proto:        config.StatsdProto,
 		Host:         config.StatsdHost,
 		prefix:       config.Prefix,
-		source:       config.Source,
+	  source:       config.Source, // TODO: unused?
 	}
 }
 
@@ -41,26 +41,28 @@ func (out *Statsd) Connect(host string) net.Conn {
 	return conn
 }
 
-func (s *Statsd) Encode(measurement *Measurement) string {
-	switch measurement.Value.(type) {
-	case uint64:
-		key := measurement.Measured(s.prefix)
+func (s *Statsd) Encode(mm Measurement) string {
+	switch mm.Type() {
+	case CounterType:
+		key := mm.Name(s.prefix)
 		last, ok := s.last[key]
-		s.last[key] = measurement
+		s.last[key] = mm.(*CounterMeasurement)
 		if ok {
-			return fmt.Sprintf("%s:%s|c", key, strconv.FormatUint(measurement.Difference(last), 10))
+			return fmt.Sprintf("%s:%s|c", key, strconv.FormatUint(
+				mm.(*CounterMeasurement).Difference(last), 10))
 		}
-	case float64:
-		return fmt.Sprintf("%s:%s|g", measurement.Measured(s.prefix), measurement.SValue())
+	case FloatGaugeType, GaugeType:
+		return fmt.Sprintf("%s:%s|g", mm.Name(s.prefix), mm.StrValue())
 	}
 	return ""
 }
 
 func (out *Statsd) Output() {
-
 	conn := out.Connect(out.Host)
 
-	for measurement := range out.measurements {
-		fmt.Fprintf(conn, out.Encode(measurement))
+	for mm := range out.measurements {
+		if ms := out.Encode(mm); ms != "" {
+			fmt.Fprintf(conn, ms)
+		}
 	}
 }
