@@ -33,7 +33,7 @@ func (out *StdOutL2MetRaw) Output() {
 type StdOutL2MetDer struct {
 	incoming <-chan Measurement
 	outgoing chan<- Measurement
-	last     map[string]*CounterMeasurement
+	last     map[string]CounterMeasurement
 	raw      *StdOutL2MetRaw
 	prefix   string
 }
@@ -43,7 +43,7 @@ func NewStdOutL2MetDer(measurements <-chan Measurement, config Config) *StdOutL2
 	return &StdOutL2MetDer{
 		incoming: measurements,
 		outgoing: plex,
-		last:     make(map[string]*CounterMeasurement),
+		last:     make(map[string]CounterMeasurement),
 		raw:      NewStdOutL2MetRaw(plex, config),
 		prefix:   config.Prefix,
 	}
@@ -60,7 +60,7 @@ func (out *StdOutL2MetDer) Output() {
 		case CounterType:
 			key := mm.Name(out.prefix)
 			last, found := out.last[key]
-			cm := mm.(*CounterMeasurement)
+			cm := mm.(CounterMeasurement)
 			out.last[key] = cm
 			if found {
 				out.outgoing <- CounterMeasurement{cm.time, cm.poller, cm.what, cm.Difference(last)}

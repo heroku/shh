@@ -8,7 +8,7 @@ import (
 
 type Statsd struct {
 	measurements <-chan Measurement
-	last         map[string]*CounterMeasurement
+	last         map[string]CounterMeasurement
 	Proto        string
 	Host         string
 	prefix       string
@@ -18,7 +18,7 @@ type Statsd struct {
 func NewStatsdOutputter(measurements <-chan Measurement, config Config) *Statsd {
 	return &Statsd{
 		measurements: measurements,
-		last:         make(map[string]*CounterMeasurement),
+		last:         make(map[string]CounterMeasurement),
 		Proto:        config.StatsdProto,
 		Host:         config.StatsdHost,
 		prefix:       config.Prefix,
@@ -46,10 +46,10 @@ func (s *Statsd) Encode(mm Measurement) string {
 	case CounterType:
 		key := mm.Name(s.prefix)
 		last, ok := s.last[key]
-		s.last[key] = mm.(*CounterMeasurement)
+		s.last[key] = mm.(CounterMeasurement)
 		if ok {
 			return fmt.Sprintf("%s:%s|c", key, strconv.FormatUint(
-				mm.(*CounterMeasurement).Difference(last), 10))
+				mm.(CounterMeasurement).Difference(last), 10))
 		}
 	case FloatGaugeType, GaugeType:
 		return fmt.Sprintf("%s:%s|g", mm.Name(s.prefix), mm.StrValue())

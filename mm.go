@@ -75,7 +75,7 @@ func (c CounterMeasurement) Type() MeasurementType {
 	return CounterType
 }
 
-func (c CounterMeasurement) Difference(l *CounterMeasurement) uint64 {
+func (c CounterMeasurement) Difference(l CounterMeasurement) uint64 {
 	// This is a crappy way to handle wraps and resets when we don't know
 	// what the max value is (32, 64 or 128 bit)
 	// Leads to a little, loss, but should be minimal overall
@@ -113,7 +113,7 @@ func (g FloatGaugeMeasurement) Name(prefix string) string {
 }
 
 func (g FloatGaugeMeasurement) StrValue() string {
-	return fmt.Sprintf("%d", g.value)
+	return fmt.Sprintf("%f", g.value)
 }
 
 func (g FloatGaugeMeasurement) Value() interface{} {

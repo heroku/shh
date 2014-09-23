@@ -35,7 +35,7 @@ func NewMultiPoller(measurements chan<- Measurement, config Config) Multi {
 		case "processes":
 			mp.RegisterPoller(NewProcessesPoller(measurements))
 		case "self":
-			mp.RegisterPoller(NewSelfPoller(measurements))
+			mp.RegisterPoller(NewSelfPoller(measurements, config))
 		case "conntrack":
 			mp.RegisterPoller(NewConntrackPoller(measurements))
 		case "syslogngstats":
