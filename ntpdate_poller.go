@@ -30,20 +30,20 @@ func (poller Ntpdate) Poll(tick time.Time) {
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
 			ctx.Error(err, "creating stdout pipe")
-			poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
+			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
 			return
 		}
 
 		if err := cmd.Start(); err != nil {
 			ctx.Error(err, "starting sub command")
-			poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
+			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
 			return
 		}
 
 		defer func() {
 			if err := cmd.Wait(); err != nil {
 				ctx.Error(err, "waiting for subcommand to end")
-				poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
+				poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
 			}
 		}()
 
@@ -57,15 +57,15 @@ func (poller Ntpdate) Poll(tick time.Time) {
 					server := strings.Replace(strings.Fields(parts[0])[1], ".", "_", 4)
 					offset := strings.Fields(parts[2])[1]
 					delay := strings.Fields(parts[3])[1]
-					poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{"offset", server}, Atofloat64(offset)}
-					poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{"delay", server}, Atofloat64(delay)}
+					poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{"offset", server}, Atofloat64(offset)}
+					poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{"delay", server}, Atofloat64(delay)}
 				}
 			} else {
 				if err == io.EOF {
 					break
 				} else {
 					ctx.Error(err, "unknown error reading data from subcommand")
-					poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
+					poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
 					return
 				}
 			}

@@ -34,7 +34,7 @@ func (poller Memory) Poll(tick time.Time) {
 		if len(fields) == 3 && fields[2] == "kB" {
 			value = value * 1024.0
 		}
-		poller.measurements <- &GaugeMeasurement{tick, poller.Name(), fixed_names, value}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), fixed_names, value}
 
 		switch fixed_names[0] {
 		case "memtotal":
@@ -49,12 +49,12 @@ func (poller Memory) Poll(tick time.Time) {
 	}
 
 	if poller.memPercentage && memTotal > 0 && memFree >= 0 {
-		poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(),
+		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(),
 			[]string{"memtotal", "perc"}, float64(memTotal - memFree) / float64(memTotal)}
 	}
 
 	if poller.swapPercentage && swapTotal > 0.0 && swapFree >= 0.0 {
-		poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(),
+		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(),
 			[]string{"swaptotal", "perc"}, float64(swapTotal - swapFree) / float64(swapTotal)}
 	}
 }

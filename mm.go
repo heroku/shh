@@ -55,27 +55,27 @@ func combinedName(prefix, poller string, what []string) string {
 	return MetricNameNormalizer.Replace(v)
 }
 
-func (c *CounterMeasurement) Name(prefix string) string {
+func (c CounterMeasurement) Name(prefix string) string {
 	return combinedName(prefix, c.poller, c.what)
 }
 
-func (c *CounterMeasurement) StrValue() string {
+func (c CounterMeasurement) StrValue() string {
 	return fmt.Sprintf("%d", c.Value)
 }
 
-func (c *CounterMeasurement) Value() interface{} {
+func (c CounterMeasurement) Value() interface{} {
 	return c.value
 }
 
-func (c *CounterMeasurement) Time() time.Time {
+func (c CounterMeasurement) Time() time.Time {
 	return c.time
 }
 
-func (c *CounterMeasurement) Type() MeasurementType {
+func (c CounterMeasurement) Type() MeasurementType {
 	return CounterType
 }
 
-func (c *CounterMeasurement) Difference(l *CounterMeasurement) uint64 {
+func (c CounterMeasurement) Difference(l *CounterMeasurement) uint64 {
 	// This is a crappy way to handle wraps and resets when we don't know
 	// what the max value is (32, 64 or 128 bit)
 	// Leads to a little, loss, but should be minimal overall
@@ -88,43 +88,43 @@ func (c *CounterMeasurement) Difference(l *CounterMeasurement) uint64 {
 	return cv - lv
 }
 
-func (g *GaugeMeasurement) Name(prefix string) string {
+func (g GaugeMeasurement) Name(prefix string) string {
 	return combinedName(prefix, g.poller, g.what)
 }
 
-func (g *GaugeMeasurement) StrValue() string {
+func (g GaugeMeasurement) StrValue() string {
 	return fmt.Sprintf("%d", g.value)
 }
 
-func (g *GaugeMeasurement) Value() interface{} {
+func (g GaugeMeasurement) Value() interface{} {
 	return g.value
 }
 
-func (g *GaugeMeasurement) Time() time.Time {
+func (g GaugeMeasurement) Time() time.Time {
 	return g.time
 }
 
-func (c *GaugeMeasurement) Type() MeasurementType {
+func (c GaugeMeasurement) Type() MeasurementType {
 	return GaugeType
 }
 
-func (g *FloatGaugeMeasurement) Name(prefix string) string {
+func (g FloatGaugeMeasurement) Name(prefix string) string {
 	return combinedName(prefix, g.poller, g.what)
 }
 
-func (g *FloatGaugeMeasurement) StrValue() string {
+func (g FloatGaugeMeasurement) StrValue() string {
 	return fmt.Sprintf("%d", g.value)
 }
 
-func (g *FloatGaugeMeasurement) Value() interface{} {
+func (g FloatGaugeMeasurement) Value() interface{} {
 	return g.value
 }
 
-func (g *FloatGaugeMeasurement) Time() time.Time {
+func (g FloatGaugeMeasurement) Time() time.Time {
 	return g.time
 }
 
-func (c *FloatGaugeMeasurement) Type() MeasurementType {
+func (c FloatGaugeMeasurement) Type() MeasurementType {
 	return FloatGaugeType
 }
 

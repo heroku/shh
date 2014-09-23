@@ -91,15 +91,15 @@ func (poller Cpu) Poll(tick time.Time) {
 			if exists {
 				percent = current.DiffPercent(last)
 
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "user"}, percent.User}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "nice"}, percent.Nice}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "system"}, percent.System}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "idle"}, percent.Idle}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "iowait"}, percent.Iowait}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "irq"}, percent.Irq}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "softirq"}, percent.Softirq}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "steal"}, percent.Steal}
-				poller.measurements <- &FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "guest"}, percent.Guest}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "user"}, percent.User}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "nice"}, percent.Nice}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "system"}, percent.System}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "idle"}, percent.Idle}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "iowait"}, percent.Iowait}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "irq"}, percent.Irq}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "softirq"}, percent.Softirq}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "steal"}, percent.Steal}
+				poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{cpu, "guest"}, percent.Guest}
 			}
 
 			poller.last[cpu] = current

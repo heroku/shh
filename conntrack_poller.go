@@ -26,7 +26,7 @@ func (poller Conntrack) Poll(tick time.Time) {
 		ctx.Error(err, "reading "+CONNTRACK_DATA)
 	}
 
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"count"}, Atouint64(string(bytes.TrimSpace(count)))}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"count"}, Atouint64(string(bytes.TrimSpace(count)))}
 }
 
 func (poller Conntrack) Name() string {

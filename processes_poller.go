@@ -62,12 +62,12 @@ func (poller Processes) Poll(tick time.Time) {
 		}
 	}
 
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"running", "count"}, running}
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"sleeping", "count"}, sleeping}
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"waiting", "count"}, waiting}
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"zombie", "count"}, zombie}
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"stopped", "count"}, stopped}
-	poller.measurements <- &GaugeMeasurement{tick, poller.Name(), []string{"paging", "count"}, paging}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"running", "count"}, running}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"sleeping", "count"}, sleeping}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"waiting", "count"}, waiting}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"zombie", "count"}, zombie}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stopped", "count"}, stopped}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"paging", "count"}, paging}
 
 }
 

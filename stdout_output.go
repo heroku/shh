@@ -63,7 +63,7 @@ func (out *StdOutL2MetDer) Output() {
 			cm := mm.(*CounterMeasurement)
 			out.last[key] = cm
 			if found {
-				out.outgoing <- &CounterMeasurement{cm.time, cm.poller, cm.what, cm.Difference(last)}
+				out.outgoing <- CounterMeasurement{cm.time, cm.poller, cm.what, cm.Difference(last)}
 			}
 		default:
 			out.outgoing <- mm
