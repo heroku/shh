@@ -170,6 +170,20 @@ separted list of network interfaces.
 * `<prefix>.nif.<device>.transmit.errors.carrier`
 * `<prefix>.nif.<device>.transmit.compressed`
 
+### Netstat (netstat)
+
+The netstat poller reports values from `/proc/net/netstat`, which is
+the proc file that netstat(8) typically looks at. Two environment
+variables control which metrics are emitted from this file:
+
+* `SHH_NETSTAT_PROTOS` - (comma separated list of first columns from
+  `/proc/net/netstat`). If empty, all protos will match.
+* `SHH_NETSTAT_STATS` - (comma separated list of stat names from `/proc/net/netstat`). If empty, all stats will match.
+
+They are reported in the form:
+
+* `<prefix>.netstat.<proto>.<name>"
+
 ### NTP (ntpdate)
 
 The ntpdate poller runs the command `ntpdate -q -u`. It reports:
