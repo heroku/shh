@@ -341,7 +341,7 @@ Adding "one" to the list of pollers in the environment variable
 method for each tick.
 
 
-[proc5]: http://linux.die.net/man/5/proc proc(5)
+[proc5]: http://linux.die.net/man/5/proc
 [kernelstat]: http://www.kernel.org/doc/Documentation/block/stat.txt
 [goruntime]: http://golang.org/pkg/runtime/#MemStats
 [gonet]: http://golang.org/pkg/net/
