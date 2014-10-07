@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -13,9 +14,17 @@ import (
 
 var (
 	signalChannel = make(chan os.Signal, 1)
+	versionFlag = flag.Bool("version", false, "Display version info and exit")
 )
 
 func main() {
+	flag.Parse()
+
+	if versionFlag {
+		fmt.Println(VERSION)
+		os.Exit(0)
+	}
+
 	measurements := make(chan Measurement, 100)
 	config := GetConfig()
 
