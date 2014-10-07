@@ -45,6 +45,7 @@ type Librato struct {
 func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
 	return &Librato{
 		measurements: measurements,
+		prefix:       config.Prefix,
 		source:       config.Source,
 		batches:      make(chan []Measurement, LibratoBacklog),
 		Timeout:      config.LibratoBatchTimeout,
