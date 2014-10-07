@@ -20,7 +20,7 @@ var (
 func main() {
 	flag.Parse()
 
-	if versionFlag {
+	if *versionFlag {
 		fmt.Println(VERSION)
 		os.Exit(0)
 	}
