@@ -40,7 +40,7 @@ func (poller SyslogngStats) Poll(tick time.Time) {
 				continue
 			} else {
 				fields := Fields(line)
-				poller.measurements <- CounterMeasurement{tick, poller.Name(), fields[:len(fields)-1], Atouint64(fields[len(fields)-1])}
+				poller.measurements <- CounterMeasurement{tick, poller.Name(), fields[:len(fields)-1], Atouint64(fields[len(fields)-1]), Empty}
 			}
 		}
 	}

@@ -177,11 +177,11 @@ func (poller Listen) Poll(tick time.Time) {
 		v := poller.stats.CountOf(k)
 		switch v.(type) {
 		case float64:
-			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(float64)}
+			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(float64), Empty}
 		case uint64:
-			poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(uint64)}
+			poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(uint64), Empty}
 		case int:
-			poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), uint64(v.(int))}
+			poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), uint64(v.(int)), Empty}
 		}
 	}
 }
@@ -222,10 +222,10 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 					poller.stats.Increment("value.parse.errors")
 					break
 				} else {
-					poller.measurements <- FloatGaugeMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(float64)}
+					poller.measurements <- FloatGaugeMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(float64), Empty}
 				}
 			} else {
-				poller.measurements <- CounterMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(uint64)}
+				poller.measurements <- CounterMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(uint64), Empty}
 			}
 			poller.stats.Increment("metrics")
 		}

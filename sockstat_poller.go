@@ -50,7 +50,11 @@ func (poller SockStat) Poll(tick time.Time) {
 
 			if SliceContainsString(poller.Protocols, proto) && len(fields) > 1 {
 				for i := 1; i+1 < len(fields); i += 2 {
-					poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{proto, fields[i]}, Atouint64(fields[i+1])}
+					unit := Sockets
+					if fields[i] == "mem" {
+						unit = Empty
+					}
+					poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{proto, fields[i]}, Atouint64(fields[i+1]), unit}
 				}
 			}
 		}

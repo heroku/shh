@@ -23,6 +23,7 @@ type CounterMeasurement struct {
 	poller string
 	what   []string
 	value  uint64
+	unit UnitType
 }
 
 type GaugeMeasurement struct {
@@ -30,6 +31,7 @@ type GaugeMeasurement struct {
 	poller string
 	what   []string
 	value  uint64
+	unit UnitType
 }
 
 type FloatGaugeMeasurement struct {
@@ -37,6 +39,7 @@ type FloatGaugeMeasurement struct {
 	poller string
 	what   []string
 	value  float64
+	unit UnitType
 }
 
 type Measurement interface {
@@ -45,6 +48,8 @@ type Measurement interface {
 	StrValue() string // String representation of the value
 	Time() time.Time  // the underlying time object.
 	Type() MeasurementType
+	Unit() string
+	UnitAbbr() string
 }
 
 func combinedName(prefix, poller string, what []string) string {
@@ -73,6 +78,14 @@ func (c CounterMeasurement) Time() time.Time {
 
 func (c CounterMeasurement) Type() MeasurementType {
 	return CounterType
+}
+
+func (c CounterMeasurement) Unit() string {
+	return c.unit.Name()
+}
+
+func (c CounterMeasurement) UnitAbbr() string {
+	return c.unit.Abbr()
 }
 
 func (c CounterMeasurement) Difference(l CounterMeasurement) uint64 {
@@ -108,6 +121,15 @@ func (c GaugeMeasurement) Type() MeasurementType {
 	return GaugeType
 }
 
+func (c GaugeMeasurement) Unit() string {
+	return c.unit.Name()
+}
+
+func (c GaugeMeasurement) UnitAbbr() string {
+	return c.unit.Abbr()
+}
+
+
 func (g FloatGaugeMeasurement) Name(prefix string) string {
 	return combinedName(prefix, g.poller, g.what)
 }
@@ -128,6 +150,13 @@ func (c FloatGaugeMeasurement) Type() MeasurementType {
 	return FloatGaugeType
 }
 
+func (c FloatGaugeMeasurement) Unit() string {
+	return c.unit.Name()
+}
+
+func (c FloatGaugeMeasurement) UnitAbbr() string {
+	return c.unit.Abbr()
+}
 
 // func (m Measurement) Timestamp() string {
 // 	return m.When.Format(time.RFC3339)

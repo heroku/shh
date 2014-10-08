@@ -63,7 +63,7 @@ func (mp Multi) RegisterPoller(poller Poller) {
 }
 
 func (mp Multi) durationMetric(tick time.Time, name string, start time.Time) {
-	mp.measurements <- FloatGaugeMeasurement{tick, mp.Name(), []string{"duration", name, "seconds"}, time.Since(start).Seconds()}
+	mp.measurements <- FloatGaugeMeasurement{tick, mp.Name(), []string{"duration", name, "seconds"}, time.Since(start).Seconds(), Seconds}
 }
 
 func (mp Multi) incrementCount(pname string) uint64 {
@@ -78,7 +78,7 @@ func (mp Multi) Poll(tick time.Time) {
 	defer mp.Wait()
 
 	for name, poller := range mp.pollers {
-		mp.measurements <- CounterMeasurement{tick, mp.Name(), []string{"ticks", name, "count"}, mp.incrementCount(name)}
+		mp.measurements <- CounterMeasurement{tick, mp.Name(), []string{"ticks", name, "count"}, mp.incrementCount(name), Empty}
 		mp.Add(1)
 		go func(poller Poller) {
 			defer mp.durationMetric(tick, poller.Name(), time.Now())
