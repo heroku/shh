@@ -50,7 +50,7 @@ func (poller Memory) Poll(tick time.Time) {
 
 	if poller.memPercentage && memTotal > 0 && memFree >= 0 {
 		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(),
-			[]string{"memtotal", "perc"}, float64(memTotal - memFree) / float64(memTotal)}
+			[]string{"memtotal", "perc"}, 100.0 * float64(memTotal - memFree) / float64(memTotal)}
 	}
 
 	if poller.swapPercentage && swapTotal > 0.0 && swapFree >= 0.0 {
