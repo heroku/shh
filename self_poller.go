@@ -19,7 +19,7 @@ func NewSelfPoller(measurements chan<- Measurement, config Config) Self {
 func (poller Self) Poll(tick time.Time) {
 	runtime.ReadMemStats(&poller.stats)
 
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "goroutines", "num"}, uint64(runtime.NumGoroutine()), Empty}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "goroutines", "num"}, uint64(runtime.NumGoroutine()), Routines}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "general", "alloc", "inuse", "bytes"}, poller.stats.Alloc, Bytes}
 	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"memstats", "general", "alloc", "bytes"}, poller.stats.TotalAlloc, Bytes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "heap", "alloc", "bytes"}, poller.stats.HeapAlloc, Bytes}
@@ -35,10 +35,10 @@ func (poller Self) Poll(tick time.Time) {
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "heap", "sys", "bytes"}, poller.stats.HeapSys, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "heap", "idle", "bytes"}, poller.stats.HeapIdle, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "heap", "released", "bytes"}, poller.stats.HeapReleased, Bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "heap", "objects"}, poller.stats.HeapObjects, Empty}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "heap", "objects"}, poller.stats.HeapObjects, Objects}
 
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "stack", "inuse"}, poller.stats.StackInuse, Empty}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "stack", "sys"}, poller.stats.StackSys, Empty}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "stack", "inuse"}, poller.stats.StackInuse, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "stack", "sys"}, poller.stats.StackSys, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "mspan", "inuse"}, poller.stats.MSpanInuse, Empty}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "mspan", "sys"}, poller.stats.MSpanSys, Empty}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"memstats", "mcache", "inuse"}, poller.stats.MCacheInuse, Empty}

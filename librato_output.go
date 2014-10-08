@@ -115,7 +115,7 @@ func (out *Librato) deliver() {
 		gauges := make([]LibratoMetric, 0)
 		counters := make([]LibratoMetric, 0)
 		for _, mm := range batch {
-			attrs := LibratoMetricAttrs{UnitName: mm.Unit(), UnitAbbr: mm.UnitAbbr()}
+			attrs := LibratoMetricAttrs{UnitName: mm.Unit().Name(), UnitAbbr: mm.Unit().Abbr()}
 			libratoMetric := LibratoMetric{mm.Name(out.prefix), mm.Value(), mm.Time().Unix(), out.source, attrs}
 			switch mm.Type() {
 			case CounterType:

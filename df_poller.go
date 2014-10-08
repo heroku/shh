@@ -39,7 +39,7 @@ func (poller Df) Poll(tick time.Time) {
 		root_free_bytes := uint64(buf.Bsize) * buf.Bfree - user_free_bytes
 		used_bytes := total_bytes - root_free_bytes - user_free_bytes
 
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total_bytes"}, total_bytes, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total", "bytes"}, total_bytes, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "root", "free", "bytes"}, root_free_bytes, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "user", "free", "bytes"}, user_free_bytes, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "bytes"}, used_bytes, Bytes}
