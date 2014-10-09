@@ -47,7 +47,7 @@ func (poller Df) Poll(tick time.Time) {
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "free", "inodes"}, buf.Ffree}
 
 		if poller.percentage {
-			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "perc"}, float64(used_bytes) / float64(total_bytes)}
+			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "perc"}, 100.0 * float64(used_bytes) / float64(total_bytes)}
 		}
 	}
 }
