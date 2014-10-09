@@ -16,9 +16,15 @@ type LibratoMetric struct {
 	Value  interface{} `json:"value"`
 	When   int64       `json:"measure_time"`
 	Source string      `json:"source,omitempty"`
+	Attributes LibratoMetricAttrs `json:"attributes,omitempty"`
 }
 
-type PostBody struct {
+type LibratoMetricAttrs struct {
+	UnitName string `json:"display_units_long,omitempty"`
+	UnitAbbr string `json:"display_units_short,omitempty"`
+}
+
+type LibratoPostBody struct {
 	Gauges   []LibratoMetric `json:"gauges,omitempty"`
 	Counters []LibratoMetric `json:"counters,omitempty"`
 }
@@ -109,7 +115,8 @@ func (out *Librato) deliver() {
 		gauges := make([]LibratoMetric, 0)
 		counters := make([]LibratoMetric, 0)
 		for _, mm := range batch {
-			libratoMetric := LibratoMetric{mm.Name(out.prefix), mm.Value(), mm.Time().Unix(), out.source}
+			attrs := LibratoMetricAttrs{UnitName: mm.Unit().Name(), UnitAbbr: mm.Unit().Abbr()}
+			libratoMetric := LibratoMetric{mm.Name(out.prefix), mm.Value(), mm.Time().Unix(), out.source, attrs}
 			switch mm.Type() {
 			case CounterType:
 				counters = append(counters, libratoMetric)
@@ -118,7 +125,7 @@ func (out *Librato) deliver() {
 			}
 		}
 
-		payload := PostBody{gauges, counters}
+		payload := LibratoPostBody{gauges, counters}
 		j, err := json.Marshal(payload)
 		if err != nil {
 			ctx.FatalError(err, "marshaling json")

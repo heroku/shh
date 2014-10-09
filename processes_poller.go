@@ -12,15 +12,15 @@ const (
 	PROC = "/proc"
 )
 
-type Processes struct {
+type Procs struct {
 	measurements chan<- Measurement
 }
 
-func NewProcessesPoller(measurements chan<- Measurement) Processes {
-	return Processes{measurements: measurements}
+func NewProcessesPoller(measurements chan<- Measurement) Procs {
+	return Procs{measurements: measurements}
 }
 
-func (poller Processes) Poll(tick time.Time) {
+func (poller Procs) Poll(tick time.Time) {
 	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	dir, err := os.Open(PROC)
@@ -62,20 +62,20 @@ func (poller Processes) Poll(tick time.Time) {
 		}
 	}
 
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"running", "count"}, running}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"sleeping", "count"}, sleeping}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"waiting", "count"}, waiting}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"zombie", "count"}, zombie}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stopped", "count"}, stopped}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"paging", "count"}, paging}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"running", "count"}, running, Processes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"sleeping", "count"}, sleeping, Processes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"waiting", "count"}, waiting, Processes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"zombie", "count"}, zombie, Processes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stopped", "count"}, stopped, Processes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"paging", "count"}, paging, Processes}
 
 }
 
-func (poller Processes) Name() string {
+func (poller Procs) Name() string {
 	return "processes"
 }
 
-func (poller Processes) Exit() {}
+func (poller Procs) Exit() {}
 
 func ProcessState(pid int) string {
 

@@ -30,9 +30,9 @@ func NewFileNrPoller(measurements chan<- Measurement) FileNr {
 func (poller FileNr) Poll(tick time.Time) {
 	for line := range FileLineChannel(FILE_NR_DATA) {
 		fields := strings.Split(strings.Trim(line, "\n"), "\t")
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"alloc"}, Atouint64(fields[0])}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"free"}, Atouint64(fields[1])}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"max"}, Atouint64(fields[2])}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"alloc"}, Atouint64(fields[0]), Files}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"free"}, Atouint64(fields[1]), Files}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"max"}, Atouint64(fields[2]), Files}
 	}
 }
 

@@ -30,7 +30,7 @@ func (poller Df) Poll(tick time.Time) {
 		if err != nil {
 			ctx["mountpoint"] = mp
 			ctx.Error(err, "calling Statfs")
-			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1}
+			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			continue
 		}
 		mmp := massageMountPoint(mp)
@@ -39,15 +39,15 @@ func (poller Df) Poll(tick time.Time) {
 		root_free_bytes := uint64(buf.Bsize) * buf.Bfree - user_free_bytes
 		used_bytes := total_bytes - root_free_bytes - user_free_bytes
 
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total_bytes"}, total_bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "root", "free", "bytes"}, root_free_bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "user", "free", "bytes"}, user_free_bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "bytes"}, used_bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total", "inodes"}, buf.Files}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "free", "inodes"}, buf.Ffree}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total", "bytes"}, total_bytes, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "root", "free", "bytes"}, root_free_bytes, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "user", "free", "bytes"}, user_free_bytes, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "bytes"}, used_bytes, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total", "inodes"}, buf.Files, INodes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "free", "inodes"}, buf.Ffree, INodes}
 
 		if poller.percentage {
-			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "perc"}, 100.0 * float64(used_bytes) / float64(total_bytes)}
+			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{mmp, "used", "perc"}, 100.0 * float64(used_bytes) / float64(total_bytes), Percent}
 		}
 	}
 }
