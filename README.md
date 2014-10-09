@@ -23,6 +23,8 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_DF_TYPES` | list of string | Default DF types | btrfs,ext3,ext4,tmpfs,xfs |
 | `SHH_LISTEN` | string | Default network socket info for listen | unix,#shh |
 | `SHH_NIF_DEVICES` | list of string | Devices to poll | eth0,lo |
+| `SHH_NETSTAT_PROTOS` | list of string | Netstat Protos to Get | |
+| `SHH_NETSTAT_STATS` | list of string | Netstat Stats to Get | |
 | `SHH_NTPDATE_SERVERS` | list of string | NTP Servers | 0.pool.ntp.org,1.pool.ntp.org |
 | `SHH_CPU_AGGR` | bool | Whether to only report aggregate CPU usage | false |
 | `SHH_LIBRATO_USER` | string | The Librato API User | |

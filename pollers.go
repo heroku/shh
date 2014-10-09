@@ -30,6 +30,8 @@ func NewMultiPoller(measurements chan<- Measurement, config Config) Multi {
 			mp.RegisterPoller(NewListenPoller(measurements, config))
 		case "mem":
 			mp.RegisterPoller(NewMemoryPoller(measurements, config))
+		case "netstat":
+			mp.RegisterPoller(NewNetstatPoller(measurements, config))
 		case "nif":
 			mp.RegisterPoller(NewNetworkInterfacePoller(measurements, config))
 		case "ntpdate":

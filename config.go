@@ -36,6 +36,8 @@ type Config struct {
 	Listen                string
 	NifDevices            []string
 	NtpdateServers        []string
+	NetstatStats          []string
+	NetstatProtos         []string
 	CpuOnlyAggregate      bool
 	LibratoUrl            string
 	LibratoUser           string
@@ -63,6 +65,9 @@ func GetConfig() (config Config) {
 	config.Percentages = GetEnvWithDefaultStrings("SHH_PERCENTAGES", DEFAULT_PERCENTAGES)
 	config.DfTypes = GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                              // Default DF types
 	config.Listen = GetEnvWithDefault("SHH_LISTEN", "unix,#shh")                                             // Default network socket info for listen
+	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                     // Devices to poll
+	config.NetstatProtos = GetEnvWithDefaultStrings("SHH_NETSTAT_PROTOS", "")                                // Devices to poll
+	config.NetstatStats = GetEnvWithDefaultStrings("SHH_NETSTAT_STATS", "")                                  // Devices to poll
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                     // Devices to poll
 	config.NtpdateServers = GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", "0.pool.ntp.org,1.pool.ntp.org") // NTP Servers
 	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", false)                                   // Whether to only report aggregate CPU usage
