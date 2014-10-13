@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -178,6 +179,9 @@ func (out *Librato) send(ctx Slog, payload []byte) (retry bool, e error) {
 		} else if strings.Contains(err.Error(), "timeout awaiting response") {
 			retry = false
 			e = nil
+		} else if err == io.EOF {
+			retry = true
+			e = fmt.Errorf("Backing off due to EOF")
 		} else {
 			ctx.FatalError(err, "doing request")
 		}
