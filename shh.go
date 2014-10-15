@@ -3,18 +3,19 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 var (
 	signalChannel = make(chan os.Signal, 1)
-	versionFlag = flag.Bool("version", false, "Display version info and exit")
+	versionFlag   = flag.Bool("version", false, "Display version info and exit")
 )
 
 func main() {
@@ -36,22 +37,22 @@ func main() {
 	go func() {
 		for sig := range signalChannel {
 			mp.Exit()
-			log.Fatal(Slog{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
+			ErrLogger.Fatal(slog.Context{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
 		}
 	}()
 
 	if config.ProfilePort != DEFAULT_PROFILE_PORT {
 		go func() {
-			log.Println(http.ListenAndServe("localhost:"+config.ProfilePort, nil))
+			Logger.Println(http.ListenAndServe("localhost:"+config.ProfilePort, nil))
 		}()
 	}
 
-	ctx := Slog{"shh_start": true, "at": config.Start.Format(time.RFC3339Nano), "interval": config.Interval}
-	fmt.Println(ctx)
+	ctx := slog.Context{"start": true, "interval": config.Interval}
+	Logger.Println(ctx)
 
 	outputter, err := NewOutputter(config.Outputter, measurements, config)
 	if err != nil {
-		ctx.FatalError(err, "creating outputter")
+		FatalError(ctx, err, "creating outputter")
 	}
 	outputter.Start()
 

@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 const (
@@ -20,18 +22,18 @@ func NewLoadPoller(measurements chan<- Measurement) Load {
 }
 
 func (poller Load) Poll(tick time.Time) {
-	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	file, err := os.Open(LOAD_DATA)
 	if err != nil {
-		ctx.FatalError(err, "opening "+LOAD_DATA)
+		FatalError(ctx, err, "opening "+LOAD_DATA)
 	}
 	defer file.Close()
 
 	reader := bufio.NewReader(file)
 	line, err := reader.ReadString('\n')
 	if err != nil {
-		ctx.Error(err, "reading line from "+LOAD_DATA)
+		LogError(ctx, err, "reading line from "+LOAD_DATA)
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 		return
 	}
