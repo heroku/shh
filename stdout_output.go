@@ -23,10 +23,10 @@ func (out *StdOutL2MetRaw) Output() {
 	for mm := range out.measurements {
 		msg := fmt.Sprintf("when=%s sample#%s=%s", mm.Time().Format(time.RFC3339), mm.Name(out.prefix), mm.StrValue())
 		if out.source != "" {
-			fmt.Println(fmt.Sprintf("%s source=%s", msg, out.source))
+			Logger.Println(fmt.Sprintf("%s source=%s", msg, out.source))
 			continue
 		}
-		fmt.Println(msg)
+		Logger.Println(msg)
 	}
 }
 
