@@ -1,4 +1,4 @@
-package main
+package shh
 
 import (
 	"fmt"
@@ -23,7 +23,7 @@ type CounterMeasurement struct {
 	poller string
 	what   []string
 	value  uint64
-	unit Unit
+	unit   Unit
 }
 
 type GaugeMeasurement struct {
@@ -31,7 +31,7 @@ type GaugeMeasurement struct {
 	poller string
 	what   []string
 	value  uint64
-	unit Unit
+	unit   Unit
 }
 
 type FloatGaugeMeasurement struct {
@@ -39,7 +39,7 @@ type FloatGaugeMeasurement struct {
 	poller string
 	what   []string
 	value  float64
-	unit Unit
+	unit   Unit
 }
 
 type Measurement interface {
@@ -64,7 +64,7 @@ func (c CounterMeasurement) Name(prefix string) string {
 }
 
 func (c CounterMeasurement) StrValue() string {
-	return fmt.Sprintf("%d", c.Value)
+	return fmt.Sprintf("%d", c.value)
 }
 
 func (c CounterMeasurement) Value() interface{} {

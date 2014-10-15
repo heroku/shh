@@ -1,4 +1,4 @@
-package main
+package shh
 
 import (
 	"strings"
@@ -36,7 +36,7 @@ func (poller Df) Poll(tick time.Time) {
 		mmp := massageMountPoint(mp)
 		total_bytes := uint64(buf.Bsize) * buf.Blocks
 		user_free_bytes := uint64(buf.Bsize) * buf.Bavail
-		root_free_bytes := uint64(buf.Bsize) * buf.Bfree - user_free_bytes
+		root_free_bytes := uint64(buf.Bsize)*buf.Bfree - user_free_bytes
 		used_bytes := total_bytes - root_free_bytes - user_free_bytes
 
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{mmp, "total", "bytes"}, total_bytes, Bytes}

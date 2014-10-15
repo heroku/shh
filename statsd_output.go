@@ -1,4 +1,4 @@
-package main
+package shh
 
 import (
 	"fmt"
@@ -22,7 +22,7 @@ func NewStatsdOutputter(measurements <-chan Measurement, config Config) *Statsd 
 		Proto:        config.StatsdProto,
 		Host:         config.StatsdHost,
 		prefix:       config.Prefix,
-	  source:       config.Source, // TODO: unused?
+		source:       config.Source, // TODO: unused?
 	}
 }
 

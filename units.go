@@ -1,4 +1,4 @@
-package main
+package shh
 
 type Unit struct {
 	name string

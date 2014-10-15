@@ -1,5 +1,5 @@
 {
-	"ImportPath": "github.com/freeformz/shh",
+	"ImportPath": "github.com/heroku/shh",
 	"GoVersion": "go1.3",
 	"Deps": [
 		{

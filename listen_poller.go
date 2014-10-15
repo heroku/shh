@@ -1,4 +1,4 @@
-package main
+package shh
 
 /*
 
@@ -21,12 +21,19 @@ In a different terminal:
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+)
+
+var (
+	MetricNameRegexp = regexp.MustCompile("^[a-zA-Z0-9]([a-zA-Z0-9.-]+)?$")
+	MetaRegexp       = regexp.MustCompile("^([cg])(:([a-zA-Z$%#]+)(,([a-zA-Z$%#]+))?)?$") // <type 1>:<unit 3>,<abbr 5>
 )
 
 // Used to track global listen stats
@@ -191,44 +198,29 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 
 	ctx := Slog{"poller": poller.Name(), "fn": "handleListenConnection", "conn": conn}
 
-	var value interface{}
-
 	poller.stats.Increment("connection.count")
 	defer poller.stats.Decrement("connection.count")
 
 	r := bufio.NewReader(conn)
 
 	for {
-		conn.SetDeadline(time.Now().Add(poller.Interval).Add(poller.Interval))
+		conn.SetDeadline(time.Now().Add(poller.Interval))
 		line, err := r.ReadString('\n')
-		if err != nil {
+		if err == io.EOF {
+			break
+		} else if err != nil {
 			ctx.Error(err, "reading string")
 			break
 		}
 
-		fields := strings.Fields(line)
-		if len(fields) == 3 {
-			when, err := time.Parse(time.RFC3339, fields[0])
-			if err != nil {
-				ctx.Error(err, "parsing time")
-				poller.stats.Increment("time.parse.errors")
-				break
-			}
-			value, err = strconv.ParseUint(fields[2], 10, 64)
-			if err != nil {
-				value, err = strconv.ParseFloat(fields[2], 64)
-				if err != nil {
-					ctx.Error(err, "parsing float / int")
-					poller.stats.Increment("value.parse.errors")
-					break
-				} else {
-					poller.measurements <- FloatGaugeMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(float64), Empty}
-				}
-			} else {
-				poller.measurements <- CounterMeasurement{when, poller.Name(), strings.Fields(fields[1]), value.(uint64), Empty}
-			}
-			poller.stats.Increment("metrics")
+		measurement, err := poller.parseLine(line)
+		if err != nil {
+			ctx.Error(err, "parse error")
+			break
 		}
+
+		poller.measurements <- measurement
+		poller.stats.Increment("metrics")
 	}
 }
 
@@ -238,4 +230,82 @@ func (poller Listen) Name() string {
 
 func (poller Listen) Exit() {
 	poller.listener.Close()
+}
+
+func (poller Listen) parseLine(line string) (Measurement, error) {
+	fields := strings.Fields(line)
+	if len(fields) != 3 {
+		return nil, fmt.Errorf("Expected 3 fields, found %d", len(fields))
+	}
+
+	when, err := poller.parseDate(fields[0])
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse date: %q", fields[0])
+	}
+
+	if !MetricNameRegexp.MatchString(fields[1]) {
+		return nil, fmt.Errorf("%q is an improper metric name", fields[1])
+	}
+
+	return poller.parseMeasurement(when, fields[1], fields[2])
+}
+
+func (poller Listen) parseDate(ds string) (time.Time, error) {
+	if when, err := time.Parse(time.RFC3339, ds); err == nil {
+		return when, nil
+	}
+
+	// unix ts?
+	if ts, terr := strconv.ParseUint(ds, 10, 64); terr != nil {
+		poller.stats.Increment("time.parse.errors")
+		return time.Now(), fmt.Errorf("Invalid timestamp: %q", ds)
+	} else {
+		return time.Unix(int64(ts), 0), nil
+	}
+}
+
+func (poller Listen) parseMeasurement(when time.Time, metric string, sval string) (Measurement, error) {
+	bits := strings.Split(sval, "|") // value, meta
+	if len(bits) == 2 {
+		subs := MetaRegexp.FindStringSubmatch(bits[1])
+		if len(subs) == 0 {
+			poller.stats.Increment("meta.parse.errors")
+			return nil, fmt.Errorf("Couldn't parse %q as meta information", bits[1])
+		}
+
+		unit := Unit{subs[3], subs[5]}
+		switch subs[1] {
+		case "c":
+			val, err := strconv.ParseUint(bits[0], 10, 64)
+			if err != nil {
+				poller.stats.Increment("value.parse.errors")
+				return nil, fmt.Errorf("Couldn't parse %q as counter", bits[0])
+			}
+			return CounterMeasurement{when, poller.Name(), strings.Fields(metric), val, unit}, nil
+		case "g":
+			val, err := strconv.ParseFloat(bits[0], 64)
+			if err != nil {
+				poller.stats.Increment("value.parse.errors")
+				return nil, fmt.Errorf("Couldn't parse %q as gauge", bits[0])
+			}
+			return FloatGaugeMeasurement{when, poller.Name(), strings.Fields(metric), val, unit}, nil
+		default:
+			return nil, fmt.Errorf("Unable to determine measurement type")
+		}
+	} else if len(bits) == 1 { // just a value, infer type
+		val, err := strconv.ParseUint(bits[0], 10, 64)
+		if err != nil {
+			fval, err := strconv.ParseFloat(bits[0], 64)
+			if err != nil {
+				poller.stats.Increment("value.parse.errors")
+				return nil, fmt.Errorf("Couldn't parse %q as value", bits[0])
+			}
+			return FloatGaugeMeasurement{when, poller.Name(), strings.Fields(metric), fval, Empty}, nil
+		}
+
+		return CounterMeasurement{when, poller.Name(), strings.Fields(metric), val, Empty}, nil
+	}
+
+	poller.stats.Increment("value.parse.errors")
+	return nil, fmt.Errorf("Invalid value")
 }

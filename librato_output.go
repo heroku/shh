@@ -1,4 +1,4 @@
-package main
+package shh
 
 import (
 	"bytes"
@@ -12,10 +12,10 @@ import (
 )
 
 type LibratoMetric struct {
-	Name   string      `json:"name"`
-	Value  interface{} `json:"value"`
-	When   int64       `json:"measure_time"`
-	Source string      `json:"source,omitempty"`
+	Name       string             `json:"name"`
+	Value      interface{}        `json:"value"`
+	When       int64              `json:"measure_time"`
+	Source     string             `json:"source,omitempty"`
 	Attributes LibratoMetricAttrs `json:"attributes,omitempty"`
 }
 

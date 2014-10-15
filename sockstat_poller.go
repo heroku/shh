@@ -1,4 +1,4 @@
-package main
+package shh
 
 import (
 	"strings"
@@ -54,7 +54,7 @@ func (poller SockStat) Poll(tick time.Time) {
 					if fields[i] == "mem" {
 						unit = Empty
 					}
-				poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{strings.ToLower(proto), fields[i]}, Atouint64(fields[i+1]), unit}
+					poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{strings.ToLower(proto), fields[i]}, Atouint64(fields[i+1]), unit}
 				}
 			}
 		}

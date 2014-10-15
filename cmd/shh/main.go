@@ -1,4 +1,4 @@
-package shh
+package main
 
 import (
 	"flag"
@@ -10,25 +10,27 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/heroku/shh"
 )
 
 var (
 	signalChannel = make(chan os.Signal, 1)
-	versionFlag   = flag.Bool("version", false, "Display version info and exit")
+	versionFlag = flag.Bool("version", false, "Display version info and exit")
 )
 
 func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println(VERSION)
+		fmt.Println(shh.VERSION)
 		os.Exit(0)
 	}
 
-	measurements := make(chan Measurement, 100)
-	config := GetConfig()
+	measurements := make(chan shh.Measurement, 100)
+	config := shh.GetConfig()
 
-	mp := NewMultiPoller(measurements, config)
+	mp := shh.NewMultiPoller(measurements, config)
 
 	signal.Notify(signalChannel, syscall.SIGINT)
 	signal.Notify(signalChannel, syscall.SIGTERM)
@@ -36,20 +38,20 @@ func main() {
 	go func() {
 		for sig := range signalChannel {
 			mp.Exit()
-			log.Fatal(Slog{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
+			log.Fatal(shh.Slog{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
 		}
 	}()
 
-	if config.ProfilePort != DEFAULT_PROFILE_PORT {
+	if config.ProfilePort != shh.DEFAULT_PROFILE_PORT {
 		go func() {
 			log.Println(http.ListenAndServe("localhost:"+config.ProfilePort, nil))
 		}()
 	}
 
-	ctx := Slog{"shh_start": true, "at": config.Start.Format(time.RFC3339Nano), "interval": config.Interval}
+	ctx := shh.Slog{"shh_start": true, "at": config.Start.Format(time.RFC3339Nano), "interval": config.Interval}
 	fmt.Println(ctx)
 
-	outputter, err := NewOutputter(config.Outputter, measurements, config)
+	outputter, err := shh.NewOutputter(config.Outputter, measurements, config)
 	if err != nil {
 		ctx.FatalError(err, "creating outputter")
 	}
