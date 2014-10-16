@@ -4,6 +4,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 type Df struct {
@@ -21,7 +23,7 @@ func NewDfPoller(measurements chan<- Measurement, config Config) Df {
 }
 
 func (poller Df) Poll(tick time.Time) {
-	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	buf := new(syscall.Statfs_t)
 
@@ -29,7 +31,7 @@ func (poller Df) Poll(tick time.Time) {
 		err := syscall.Statfs(mp, buf)
 		if err != nil {
 			ctx["mountpoint"] = mp
-			ctx.Error(err, "calling Statfs")
+			LogError(ctx, err, "calling Statfs")
 			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			continue
 		}

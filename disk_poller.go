@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 const (
@@ -23,13 +25,13 @@ func NewDiskPoller(measurements chan<- Measurement, config Config) Disk {
 
 // http://www.kernel.org/doc/Documentation/block/stat.txt
 func (poller Disk) Poll(tick time.Time) {
-	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	for device := range deviceChannel(poller.diskFilter) {
 		target := SYS + device + "/stat"
 		statBytes, err := ioutil.ReadFile(target)
 		if err != nil {
-			ctx.Error(err, "reading "+target)
+			LogError(ctx, err, "reading"+target)
 			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			continue
 		}

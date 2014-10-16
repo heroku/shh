@@ -6,6 +6,8 @@ import (
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 const (
@@ -21,18 +23,18 @@ func NewProcessesPoller(measurements chan<- Measurement) Procs {
 }
 
 func (poller Procs) Poll(tick time.Time) {
-	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	dir, err := os.Open(PROC)
 	if err != nil {
-		ctx.FatalError(err, "opening "+PROC)
+		FatalError(ctx, err, "opening "+PROC)
 	}
 
 	defer dir.Close()
 
 	dirs, err := dir.Readdirnames(0)
 	if err != nil {
-		ctx.FatalError(err, "reading dir names")
+		FatalError(ctx, err, "reading dir names")
 	}
 
 	var running, sleeping, waiting, zombie, stopped, paging uint64

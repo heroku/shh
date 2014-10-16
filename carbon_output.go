@@ -3,6 +3,8 @@ package shh
 import (
 	"fmt"
 	"net"
+
+	"github.com/heroku/slog"
 )
 
 type Carbon struct {
@@ -21,11 +23,11 @@ func (out *Carbon) Start() {
 }
 
 func (out *Carbon) Connect(host string) net.Conn {
-	ctx := Slog{"fn": "Connect", "outputter": "carbon"}
+	ctx := slog.Context{"fn": "Connect", "outputter": "carbon"}
 
 	conn, err := net.Dial("tcp", host)
 	if err != nil {
-		ctx.FatalError(err, "Connecting to carbon host")
+		FatalError(ctx, err, "Connecting to carbon host")
 	}
 
 	return conn

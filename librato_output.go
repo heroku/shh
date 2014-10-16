@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 type LibratoMetric struct {
@@ -81,7 +83,7 @@ func (out *Librato) makeBatch() []Measurement {
 
 func (out *Librato) batch() {
 	var ready bool
-	ctx := Slog{"fn": "batch", "outputter": "librato"}
+	ctx := slog.Context{"fn": "batch", "outputter": "librato"}
 	ticker := time.Tick(out.Timeout)
 	batch := out.makeBatch()
 	for {
@@ -101,7 +103,7 @@ func (out *Librato) batch() {
 			select {
 			case out.batches <- batch:
 			default:
-				ctx.Error(nil, "Batches backlogged, dropping")
+				LogError(ctx, nil, "Batches backlogged, dropping")
 			}
 			batch = out.makeBatch()
 			ready = false
@@ -110,7 +112,7 @@ func (out *Librato) batch() {
 }
 
 func (out *Librato) deliver() {
-	ctx := Slog{"fn": "prepare", "outputter": "librato"}
+	ctx := slog.Context{"fn": "prepare", "outputter": "librato"}
 	for batch := range out.batches {
 		gauges := make([]LibratoMetric, 0)
 		counters := make([]LibratoMetric, 0)
@@ -128,7 +130,7 @@ func (out *Librato) deliver() {
 		payload := LibratoPostBody{gauges, counters}
 		j, err := json.Marshal(payload)
 		if err != nil {
-			ctx.FatalError(err, "marshaling json")
+			FatalError(ctx, err, "marshaling json")
 		}
 
 		out.sendWithBackoff(j)
@@ -136,7 +138,7 @@ func (out *Librato) deliver() {
 }
 
 func (out *Librato) sendWithBackoff(payload []byte) bool {
-	ctx := Slog{"fn": "retry", "outputter": "librato"}
+	ctx := slog.Context{"fn": "retry", "outputter": "librato"}
 	attempts := 0
 	bo := 0 * time.Millisecond
 
@@ -144,11 +146,11 @@ func (out *Librato) sendWithBackoff(payload []byte) bool {
 		if retry, err := out.send(ctx, payload); retry {
 			ctx["backoff"] = bo
 			ctx["message"] = err
-			fmt.Println(ctx)
+			Logger.Println(ctx)
 			bo = backoff(bo)
 		} else if err != nil {
 			ctx["error"] = err
-			fmt.Println(ctx)
+			ErrLogger.Println(ctx)
 			return false
 		} else {
 			return true
@@ -160,11 +162,11 @@ func (out *Librato) sendWithBackoff(payload []byte) bool {
 	return false
 }
 
-func (out *Librato) send(ctx Slog, payload []byte) (retry bool, e error) {
+func (out *Librato) send(ctx slog.Context, payload []byte) (retry bool, e error) {
 	body := bytes.NewBuffer(payload)
 	req, err := http.NewRequest("POST", out.Url, body)
 	if err != nil {
-		ctx.FatalError(err, "creating new request")
+		FatalError(ctx, err, "creating new request")
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -179,7 +181,7 @@ func (out *Librato) send(ctx Slog, payload []byte) (retry bool, e error) {
 			retry = false
 			e = nil
 		} else {
-			ctx.FatalError(err, "doing request")
+			FatalError(ctx, err, "doing request")
 		}
 	} else {
 		defer resp.Body.Close()
@@ -212,7 +214,7 @@ func backoff(bo time.Duration) time.Duration {
 	}
 }
 
-func resetCtx(ctx Slog) {
+func resetCtx(ctx slog.Context) {
 	delete(ctx, "backoff")
 	delete(ctx, "message")
 	delete(ctx, "body")
