@@ -71,10 +71,11 @@ Wait for the deb to be available, download and do what you want with it.
 1. Obtain a Linux system (only really tested on Ubuntu ATM)
 2. Install Go (version 1.3 works fine)
 3. Set GOPATH [appropriately](http://golang.org/doc/code.html)
+4. `go get github.com/tool/godep`
 3. `go get github.com/heroku/shh`
 4. cd $GOPATH/src/github.com/heroku/shh
-5. go build
-6. ./shh
+5. godep go install ./...
+6. $GOPATH/bin/shh
 
 hack away
 

@@ -57,7 +57,7 @@ nothing more than:
 it should still do the "right thing." We, however, have now
 implemented the following EBNF for unambiguously describing a metric:
   
-    METRIC := DATE <SP> NAME <SP> VALUE <NL>
+    MEASUREMENT := DATE <SP> NAME <SP> VALUE <NL>
     
     DATE := <RFC-3339 DATE> | <UNIX TS>
     
@@ -66,13 +66,13 @@ implemented the following EBNF for unambiguously describing a metric:
     VALUE := <FLOAT> META? |
              <INTEGER> META?
              
-    META := `|` TYPE `:` UNIT |
-            `|` TYPE
+    META := <SP> TYPE <SP> UNIT |
+            <SP> TYPE
     
     UNIT := [a-zA-Z]+ |
             [a-zA-Z]+ `,` [a-zA-Z]+
             
-    TYPE := `c` | `g`
+    TYPE := `c` | `counter` | `g` | `gauge`
     
 The `UNIT` non-terminal describes the unit that the measurement is in,
 with an optional abbreviation, *e.g.*, "Bytes,b" or "Seconds,s".
@@ -115,4 +115,4 @@ timestamp, and arguments:
     
 will open a TCP connection to 127.0.0.1:8000 and send the following:
 
-    2014-01-29T01:01:01Z memfree 1093293|g:Bytes,b
+    2014-01-29T01:01:01Z memfree 1093293 g Bytes,b

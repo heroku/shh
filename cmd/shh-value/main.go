@@ -80,9 +80,9 @@ func assertValidValue(v string) interface{} {
 func formatLine(metric string, value interface{}, mtype string, unit string) string {
 	ts := time.Now().Format(time.RFC3339)
 	if unit == "" {
-		return fmt.Sprintf("%s %s %v|%s\n", ts, metric, value, mtype)
+		return fmt.Sprintf("%s %s %v %s\n", ts, metric, value, mtype)
 	}
-	return fmt.Sprintf("%s %s %v|%s:%s\n", ts, metric, value, mtype, unit)
+	return fmt.Sprintf("%s %s %v %s %s\n", ts, metric, value, mtype, unit)
 }
 
 func main() {
@@ -111,7 +111,7 @@ func main() {
 		die("ERROR: invalid metric name\n")
 	}
 
-	conn, err := getConnection(*shhAddr)
+	conn, err := getConnection(shh.GetEnvWithDefault("SHH_ADDRESS", *shhAddr))
 	if err != nil {
 		die(fmt.Sprintf("ERROR: couldn't get connection to %s: %s\n", *shhAddr, err))
 	}

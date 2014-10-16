@@ -40,16 +40,16 @@ func TestListenPollerParser_HappyPath(t *testing.T) {
 		}
 	}
 
-	m, err = listen.parseLine("90210 beverly.hills 10|g")
+	m, err = listen.parseLine("90210 beverly.hills 10 g")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
 	} else {
-		if c, ok := m.(FloatGaugeMeasurement); !ok {
+		if c, ok := m.(GaugeMeasurement); !ok {
 			t.Errorf("Should have returned a GaugeMeasurement, was= %u", c)
 		}
 	}
 
-	m, err = listen.parseLine("90210 beverly.hills 10|c")
+	m, err = listen.parseLine("90210 beverly.hills 10 c")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
 	} else {
@@ -58,7 +58,7 @@ func TestListenPollerParser_HappyPath(t *testing.T) {
 		}
 	}
 
-	m, err = listen.parseLine("90210 beverly.hills 10|c:Millionaires")
+	m, err = listen.parseLine("90210 beverly.hills 10 c Millionaires")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
 	} else {
@@ -67,7 +67,7 @@ func TestListenPollerParser_HappyPath(t *testing.T) {
 		}
 	}
 
-	m, err = listen.parseLine("90210 beverly.hills 10|c:Millionaires,$$")
+	m, err = listen.parseLine("90210 beverly.hills 10 c Millionaires,$$")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
 	} else {
@@ -83,16 +83,18 @@ func TestListenPollerParser_Errors(t *testing.T) {
 	listen := Listen{stats: &ListenStats{counts: make(map[string]interface{})}}
 
 	failure_cases := []string{
+		"timestamp metric",
 		"timestamp metric value",
 		"2014-10-13 22:00:16 non.compliant.ts 10",
 		"2014-10-13T22:00:16Z - 10",
 		"2014-10-13T22:00:16Z 10",
-		"2014-10-13T22:00:16Z negative.counter -1020|c",
-		"2014-10-13T22:00:16Z bad.type 10|q",
-		"2014-10-13T22:00:16Z bad.unit 10|c:Bad Unit",
-		"2014-10-13T22:00:16Z bad.abbr 10|c:BadAbbr,88888",
-		"2014-10-13T22:00:16Z malformed.unit 10|c:Malform:m",
-		"2014-10-13T22:00:16Z malformed.meta 10/c:Malform,m",
+		"2014-10-13T22:00:16Z negative.counter -1020 c",
+		"2014-10-13T22:00:16Z bad.type 10 q",
+		"2014-10-13T22:00:16Z malformed.type 10g",
+		"2014-10-13T22:00:16Z bad.unit 10 c Bad Unit",
+		"2014-10-13T22:00:16Z bad.abbr 10 c BadAbbr,88888",
+		"2014-10-13T22:00:16Z malformed.unit 10 c Malform:m",
+		"2014-10-13T22:00:16Z malformed.meta 10 c:Malform,m",
 	}
 
 	for _, fail := range failure_cases {
