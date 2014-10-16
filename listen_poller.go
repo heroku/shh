@@ -27,6 +27,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 // Used to track global listen stats
@@ -108,14 +110,14 @@ type Listen struct {
 }
 
 func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
-	ctx := Slog{"poller": "listen", "fn": "NewListenPoller"}
+	ctx := slog.Context{"poller": "listen", "fn": "NewListenPoller"}
 	tmp := strings.Split(config.Listen, ",")
 
 	formatErr := fmt.Errorf("SHH_LISTEN is not in the correct format")
 	fix := "The correct format is: <tcp|tcp4|tcp6|unix|unixpacket>,<address>"
 
 	if len(tmp) != 2 {
-		ctx.FatalError(formatErr, fix)
+		FatalError(ctx, formatErr, fix)
 	}
 
 	listenNet := tmp[0]
@@ -125,21 +127,21 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 	case "tcp", "tcp4", "tcp6", "unix", "unixpacket":
 		break
 	default:
-		ctx.FatalError(formatErr, fix)
+		FatalError(ctx, formatErr, fix)
 	}
 
 	// If this is a path, remove it
 	if listenNet == "unix" && Exists(listenLaddr) {
 		err := os.Remove(listenLaddr)
 		if err != nil {
-			ctx.FatalError(err, "unable to remove old socket path")
+			FatalError(ctx, err, "unable to remove old socket path")
 		}
 	}
 
 	listener, err := net.Listen(listenNet, listenLaddr)
 
 	if err != nil {
-		ctx.FatalError(err, "unable to listen on "+listenNet+listenLaddr)
+		FatalError(ctx, err, "unable to listen on "+listenNet+listenLaddr)
 	}
 
 	ls := &ListenStats{counts: make(map[string]interface{})}
@@ -156,12 +158,12 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 	}
 
 	go func(poller *Listen) {
-		ctx := Slog{"poller": poller.Name(), "fn": "acceptor"}
+		ctx := slog.Context{"poller": poller.Name(), "fn": "acceptor"}
 
 		for {
 			conn, err := poller.listener.Accept()
 			if err != nil {
-				ctx.Error(err, "accepting connection")
+				LogError(ctx, err, "accepting connection")
 				continue
 			}
 
@@ -189,7 +191,7 @@ func (poller Listen) Poll(tick time.Time) {
 func handleListenConnection(poller *Listen, conn net.Conn) {
 	defer conn.Close()
 
-	ctx := Slog{"poller": poller.Name(), "fn": "handleListenConnection", "conn": conn}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "handleListenConnection", "conn": conn}
 
 	var value interface{}
 
@@ -202,7 +204,7 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 		conn.SetDeadline(time.Now().Add(poller.Interval).Add(poller.Interval))
 		line, err := r.ReadString('\n')
 		if err != nil {
-			ctx.Error(err, "reading string")
+			LogError(ctx, err, "reading string")
 			break
 		}
 
@@ -210,7 +212,7 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 		if len(fields) == 3 {
 			when, err := time.Parse(time.RFC3339, fields[0])
 			if err != nil {
-				ctx.Error(err, "parsing time")
+				LogError(ctx, err, "parsing time")
 				poller.stats.Increment("time.parse.errors")
 				break
 			}
@@ -218,7 +220,7 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 			if err != nil {
 				value, err = strconv.ParseFloat(fields[2], 64)
 				if err != nil {
-					ctx.Error(err, "parsing float / int")
+					LogError(ctx, err, "parsing float / int")
 					poller.stats.Increment("value.parse.errors")
 					break
 				} else {

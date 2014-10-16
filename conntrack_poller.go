@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"io/ioutil"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 const (
@@ -19,11 +21,11 @@ func NewConntrackPoller(measurements chan<- Measurement) Conntrack {
 }
 
 func (poller Conntrack) Poll(tick time.Time) {
-	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	count, err := ioutil.ReadFile(CONNTRACK_DATA)
 	if err != nil {
-		ctx.Error(err, "reading "+CONNTRACK_DATA)
+		LogError(ctx, err, "reading"+CONNTRACK_DATA)
 	}
 
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"count"}, Atouint64(string(bytes.TrimSpace(count))), Connections}

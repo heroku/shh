@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+
+	"github.com/heroku/slog"
 )
 
 type Statsd struct {
@@ -22,7 +24,7 @@ func NewStatsdOutputter(measurements <-chan Measurement, config Config) *Statsd 
 		Proto:        config.StatsdProto,
 		Host:         config.StatsdHost,
 		prefix:       config.Prefix,
-	  source:       config.Source, // TODO: unused?
+		source:       config.Source, // TODO: unused?
 	}
 }
 
@@ -31,11 +33,11 @@ func (out *Statsd) Start() {
 }
 
 func (out *Statsd) Connect(host string) net.Conn {
-	ctx := Slog{"fn": "Connect", "outputter": "statsd"}
+	ctx := slog.Context{"fn": "Connect", "outputter": "statsd"}
 
 	conn, err := net.Dial(out.Proto, host)
 	if err != nil {
-		ctx.FatalError(err, "Connecting to statsd host")
+		FatalError(ctx, err, "Connecting to statsd host")
 	}
 
 	return conn

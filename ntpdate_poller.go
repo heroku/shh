@@ -6,6 +6,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/heroku/slog"
 )
 
 type Ntpdate struct {
@@ -22,27 +24,27 @@ func NewNtpdatePoller(measurements chan<- Measurement, config Config) Ntpdate {
 
 //FIXME: Timeout
 func (poller Ntpdate) Poll(tick time.Time) {
-	ctx := Slog{"poller": poller.Name(), "fn": "Poll", "tick": tick}
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	if len(poller.Servers) > 0 {
 		cmd := exec.Command("ntpdate", "-q", "-u")
 		cmd.Args = append(cmd.Args, poller.Servers...)
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
-			ctx.Error(err, "creating stdout pipe")
+			LogError(ctx, err, "creating stdout pipe")
 			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			return
 		}
 
 		if err := cmd.Start(); err != nil {
-			ctx.Error(err, "starting sub command")
+			LogError(ctx, err, "starting sub command")
 			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			return
 		}
 
 		defer func() {
 			if err := cmd.Wait(); err != nil {
-				ctx.Error(err, "waiting for subcommand to end")
+				LogError(ctx, err, "waiting for subcommand to end")
 				poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			}
 		}()
@@ -64,7 +66,7 @@ func (poller Ntpdate) Poll(tick time.Time) {
 				if err == io.EOF {
 					break
 				} else {
-					ctx.Error(err, "unknown error reading data from subcommand")
+					LogError(ctx, err, "unknown error reading data from subcommand")
 					poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 					return
 				}
