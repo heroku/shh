@@ -1,4 +1,4 @@
-package main
+package shh
 
 import (
 	"fmt"
@@ -64,7 +64,7 @@ func (c CounterMeasurement) Name(prefix string) string {
 }
 
 func (c CounterMeasurement) StrValue() string {
-	return fmt.Sprintf("%d", c.Value)
+	return fmt.Sprintf("%d", c.value)
 }
 
 func (c CounterMeasurement) Value() interface{} {

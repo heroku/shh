@@ -19,11 +19,13 @@ Description: Systems statistics to formatted log lines
 endef
 export DEB_CONTROL
 
-deb: bin/shh
+deb: bin/shh bin/shh-value
+	echo "making deb"
 	mkdir -p -m 0755 $(controldir)
 	echo "$$DEB_CONTROL" > $(controldir)/control
 	mkdir -p $(installpath)
 	install bin/shh $(installpath)/shh
+	install bin/shh-value $(installpath)/shh-value
 	fakeroot dpkg-deb --build $(tempdir) .
 	rm -rf $(tempdir)
 
@@ -32,5 +34,9 @@ clean:
 	rm -f shh*.deb
 
 bin/shh:
+	git clone git://github.com/kr/heroku-buildpack-go.git $(buildpath)
+	$(buildpath)/bin/compile . $(buildpackcache)
+
+bin/shh-value: 
 	git clone git://github.com/kr/heroku-buildpack-go.git $(buildpath)
 	$(buildpath)/bin/compile . $(buildpackcache)
