@@ -6,6 +6,15 @@ All notable changes to this project will be documented in this file.
 
 - netstat poller. Polls values from `/proc/net/netstat`
 
+## 0.6.0 - 2013-10-20
+
+- shh-value cli tool for interacting with the unix socket.
+- Latest version of Go (1.3.3) used.
+- use github.com/heroku/slog for structured logging (extracted from shh originally).
+- LISTEN Poller documentation.
+- Improved Listen Poller with support for types and units
+- Use of Go's logger (over fmt.Println)
+
 ## 0.5.0 - 2014-10-09
 
 ### Added
