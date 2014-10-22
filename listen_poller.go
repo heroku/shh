@@ -113,7 +113,7 @@ type Listen struct {
 	measurements chan<- Measurement
 	listener     net.Listener
 	stats        *ListenStats
-	Interval     time.Duration
+	Timeout      time.Duration
 }
 
 func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
@@ -161,7 +161,7 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 		measurements: measurements,
 		listener:     listener,
 		stats:        ls,
-		Interval:     config.Interval,
+		Timeout:      config.ListenTimeout,
 	}
 
 	go func(poller *Listen) {
@@ -206,7 +206,7 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 	r := bufio.NewReader(conn)
 
 	for {
-		conn.SetDeadline(time.Now().Add(poller.Interval))
+		conn.SetDeadline(time.Now().Add(poller.Timeout))
 		line, err := r.ReadString('\n')
 		if err == io.EOF {
 			break
