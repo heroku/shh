@@ -49,6 +49,7 @@ type Librato struct {
 	prefix       string
 	source       string
 	client       *http.Client
+	userAgent    string
 }
 
 func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
@@ -70,6 +71,7 @@ func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librat
 				},
 			},
 		},
+		userAgent: config.UserAgent,
 	}
 }
 
@@ -171,6 +173,7 @@ func (out *Librato) send(ctx slog.Context, payload []byte) (retry bool, e error)
 	}
 
 	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("User-Agent", out.userAgent)
 	req.SetBasicAuth(out.User, out.Token)
 
 	resp, err := out.client.Do(req)
