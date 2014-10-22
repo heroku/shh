@@ -1,7 +1,7 @@
 package shh
 
 import (
-	"bufio"
+	"bytes"
 	"io"
 	"os/exec"
 	"strings"
@@ -29,30 +29,18 @@ func (poller Ntpdate) Poll(tick time.Time) {
 	if len(poller.Servers) > 0 {
 		cmd := exec.Command("ntpdate", "-q", "-u")
 		cmd.Args = append(cmd.Args, poller.Servers...)
-		stdout, err := cmd.StdoutPipe()
-		if err != nil {
-			LogError(ctx, err, "creating stdout pipe")
+		var stdout, stderr bytes.Buffer
+		cmd.Stdout = &stdout
+		cmd.Stderr = &stderr
+
+		if err := cmd.Run(); err != nil {
+			LogError(ctx, err, "running sub command: "+string(stderr.Bytes()))
 			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
 			return
 		}
-
-		if err := cmd.Start(); err != nil {
-			LogError(ctx, err, "starting sub command")
-			poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
-			return
-		}
-
-		defer func() {
-			if err := cmd.Wait(); err != nil {
-				LogError(ctx, err, "waiting for subcommand to end")
-				poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"error"}, 1, Errors}
-			}
-		}()
-
-		buf := bufio.NewReader(stdout)
 
 		for {
-			line, err := buf.ReadString('\n')
+			line, err := stdout.ReadString('\n')
 			if err == nil {
 				if strings.HasPrefix(line, "server") {
 					parts := strings.Split(line, ",")
