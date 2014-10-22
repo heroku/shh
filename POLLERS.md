@@ -250,7 +250,10 @@ the other involves modifying the `shh` source code.
 `shh` provides a facility for external processes to emit stats via a
 socket. If you include the "listen" poller in `SHH_POLLERS`, `shh` will
 create a listening socket, listening at the address described by
-`SHH_LISTEN` (defaults to a unix socket called #shh in the CWD).
+`SHH_LISTEN` (defaults to a unix socket called #shh in the CWD). If you
+set `SHH_LISTEN_TIMEOUT` to a duration (defaults to the value of
+`SHH_INTERVAL`) the socket will close if the timeout duration passed
+without receiving any data.
 
 Data is then communicated in the following format:
 

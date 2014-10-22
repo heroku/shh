@@ -35,6 +35,7 @@ type Config struct {
 	Percentages           []string
 	DfTypes               []string
 	Listen                string
+	ListenTimeout         time.Duration
 	NifDevices            []string
 	NtpdateServers        []string
 	CpuOnlyAggregate      bool
@@ -55,15 +56,16 @@ type Config struct {
 }
 
 func GetConfig() (config Config) {
-	config.Interval = GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL)    // Polling Interval
-	config.Outputter = GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)         // Outputter
-	config.Pollers = GetEnvWithDefaultStrings("SHH_POLLERS", DEFAULT_POLLERS)        // Pollers to poll
-	config.Source = GetEnvWithDefault("SHH_SOURCE", "")                              // Source to emit
-	config.Prefix = GetEnvWithDefault("SHH_PREFIX", "")                              // Metric prefix to use
-	config.ProfilePort = GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT) // Profile Port
-	config.Percentages = GetEnvWithDefaultStrings("SHH_PERCENTAGES", DEFAULT_PERCENTAGES)
+	config.Interval = GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL)                            // Polling Interval
+	config.Outputter = GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)                                 // Outputter
+	config.Pollers = GetEnvWithDefaultStrings("SHH_POLLERS", DEFAULT_POLLERS)                                // Pollers to poll
+	config.Source = GetEnvWithDefault("SHH_SOURCE", "")                                                      // Source to emit
+	config.Prefix = GetEnvWithDefault("SHH_PREFIX", "")                                                      // Metric prefix to use
+	config.ProfilePort = GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                         // Profile Port
+	config.Percentages = GetEnvWithDefaultStrings("SHH_PERCENTAGES", DEFAULT_PERCENTAGES)                    // Use Percentages for these pollers
 	config.DfTypes = GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                              // Default DF types
 	config.Listen = GetEnvWithDefault("SHH_LISTEN", DEFAULT_LISTEN_ADDR)                                     // Default network socket info for listen
+	config.ListenTimeout = GetEnvWithDefaultDuration("SHH_LISTEN_TIMEOUT", config.Interval.String())         // Listen Poller Socket Timeout
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                     // Devices to poll
 	config.NtpdateServers = GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", "0.pool.ntp.org,1.pool.ntp.org") // NTP Servers
 	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", false)                                   // Whether to only report aggregate CPU usage
