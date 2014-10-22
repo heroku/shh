@@ -130,6 +130,15 @@ func (out *Librato) deliver() {
 			}
 		}
 
+		attrs := LibratoMetricAttrs{UnitName: Metrics.Name(), UnitAbbr: Metrics.Abbr()}
+		gaugeStat := GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "guage", "size"}, uint64(len(gauges) + 2), Metrics}
+		libratoMetric := LibratoMetric{gaugeStat.Name(out.prefix), gaugeStat.Value(), gaugeStat.Time().Unix(), out.source, attrs}
+		gauges = append(gauges, libratoMetric)
+
+		counterStat := GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "counter", "size"}, uint64(len(counters)), Metrics}
+		libratoMetric = LibratoMetric{counterStat.Name(out.prefix), counterStat.Value(), counterStat.Time().Unix(), out.source, attrs}
+		gauges = append(gauges, libratoMetric)
+
 		payload := LibratoPostBody{gauges, counters}
 		j, err := json.Marshal(payload)
 		if err != nil {
