@@ -146,14 +146,12 @@ func (out *Librato) sendWithBackoff(payload []byte) bool {
 	bo := 0 * time.Millisecond
 
 	for attempts < LibratoMaxAttempts {
-		if retry, err := out.send(ctx, payload); retry {
-			ctx["backoff"] = bo
-			ctx["message"] = err
-			Logger.Println(ctx)
+		retry, err := out.send(ctx, payload)
+		if retry {
+			LogError(ctx, err, "backoffing off")
 			bo = backoff(bo)
 		} else if err != nil {
-			ctx["error"] = err
-			ErrLogger.Println(ctx)
+			LogError(ctx, err, "error sending")
 			return false
 		} else {
 			return true
@@ -222,8 +220,6 @@ func backoff(bo time.Duration) time.Duration {
 }
 
 func resetCtx(ctx slog.Context) {
-	delete(ctx, "backoff")
-	delete(ctx, "message")
 	delete(ctx, "body")
 	delete(ctx, "code")
 }
