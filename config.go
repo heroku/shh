@@ -1,7 +1,9 @@
 package shh
 
 import (
+	"fmt"
 	"regexp"
+	"runtime"
 	"time"
 )
 
@@ -53,6 +55,7 @@ type Config struct {
 	SelfPollerMode        string
 	Start                 time.Time
 	DiskFilter            *regexp.Regexp
+	UserAgent             string
 }
 
 func GetConfig() (config Config) {
@@ -83,6 +86,7 @@ func GetConfig() (config Config) {
 	config.SelfPollerMode = GetEnvWithDefault("SHH_SELF_POLLER_MODE", "minimal")                             // Self poller mode (full, minimal)
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", ".*")
 	config.DiskFilter = regexp.MustCompile(tmp)
+	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)
 	config.Start = start // Start time
 	return
 }

@@ -7,9 +7,12 @@ import (
 	"time"
 )
 
-type HappyHandler struct{}
+type HappyHandler struct {
+	headers http.Header
+}
 
 func (s *HappyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	s.headers = req.Header
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -111,5 +114,32 @@ func TestLibrato_ClientError(t *testing.T) {
 
 	if librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Retry should not have succeeded due to non-server error.")
+	}
+}
+
+func TestLibrato_UserAgent(t *testing.T) {
+	handler := &HappyHandler{}
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	config := GetConfig()
+	config.LibratoUrl = server.URL
+	config.LibratoUser = "user"
+	config.LibratoToken = "token"
+
+	measurements := make(chan Measurement, 10)
+	librato := NewLibratoOutputter(measurements, config)
+
+	if !librato.sendWithBackoff([]byte(`{}`)) {
+		t.Errorf("should have succeeded.")
+	}
+
+	h, ok := handler.headers["User-Agent"]
+	if !ok {
+		t.Errorf("Missing User-Agent Header")
+	}
+
+	if h[0] != config.UserAgent {
+		t.Errorf("Incorrect User-Agent Header value")
 	}
 }
