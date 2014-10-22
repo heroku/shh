@@ -2,9 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## Soon
+## 0.6.1 - 2013-10-22
 
-- netstat poller. Polls values from `/proc/net/netstat`
+- `$SHH_LISTEN_TIMEOUT` now controls the timeout on the socket.
+- Librato outlet now reports a `User-Agent` header at the request of Librato.
+- Timeout errors to the librato api are now reported.
+- Better handling of ntpdate sub process error messages.
 
 ## 0.6.0 - 2013-10-20
 
