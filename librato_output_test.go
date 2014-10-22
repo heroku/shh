@@ -58,8 +58,8 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	measurements := make(chan Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if !librato.sendWithBackoff([]byte(`{}`)) {
-		t.Errorf("Request should have completed successfully with a sleepy handler")
+	if librato.sendWithBackoff([]byte(`{}`)) {
+		t.Errorf("Request should have errored with a sleepy handler")
 	}
 }
 
