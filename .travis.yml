@@ -1,20 +1,16 @@
 language: go
 go:
 - 1.3.3
-
 before_install:
 - go get github.com/tools/godep
 - export PATH=$HOME/gopath/bin:$PATH
-
 install: godep go version
-
 script:
 - godep go test -v ./...
-
 notifications:
   email: false
   hipchat:
     rooms:
-      secure: aPJaUqDC9JCqT0F17SxJXYbDIffm1zRJhpQvSuHxj5K7iuy8ESostb6Gs6HbZGLDqd9CZbtkk1pqFovfXUtwoNMOQ6wN1rEZk1VJe8npPhWaot7HsBGEivSsZLrIX7BD2b13QlK8/Yz4YiuUyQ+moS7YRkVw6oSOj6GVWV77rC4=
+      secure: ZwhFmaWdX3/D3pU30ufAWxjr5/alcaZWl9qvBc+aj/lCRyNJuhFRl2PkT+Wf6AG7G6VFnovOXwkR/04al+qrCfRziMUuDWF7aX8PM+8aoxsPv4tcdySlOpUtBTAxkuGmAf9g9FI13KuzbYaeYDHOEFC3QwZUQMLAPQxxkZtdHXY=
     template:
     - "%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}"
