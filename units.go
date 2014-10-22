@@ -23,6 +23,7 @@ var (
 	Avg          = Unit{"Avg", "avg"}
 	Objects      = Unit{"Objects", "objs"}
 	Routines     = Unit{"Routines", "routines"}
+	Metrics      = Unit{"Metrics", "metrics"}
 )
 
 func (u Unit) Name() string {
