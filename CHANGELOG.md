@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.2 - 2013-10-22
+
+- Report to librato how many guages / counters are being reported in a batch
+
 ## 0.6.1 - 2013-10-22
 
 - `$SHH_LISTEN_TIMEOUT` now controls the timeout on the socket.
