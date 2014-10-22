@@ -181,7 +181,7 @@ func (out *Librato) send(ctx slog.Context, payload []byte) (retry bool, e error)
 			e = fmt.Errorf("Backing off due to transport error")
 		} else if strings.Contains(err.Error(), "timeout awaiting response") {
 			retry = false
-			e = nil
+			e = err
 		} else if err == io.EOF {
 			retry = true
 			e = fmt.Errorf("Backing off due to EOF")
