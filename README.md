@@ -37,7 +37,7 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_STATSD_HOST` | string | Where the Statsd Outputter sends it's data | |
 | `SHH_STATSD_PROTO` | string | Whether the Stats Outputter uses TCP or UDP | udp |
 | `SHH_SYSLOGNG_SOCKET` | string | The location of the syslog-ng socket | /var/lib/syslog-ng/syslog-ng.ctl |
-| `SHH_SELF_POLLER_MODE` | string | Self poller mode {minimal, full} | minimal |
+| `SHH_FULL | list of strings | Pollers that should report full metrics. `shh` defaults to minimal | "" |
 | `SHH_DISK_FILTER` | regexp | | .* |
 
 For more information on the duration type, see [time.ParseDuration](http://golang.org/pkg/time/#ParseDuration)

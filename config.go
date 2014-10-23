@@ -14,19 +14,22 @@ const (
 	DEFAULT_OUTPUTTER               = "stdoutl2metder"                                                   // Default outputter
 	DEFAULT_POLLERS                 = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
 	DEFAULT_PROFILE_PORT            = "0"                                                                // Default profile port, 0 disables
-	DEFAULT_DF_TYPES                = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
+	DEFAULT_DF_TYPES                = "btrfs,ext3,ext4,xfs"                                              // Default fs types to report df for
+	DEFAULT_DF_LOOP                 = false                                                              // Default to not reporting df metrics for loop back filesystems
 	DEFAULT_NIF_DEVICES             = "eth0,lo"                                                          // Default interfaces to report stats for
 	DEFAULT_NTPDATE_SERVERS         = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
 	DEFAULT_CPU_AGGR                = true                                                               // Default whether to only report aggregate CPU
 	DEFAULT_SYSLOGNG_SOCKET         = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
+	DEFAULT_SELF_POLLER_MODE        = "minimal"                                                          // Default to only minimal set of self metrics
 	DEFAULT_SOCKSTAT_PROTOS         = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
 	DEFAULT_PERCENTAGES             = ""                                                                 // Default pollers where publishing perc metrics is allowed
+	DEFAULT_FULL                    = ""                                                                 // Default list of pollers who should report full metrycs
 	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"
 	DEFAULT_LIBRATO_BATCH_SIZE      = 500
 	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"
 	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"
 	DEFAULT_LISTEN_ADDR             = "unix,#shh"
-	DEFAULT_DISK_FILTER             = ".*"
+	DEFAULT_DISK_FILTER             = "(xv|s)d"
 )
 
 var (
@@ -41,7 +44,9 @@ type Config struct {
 	Prefix                string
 	ProfilePort           string
 	Percentages           []string
+	Full                  []string
 	DfTypes               []string
+	DfLoop                bool
 	Listen                string
 	ListenTimeout         time.Duration
 	NifDevices            []string
@@ -58,7 +63,6 @@ type Config struct {
 	StatsdHost            string
 	StatsdProto           string
 	SyslogngSocket        string
-	SelfPollerMode        string
 	Start                 time.Time
 	DiskFilter            *regexp.Regexp
 	UserAgent             string
@@ -72,12 +76,14 @@ func GetConfig() (config Config) {
 	config.Prefix = GetEnvWithDefault("SHH_PREFIX", DEFAULT_EMPTY_STRING)                                                    // Metric prefix to use
 	config.ProfilePort = GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                                         // Profile Port
 	config.Percentages = GetEnvWithDefaultStrings("SHH_PERCENTAGES", DEFAULT_PERCENTAGES)                                    // Use Percentages for these pollers
+	config.Full = GetEnvWithDefaultStrings("SHH_FULL", DEFAULT_FULL)                                                         // Report full measurements for these pollers
 	config.DfTypes = GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                                              // Default DF types
+	config.DfLoop = GetEnvWithDefaultBool("SHH_DF_LOOP", DEFAULT_DF_LOOP)                                                    // Report df metrics for loop back filesystmes or not
 	config.Listen = GetEnvWithDefault("SHH_LISTEN", DEFAULT_LISTEN_ADDR)                                                     // Default network socket info for listen
 	config.ListenTimeout = GetEnvWithDefaultDuration("SHH_LISTEN_TIMEOUT", config.Interval.String())                         // Listen Poller Socket Timeout
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                                     // Devices to poll
 	config.NtpdateServers = GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", DEFAULT_NTPDATE_SERVERS)                         // NTP Servers
-	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", false)                                                   // Whether to only report aggregate CPU usage
+	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", DEFAULT_CPU_AGGR)                                        // Whether to only report aggregate CPU usage
 	config.LibratoUrl = GetEnvWithDefault("SHH_LIBRATO_URL", DEFAULT_LIBRATO_URL)                                            // The Librato API End-Point
 	config.LibratoUser = GetEnvWithDefault("SHH_LIBRATO_USER", DEFAULT_EMPTY_STRING)                                         // The Librato API User
 	config.LibratoToken = GetEnvWithDefault("SHH_LIBRATO_TOKEN", DEFAULT_EMPTY_STRING)                                       // The Librato API TOken
@@ -89,7 +95,6 @@ func GetConfig() (config Config) {
 	config.StatsdHost = GetEnvWithDefault("SHH_STATSD_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Statsd Outputter sends it's data
 	config.StatsdProto = GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                                        // Whether the Stats Outputter uses TCP or UDP
 	config.SyslogngSocket = GetEnvWithDefault("SHH_SYSLOGNG_SOCKET", DEFAULT_SYSLOGNG_SOCKET)                                // The location of the syslog-ng socket
-	config.SelfPollerMode = GetEnvWithDefault("SHH_SELF_POLLER_MODE", "minimal")                                             // Self poller mode (full, minimal)
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)

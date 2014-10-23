@@ -131,15 +131,21 @@ started by the system:
 
 ### Memory (mem)
 
-The `mem` poller uses `/proc/meminfo` which exposes a variable number of stats depending on the kernel version and configuration. However, `shh` will report all of the stats in bytes. See [man 5 proc][proc5] for more information on available stats.
+The `mem` poller uses `/proc/meminfo` which exposes a variable number of
+measurements depending on the kernel version and configuration. By default,
+`shh` will report a subset of these. Adding `mem` to `SHH__FULL` will tell
+`shh` to report all of them. `shh` reports all measurements in bytes. See [man
+5 proc][proc5] for more information on available data.
 
 The template for the emitted metrics are:
 
 * `<prefix>.mem.<fixup-name>`
 
-where `<fixup-name>` is a lowercased version of the stat with '(' and ')' replaced by '.', and '.' replaced by '_'.
+where `<fixup-name>` is a lowercased version of the stat with '(' and ')'
+replaced by '.', and '.' replaced by '_'.
 
-In addition, if the environment variable `SHH_PERCENTAGES` includes `mem` and/or `swap`:
+In addition, if the environment variable `SHH_PERCENTAGES` includes `mem`
+and/or `swap`:
 
 * `<prefix>.memtotal.perc`
 * `<prefix>.swaptotal.perc`
@@ -202,7 +208,7 @@ The self poller provides metrics by introspecting itself. The Go programming lan
 * `<prefix>.self.memstats.heap.alloc.bytes`
 * `<prefix>.self.memstats.heap.inuse.bytes`
 
-If the environment variable `SHH_SELF_POLLER_MODE` is equal to "full", self also reports the following:
+If the environment variable `SHH_FULL` contains "self", it also reports the following:
 
 * `<prefix>.self.measurements.length`
 * `<prefix>.self.memstats.general.sys.bytes`
