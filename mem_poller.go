@@ -8,16 +8,27 @@ const (
 	MEMORY_FILE = "/proc/meminfo"
 )
 
+var (
+	MEM_MINIMAL_LIST = []string{"memfree", "memtotal", "swapfree", "swaptotal", "buffers", "cached", "swapcached"}
+)
+
 type Memory struct {
 	measurements   chan<- Measurement
 	memPercentage  bool
 	swapPercentage bool
+	full           bool
 }
 
 func NewMemoryPoller(measurements chan<- Measurement, config Config) Memory {
 	memPerc := LinearSliceContainsString(config.Percentages, "mem")
 	swapPerc := LinearSliceContainsString(config.Percentages, "swap")
-	return Memory{measurements: measurements, memPercentage: memPerc, swapPercentage: swapPerc}
+	mem := Memory{
+		measurements:   measurements,
+		memPercentage:  memPerc,
+		swapPercentage: swapPerc,
+	}
+	mem.full = SliceContainsString(config.Full, mem.Name())
+	return mem
 }
 
 // http://www.kernel.org/doc/Documentation/filesystems/proc.txt
@@ -39,8 +50,6 @@ func (poller Memory) Poll(tick time.Time) {
 			unit = Empty
 		}
 
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), fixed_names, value, unit}
-
 		switch fixed_names[0] {
 		case "memtotal":
 			memTotal = value
@@ -51,6 +60,11 @@ func (poller Memory) Poll(tick time.Time) {
 		case "swapfree":
 			swapFree = value
 		}
+
+		if poller.full || SliceContainsString(MEM_MINIMAL_LIST, fixed_names[0]) {
+			poller.measurements <- GaugeMeasurement{tick, poller.Name(), fixed_names, value, unit}
+		}
+
 	}
 
 	if poller.memPercentage && memTotal > 0 && memFree >= 0 {
@@ -62,6 +76,7 @@ func (poller Memory) Poll(tick time.Time) {
 		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(),
 			[]string{"swaptotal", "perc"}, 100.0 * float64(swapTotal-swapFree) / float64(swapTotal), Percent}
 	}
+
 }
 
 func (poller Memory) Name() string {

@@ -12,7 +12,9 @@ type Self struct {
 }
 
 func NewSelfPoller(measurements chan<- Measurement, config Config) Self {
-	return Self{measurements: measurements, stats: runtime.MemStats{}, full: config.SelfPollerMode == "full"}
+	self := Self{measurements: measurements, stats: runtime.MemStats{}}
+	self.full = SliceContainsString(config.Full, self.Name())
+	return self
 }
 
 // See http://golang.org/pkg/runtime/#MemStats
