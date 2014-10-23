@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.7.0 - 2013-10-22
+
+- Update some defaults: SHH_INTERVAL=60s & SHH_LIBRATO_BATCH_TIMEOUT=10s
+
 ## 0.6.4 - 2013-10-22
 
 - Bugfix
