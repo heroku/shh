@@ -14,7 +14,8 @@ const (
 	DEFAULT_OUTPUTTER               = "stdoutl2metder"                                                   // Default outputter
 	DEFAULT_POLLERS                 = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
 	DEFAULT_PROFILE_PORT            = "0"                                                                // Default profile port, 0 disables
-	DEFAULT_DF_TYPES                = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
+	DEFAULT_DF_TYPES                = "btrfs,ext3,ext4,xfs"                                              // Default fs types to report df for
+	DEFAULT_DF_LOOP                 = false                                                              // Default to not reporting df metrics for loop back filesystems
 	DEFAULT_NIF_DEVICES             = "eth0,lo"                                                          // Default interfaces to report stats for
 	DEFAULT_NTPDATE_SERVERS         = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
 	DEFAULT_CPU_AGGR                = true                                                               // Default whether to only report aggregate CPU
@@ -43,6 +44,7 @@ type Config struct {
 	ProfilePort           string
 	Percentages           []string
 	DfTypes               []string
+	DfLoop                bool
 	Listen                string
 	ListenTimeout         time.Duration
 	NifDevices            []string
@@ -74,6 +76,7 @@ func GetConfig() (config Config) {
 	config.ProfilePort = GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                                         // Profile Port
 	config.Percentages = GetEnvWithDefaultStrings("SHH_PERCENTAGES", DEFAULT_PERCENTAGES)                                    // Use Percentages for these pollers
 	config.DfTypes = GetEnvWithDefaultStrings("SHH_DF_TYPES", DEFAULT_DF_TYPES)                                              // Default DF types
+	config.DfLoop = GetEnvWithDefaultBool("SHH_DF_LOOP", DEFAULT_DF_LOOP)                                                    // Report df metrics for loop back filesystmes or not
 	config.Listen = GetEnvWithDefault("SHH_LISTEN", DEFAULT_LISTEN_ADDR)                                                     // Default network socket info for listen
 	config.ListenTimeout = GetEnvWithDefaultDuration("SHH_LISTEN_TIMEOUT", config.Interval.String())                         // Listen Poller Socket Timeout
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                                     // Devices to poll

@@ -12,6 +12,7 @@ type Df struct {
 	measurements chan<- Measurement
 	percentage   bool
 	Types        []string
+	Loop         bool
 }
 
 func NewDfPoller(measurements chan<- Measurement, config Config) Df {
@@ -19,6 +20,7 @@ func NewDfPoller(measurements chan<- Measurement, config Config) Df {
 		measurements: measurements,
 		percentage:   LinearSliceContainsString(config.Percentages, "df"),
 		Types:        config.DfTypes,
+		Loop:         config.DfLoop,
 	}
 }
 
@@ -85,8 +87,13 @@ func (poller Df) mountpointChannel() <-chan string {
 
 			fields := strings.Fields(line)
 			fsType := fields[2]
+			device := fields[0]
 
 			if SliceContainsString(poller.Types, fsType) {
+				if !poller.Loop && strings.Contains(device, "/loop") {
+					continue
+				}
+
 				mountpoints <- fields[1]
 			}
 		}
