@@ -10,7 +10,7 @@ import (
 const (
 	VERSION                         = "0.6.4"
 	DEFAULT_EMPTY_STRING            = ""
-	DEFAULT_INTERVAL                = "10s"                                                              // Default tick interval for pollers
+	DEFAULT_INTERVAL                = "60s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER               = "stdoutl2metder"                                                   // Default outputter
 	DEFAULT_POLLERS                 = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
 	DEFAULT_PROFILE_PORT            = "0"                                                                // Default profile port, 0 disables
@@ -24,6 +24,7 @@ const (
 	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"
 	DEFAULT_LIBRATO_BATCH_SIZE      = 500
 	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"
+	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"
 	DEFAULT_LISTEN_ADDR             = "unix,#shh"
 	DEFAULT_DISK_FILTER             = ".*"
 )
@@ -81,7 +82,7 @@ func GetConfig() (config Config) {
 	config.LibratoUser = GetEnvWithDefault("SHH_LIBRATO_USER", DEFAULT_EMPTY_STRING)                                         // The Librato API User
 	config.LibratoToken = GetEnvWithDefault("SHH_LIBRATO_TOKEN", DEFAULT_EMPTY_STRING)                                       // The Librato API TOken
 	config.LibratoBatchSize = GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", DEFAULT_LIBRATO_BATCH_SIZE)                     // The max number of metrics to submit in a single request
-	config.LibratoBatchTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", config.Interval.String())            // The max time metrics will sit un-delivered
+	config.LibratoBatchTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", DEFAULT_LIBRATO_BATCH_TIMEOUT)       // The max time metrics will sit un-delivered
 	config.LibratoNetworkTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_NETWORK_TIMEOUT", DEFAULT_LIBRATO_NETWORK_TIMEOUT) // The maximum time to wait for Librato to respond (for both dial and first header)
 	config.CarbonHost = GetEnvWithDefault("SHH_CARBON_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Carbon Outputter sends it's data
 	config.SockStatProtos = GetEnvWithDefaultStrings("SHH_SOCKSTAT_PROTOS", DEFAULT_SOCKSTAT_PROTOS)                         // Protocols to report sockstats about
