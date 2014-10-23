@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.4 - 2013-10-22
+
+- Bugfix
+
 ## 0.6.3 - 2013-10-22
 
 - SHH_LIBRATO_BATCH_SIZE defaults to 500
