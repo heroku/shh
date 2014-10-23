@@ -61,11 +61,10 @@ func (poller Memory) Poll(tick time.Time) {
 			swapFree = value
 		}
 
-		if !poller.full && !SliceContainsString(MEM_MINIMAL_LIST, fixed_names[0]) {
-			continue
+		if poller.full || SliceContainsString(MEM_MINIMAL_LIST, fixed_names[0]) {
+			poller.measurements <- GaugeMeasurement{tick, poller.Name(), fixed_names, value, unit}
 		}
 
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), fixed_names, value, unit}
 	}
 
 	if poller.memPercentage && memTotal > 0 && memFree >= 0 {
