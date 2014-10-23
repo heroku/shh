@@ -19,6 +19,7 @@ const (
 	DEFAULT_NTPDATE_SERVERS         = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
 	DEFAULT_CPU_AGGR                = true                                                               // Default whether to only report aggregate CPU
 	DEFAULT_SYSLOGNG_SOCKET         = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
+	DEFAULT_SELF_POLLER_MODE        = "minimal"                                                          // Default to only minimal set of self metrics
 	DEFAULT_SOCKSTAT_PROTOS         = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
 	DEFAULT_PERCENTAGES             = ""                                                                 // Default pollers where publishing perc metrics is allowed
 	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"
@@ -89,7 +90,7 @@ func GetConfig() (config Config) {
 	config.StatsdHost = GetEnvWithDefault("SHH_STATSD_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Statsd Outputter sends it's data
 	config.StatsdProto = GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                                        // Whether the Stats Outputter uses TCP or UDP
 	config.SyslogngSocket = GetEnvWithDefault("SHH_SYSLOGNG_SOCKET", DEFAULT_SYSLOGNG_SOCKET)                                // The location of the syslog-ng socket
-	config.SelfPollerMode = GetEnvWithDefault("SHH_SELF_POLLER_MODE", "minimal")                                             // Self poller mode (full, minimal)
+	config.SelfPollerMode = GetEnvWithDefault("SHH_SELF_POLLER_MODE", DEFAULT_SELF_POLLER_MODE)                              // Self poller mode (full, minimal)
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)
