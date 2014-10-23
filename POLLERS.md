@@ -134,7 +134,7 @@ started by the system:
 The `mem` poller uses `/proc/meminfo` which exposes a variable number of 
 stats depending on the kernel version and configuration. By default, `shh` will report
 a subset of these metrics. Adding `mem` to `SHH__FULL` will tell `shh` to report
-all metrics thought. `shh` reports all of the metrics in bytes. See [man 5 proc][proc5]
+all metrics though. `shh` reports all of the metrics in bytes. See [man 5 proc][proc5]
 for more information on available stats.
 
 The template for the emitted metrics are:
