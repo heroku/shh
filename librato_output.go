@@ -80,36 +80,37 @@ func (out *Librato) Start() {
 	go out.batch()
 }
 
-func (out *Librato) makeBatch() []Measurement {
-	return make([]Measurement, 0, out.BatchSize)
-}
-
-func (out *Librato) batch() {
-	var ready bool
-	ctx := slog.Context{"fn": "batch", "outputter": "librato"}
-	ticker := time.Tick(out.Timeout)
-	batch := out.makeBatch()
+// Returns a batch that is ready to be submitted to Librato, either because it timed out
+// after receiving it's first measurement or it is full.
+func (out *Librato) readyBatch() []Measurement {
+	batch := make([]Measurement, 0, out.BatchSize)
+	var timer *time.Timer // "empty" timer so we don't timeout before we have any measurements
 	for {
 		select {
 		case measurement := <-out.measurements:
 			batch = append(batch, measurement)
+			if len(batch) == 1 { // We got a measurement, so we want to start the timer.
+				timer = time.NewTimer(out.Timeout)
+			}
 			if len(batch) == cap(batch) {
-				ready = true
+				return batch
 			}
-		case <-ticker:
-			if len(batch) > 0 {
-				ready = true
-			}
+		case <-timer.C:
+			return batch
 		}
+	}
+}
 
-		if ready {
-			select {
-			case out.batches <- batch:
-			default:
-				LogError(ctx, nil, "Batches backlogged, dropping")
-			}
-			batch = out.makeBatch()
-			ready = false
+// Continuously batch measurments into the batch channel
+func (out *Librato) batch() {
+	ctx := slog.Context{"fn": "batch", "outputter": "librato"}
+	for {
+		batch := out.readyBatch()
+
+		select {
+		case out.batches <- batch:
+		default:
+			LogError(ctx, nil, "Batches backlogged, dropping")
 		}
 	}
 }
