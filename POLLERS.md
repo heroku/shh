@@ -131,7 +131,11 @@ started by the system:
 
 ### Memory (mem)
 
-The `mem` poller uses `/proc/meminfo` which exposes a variable number of stats depending on the kernel version and configuration. However, `shh` will report all of the stats in bytes. See [man 5 proc][proc5] for more information on available stats.
+The `mem` poller uses `/proc/meminfo` which exposes a variable number of 
+stats depending on the kernel version and configuration. By default, `shh` will report
+a subset of these metrics. Adding `mem` to `SHH__FULL` will tell `shh` to report
+all metrics thought. `shh` reports all of the metrics in bytes. See [man 5 proc][proc5]
+for more information on available stats.
 
 The template for the emitted metrics are:
 
@@ -202,7 +206,7 @@ The self poller provides metrics by introspecting itself. The Go programming lan
 * `<prefix>.self.memstats.heap.alloc.bytes`
 * `<prefix>.self.memstats.heap.inuse.bytes`
 
-If the environment variable `SHH_SELF_POLLER_MODE` is equal to "full", self also reports the following:
+If the environment variable `SHH_FULL` contains "self", it also reports the following:
 
 * `<prefix>.self.measurements.length`
 * `<prefix>.self.memstats.general.sys.bytes`

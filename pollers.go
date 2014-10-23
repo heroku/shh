@@ -12,7 +12,7 @@ type Poller interface {
 }
 
 func NewMultiPoller(measurements chan<- Measurement, config Config) Multi {
-	mp := Multi{pollers: make(map[string]Poller), measurements: measurements, counts: make(map[string]uint64)}
+	mp := Multi{pollers: make(map[string]Poller), measurements: measurements}
 
 	for _, poller := range config.Pollers {
 		switch poller {
@@ -54,38 +54,29 @@ type Multi struct {
 	sync.WaitGroup
 	measurements chan<- Measurement
 	pollers      map[string]Poller
-	counts       map[string]uint64
 }
 
 func (mp Multi) RegisterPoller(poller Poller) {
 	mp.pollers[poller.Name()] = poller
-	mp.counts[poller.Name()] = 0
 }
 
 func (mp Multi) durationMetric(tick time.Time, name string, start time.Time) {
 	mp.measurements <- FloatGaugeMeasurement{tick, mp.Name(), []string{"duration", name, "seconds"}, time.Since(start).Seconds(), Seconds}
 }
 
-func (mp Multi) incrementCount(pname string) uint64 {
-	count := mp.counts[pname]
-	count++
-	mp.counts[pname] = count
-	return count
-}
-
 func (mp Multi) Poll(tick time.Time) {
 	defer mp.durationMetric(tick, "all", time.Now())
-	defer mp.Wait()
 
-	for name, poller := range mp.pollers {
-		mp.measurements <- CounterMeasurement{tick, mp.Name(), []string{"ticks", name, "count"}, mp.incrementCount(name), Empty}
+	for _, poller := range mp.pollers {
 		mp.Add(1)
 		go func(poller Poller) {
 			defer mp.durationMetric(tick, poller.Name(), time.Now())
-			defer mp.Done()
 			poller.Poll(tick)
+			mp.Done()
 		}(poller)
 	}
+
+	mp.Wait()
 }
 
 func (mp Multi) Name() string {
