@@ -17,7 +17,7 @@ const (
 	DEFAULT_DF_TYPES                = "btrfs,ext3,ext4,tmpfs,xfs"                                        // Default fs types to report df for
 	DEFAULT_NIF_DEVICES             = "eth0,lo"                                                          // Default interfaces to report stats for
 	DEFAULT_NTPDATE_SERVERS         = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
-	DEFAULT_CPU_AGGR                = false                                                              // Default whether to only report aggregate CPU
+	DEFAULT_CPU_AGGR                = true                                                               // Default whether to only report aggregate CPU
 	DEFAULT_SYSLOGNG_SOCKET         = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
 	DEFAULT_SOCKSTAT_PROTOS         = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
 	DEFAULT_PERCENTAGES             = ""                                                                 // Default pollers where publishing perc metrics is allowed
