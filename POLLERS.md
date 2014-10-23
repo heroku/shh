@@ -202,7 +202,7 @@ The self poller provides metrics by introspecting itself. The Go programming lan
 * `<prefix>.self.memstats.heap.alloc.bytes`
 * `<prefix>.self.memstats.heap.inuse.bytes`
 
-If the environment variable `SHH_SELF_POLLER_MODE` is equal to "full", which is the default, self also reports the following:
+If the environment variable `SHH_SELF_POLLER_MODE` is equal to "full", self also reports the following:
 
 * `<prefix>.self.measurements.length`
 * `<prefix>.self.memstats.general.sys.bytes`
