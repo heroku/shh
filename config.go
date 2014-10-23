@@ -27,7 +27,7 @@ const (
 	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"
 	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"
 	DEFAULT_LISTEN_ADDR             = "unix,#shh"
-	DEFAULT_DISK_FILTER             = ".*"
+	DEFAULT_DISK_FILTER             = "(xv|s)d"
 )
 
 var (
