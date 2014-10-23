@@ -2,33 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.7.0 - 2013-10-22
+## 0.8.0 - 2014-10-22
 
-- Update some defaults: SHH_INTERVAL=60s & SHH_LIBRATO_BATCH_TIMEOUT=10s
+### Added
 
-## 0.6.4 - 2013-10-22
+- `SHH_DF_LOOP` introduced to avoid loopback mounts from showing up in df poller (default false)
+- `SHH_FULL` introduced to add back full set of metrics from some pollers
+
+### Changed
+
+- Remove `DEFAULT_SELF_POLLER_MODE` in favor of SHH_FULL="self"
+- `SHH_CPU_AGGR` defaults to true, eliminating cpu metrics for all cores by default
+- `SHH_DF_TYPES` removes tmpfs by default
+- Default pollers to minimal set. Utilize `SHH_FULL` to get full set of metrics
+
+## 0.7.0 - 2014-10-22
+
+- Update some defaults: `SHH_INTERVAL=60s` & `SHH_LIBRATO_BATCH_TIMEOUT=10s`
+
+## 0.6.4 - 2014-10-22
 
 - Bugfix
 
-## 0.6.3 - 2013-10-22
+## 0.6.3 - 2014-10-22
 
 - SHH_LIBRATO_BATCH_SIZE defaults to 500
 - SHH_LIBRATO_NETWORK_TIMEOUT defaults to 5s
 - SHH_LIBRATO_BATCH_TIMEOUT defaults to SHH_INTERVAL
 - Librato Outputter timeout doesn't start until there is a measurement
 
-## 0.6.2 - 2013-10-22
+## 0.6.2 - 2014-10-22
 
 - Report to librato how many guages / counters are being reported in a batch
 
-## 0.6.1 - 2013-10-22
+## 0.6.1 - 2014-10-22
 
 - `$SHH_LISTEN_TIMEOUT` now controls the timeout on the socket.
 - Librato outlet now reports a `User-Agent` header at the request of Librato.
 - Timeout errors to the librato api are now reported.
 - Better handling of ntpdate sub process error messages.
 
-## 0.6.0 - 2013-10-20
+## 0.6.0 - 2014-10-20
 
 - shh-value cli tool for interacting with the unix socket.
 - Latest version of Go (1.3.3) used.
