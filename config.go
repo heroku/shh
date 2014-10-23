@@ -78,7 +78,7 @@ func GetConfig() (config Config) {
 	config.ListenTimeout = GetEnvWithDefaultDuration("SHH_LISTEN_TIMEOUT", config.Interval.String())                         // Listen Poller Socket Timeout
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                                     // Devices to poll
 	config.NtpdateServers = GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", DEFAULT_NTPDATE_SERVERS)                         // NTP Servers
-	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", false)                                                   // Whether to only report aggregate CPU usage
+	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", DEFAULT_CPU_AGGR)                                        // Whether to only report aggregate CPU usage
 	config.LibratoUrl = GetEnvWithDefault("SHH_LIBRATO_URL", DEFAULT_LIBRATO_URL)                                            // The Librato API End-Point
 	config.LibratoUser = GetEnvWithDefault("SHH_LIBRATO_USER", DEFAULT_EMPTY_STRING)                                         // The Librato API User
 	config.LibratoToken = GetEnvWithDefault("SHH_LIBRATO_TOKEN", DEFAULT_EMPTY_STRING)                                       // The Librato API TOken
