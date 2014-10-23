@@ -131,19 +131,21 @@ started by the system:
 
 ### Memory (mem)
 
-The `mem` poller uses `/proc/meminfo` which exposes a variable number of 
-stats depending on the kernel version and configuration. By default, `shh` will report
-a subset of these metrics. Adding `mem` to `SHH__FULL` will tell `shh` to report
-all metrics though. `shh` reports all of the metrics in bytes. See [man 5 proc][proc5]
-for more information on available stats.
+The `mem` poller uses `/proc/meminfo` which exposes a variable number of
+measurements depending on the kernel version and configuration. By default,
+`shh` will report a subset of these. Adding `mem` to `SHH__FULL` will tell
+`shh` to report all of them. `shh` reports all measurements in bytes. See [man
+5 proc][proc5] for more information on available data.
 
 The template for the emitted metrics are:
 
 * `<prefix>.mem.<fixup-name>`
 
-where `<fixup-name>` is a lowercased version of the stat with '(' and ')' replaced by '.', and '.' replaced by '_'.
+where `<fixup-name>` is a lowercased version of the stat with '(' and ')'
+replaced by '.', and '.' replaced by '_'.
 
-In addition, if the environment variable `SHH_PERCENTAGES` includes `mem` and/or `swap`:
+In addition, if the environment variable `SHH_PERCENTAGES` includes `mem`
+and/or `swap`:
 
 * `<prefix>.memtotal.perc`
 * `<prefix>.swaptotal.perc`
