@@ -84,13 +84,14 @@ func (out *Librato) Start() {
 // after receiving it's first measurement or it is full.
 func (out *Librato) readyBatch() []Measurement {
 	batch := make([]Measurement, 0, out.BatchSize)
-	var timer *time.Timer // "empty" timer so we don't timeout before we have any measurements
+	timer := new(time.Timer) // "empty" timer so we don't timeout before we have any measurements
 	for {
 		select {
 		case measurement := <-out.measurements:
 			batch = append(batch, measurement)
 			if len(batch) == 1 { // We got a measurement, so we want to start the timer.
 				timer = time.NewTimer(out.Timeout)
+				defer timer.Stop()
 			}
 			if len(batch) == cap(batch) {
 				return batch
