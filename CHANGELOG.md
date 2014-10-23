@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.6.3 - 2013-10-22
+
+- SHH_LIBRATO_BATCH_SIZE defaults to 500
+- SHH_LIBRATO_NETWORK_TIMEOUT defaults to 5s
+- SHH_LIBRATO_BATCH_TIMEOUT defaults to SHH_INTERVAL
+- Librato Outputter timeout doesn't start until there is a measurement
+
 ## 0.6.2 - 2013-10-22
 
 - Report to librato how many guages / counters are being reported in a batch
