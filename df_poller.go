@@ -90,7 +90,7 @@ func (poller Df) mountpointChannel() <-chan string {
 			device := fields[0]
 
 			if SliceContainsString(poller.Types, fsType) {
-				if !poller.Loop && strings.Contains(device, "/loop") {
+				if !poller.Loop && strings.HasPrefix(device, "/dev/loop") {
 					continue
 				}
 
