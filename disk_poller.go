@@ -37,19 +37,19 @@ func (poller Disk) Poll(tick time.Time) {
 		}
 
 		fields := strings.Fields(string(statBytes))
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "read", "requests"}, Atouint64(fields[0]), Requests}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "read", "merges"}, Atouint64(fields[1]), Requests}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "read", "bytes"}, Atouint64(fields[2]) * SECTOR_SIZE, Bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "read", "ticks"}, Atouint64(fields[3]), MilliSeconds}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "read", "requests"}, Atouint64(fields[0]), Requests}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "read", "merges"}, Atouint64(fields[1]), Requests}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "read", "bytes"}, Atouint64(fields[2]) * SECTOR_SIZE, Bytes}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "read", "ticks"}, Atouint64(fields[3]), MilliSeconds}
 
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "write", "requests"}, Atouint64(fields[4]), Requests}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "write", "merges"}, Atouint64(fields[5]), Requests}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "write", "bytes"}, Atouint64(fields[6]) * SECTOR_SIZE, Bytes}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "write", "ticks"}, Atouint64(fields[7]), MilliSeconds}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "write", "requests"}, Atouint64(fields[4]), Requests}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "write", "merges"}, Atouint64(fields[5]), Requests}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "write", "bytes"}, Atouint64(fields[6]) * SECTOR_SIZE, Bytes}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "write", "ticks"}, Atouint64(fields[7]), MilliSeconds}
 
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "in_flight", "requests"}, Atouint64(fields[8]), Requests}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "io", "ticks"}, Atouint64(fields[9]), MilliSeconds}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{device, "queue", "time"}, Atouint64(fields[10]), MilliSeconds}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "io", "ticks"}, Atouint64(fields[9]), MilliSeconds}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{device, "queue", "time"}, Atouint64(fields[10]), MilliSeconds}
 	}
 
 }
