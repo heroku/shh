@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.8.1 - 2014-10-24
+
+### Changed (Breaking)
+
+- Some disk poller stats were incorrectly being reported as Gauges.
+
 ## 0.8.0 - 2014-10-22
 
 ### Added
