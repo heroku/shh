@@ -32,6 +32,7 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_LIBRATO_BATCH_SIZE` | int | The max number of metrics to submit in a single request | 500 |
 | `SHH_LIBRATO_BATCH_TIMEOUT` | duration | The max time metrics will sit un-delivered | `SHH_INTERVAL` |
 | `SHH_LIBRATO_NETWORK_TIMEOUT` | duration | Timeout til connect (will retry). And timeout to first header (will assume successful) | 5s |
+| `SHH_LIBRATO_ROUND` | bool | Should shh round times to the nearest interval? | true |
 | `SHH_CARBON_HOST` | string | Where the Carbon Outputter sends it's data | |
 | `SHH_SOCKSTAT_PROTOS` | list of string | Protocols to report sockstats about | TCP,UDP,TCP6,UDP6 |
 | `SHH_STATSD_HOST` | string | Where the Statsd Outputter sends it's data | |

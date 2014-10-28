@@ -50,6 +50,8 @@ type Librato struct {
 	source       string
 	client       *http.Client
 	userAgent    string
+	interval     time.Duration
+	round        bool
 }
 
 func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
@@ -63,6 +65,8 @@ func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librat
 		User:         config.LibratoUser,
 		Token:        config.LibratoToken,
 		Url:          config.LibratoUrl,
+		interval:     config.Interval,
+		round:        config.LibratoRound,
 		client: &http.Client{
 			Transport: &http.Transport{
 				ResponseHeaderTimeout: config.LibratoNetworkTimeout,
@@ -116,30 +120,46 @@ func (out *Librato) batch() {
 	}
 }
 
+func (out *Librato) appendLibratoMetric(counters, gauges []LibratoMetric, mm Measurement) ([]LibratoMetric, []LibratoMetric) {
+	var t int64
+	attrs := LibratoMetricAttrs{UnitName: mm.Unit().Name(), UnitAbbr: mm.Unit().Abbr()}
+
+	if out.round {
+		t = mm.Time().Round(out.interval).Unix()
+	} else {
+		t = mm.Time().Unix()
+	}
+
+	libratoMetric := LibratoMetric{mm.Name(out.prefix), mm.Value(), t, out.source, attrs}
+
+	switch mm.Type() {
+	case CounterType:
+		counters = append(counters, libratoMetric)
+	case GaugeType, FloatGaugeType:
+		gauges = append(gauges, libratoMetric)
+	}
+	return counters, gauges
+}
+
 func (out *Librato) deliver() {
 	ctx := slog.Context{"fn": "prepare", "outputter": "librato"}
 	for batch := range out.batches {
 		gauges := make([]LibratoMetric, 0)
 		counters := make([]LibratoMetric, 0)
 		for _, mm := range batch {
-			attrs := LibratoMetricAttrs{UnitName: mm.Unit().Name(), UnitAbbr: mm.Unit().Abbr()}
-			libratoMetric := LibratoMetric{mm.Name(out.prefix), mm.Value(), mm.Time().Unix(), out.source, attrs}
-			switch mm.Type() {
-			case CounterType:
-				counters = append(counters, libratoMetric)
-			case GaugeType, FloatGaugeType:
-				gauges = append(gauges, libratoMetric)
-			}
+			counters, gauges = out.appendLibratoMetric(counters, gauges, mm)
 		}
 
-		attrs := LibratoMetricAttrs{UnitName: Metrics.Name(), UnitAbbr: Metrics.Abbr()}
-		gaugeStat := GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "guage", "size"}, uint64(len(gauges) + 2), Metrics}
-		libratoMetric := LibratoMetric{gaugeStat.Name(out.prefix), gaugeStat.Value(), gaugeStat.Time().Unix(), out.source, attrs}
-		gauges = append(gauges, libratoMetric)
-
-		counterStat := GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "counter", "size"}, uint64(len(counters)), Metrics}
-		libratoMetric = LibratoMetric{counterStat.Name(out.prefix), counterStat.Value(), counterStat.Time().Unix(), out.source, attrs}
-		gauges = append(gauges, libratoMetric)
+		counters, gauges = out.appendLibratoMetric(
+			counters,
+			gauges,
+			GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "guage", "size"}, uint64(len(gauges) + 2), Metrics},
+		)
+		counters, gauges = out.appendLibratoMetric(
+			counters,
+			gauges,
+			GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "counter", "size"}, uint64(len(counters)), Metrics},
+		)
 
 		payload := LibratoPostBody{gauges, counters}
 		j, err := json.Marshal(payload)

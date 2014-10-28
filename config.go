@@ -28,6 +28,7 @@ const (
 	DEFAULT_LIBRATO_BATCH_SIZE      = 500
 	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"
 	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"
+	DEFAULT_LIBRATO_ROUND           = true
 	DEFAULT_LISTEN_ADDR             = "unix,#shh"
 	DEFAULT_DISK_FILTER             = "(xv|s)d"
 )
@@ -58,6 +59,7 @@ type Config struct {
 	LibratoBatchSize      int
 	LibratoBatchTimeout   time.Duration
 	LibratoNetworkTimeout time.Duration
+	LibratoRound          bool
 	CarbonHost            string
 	SockStatProtos        []string
 	StatsdHost            string
@@ -90,6 +92,7 @@ func GetConfig() (config Config) {
 	config.LibratoBatchSize = GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", DEFAULT_LIBRATO_BATCH_SIZE)                     // The max number of metrics to submit in a single request
 	config.LibratoBatchTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", DEFAULT_LIBRATO_BATCH_TIMEOUT)       // The max time metrics will sit un-delivered
 	config.LibratoNetworkTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_NETWORK_TIMEOUT", DEFAULT_LIBRATO_NETWORK_TIMEOUT) // The maximum time to wait for Librato to respond (for both dial and first header)
+	config.LibratoRound = GetEnvWithDefaultBool("SHH_LIBRATO_ROUND", DEFAULT_LIBRATO_ROUND)                                  // Should we round measurement times to the nearest Interval when submitting to Librato
 	config.CarbonHost = GetEnvWithDefault("SHH_CARBON_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Carbon Outputter sends it's data
 	config.SockStatProtos = GetEnvWithDefaultStrings("SHH_SOCKSTAT_PROTOS", DEFAULT_SOCKSTAT_PROTOS)                         // Protocols to report sockstats about
 	config.StatsdHost = GetEnvWithDefault("SHH_STATSD_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Statsd Outputter sends it's data
