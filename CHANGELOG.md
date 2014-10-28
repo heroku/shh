@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.8.2 - 2013-10-28
+
+- `SHH_LIBRATO_ROUND`: true - round measurement times to nearest interval during submission
+
 ## 0.8.1 - 2014-10-24
 
 ### Changed (Breaking)
