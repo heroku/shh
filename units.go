@@ -18,12 +18,15 @@ var (
 	INodes       = Unit{"INodes", "inodes"}
 	Files        = Unit{"Files", "files"}
 	Processes    = Unit{"Processes", "procs"}
+	Threads      = Unit{"Threads", "threads"}
 	Connections  = Unit{"Connections", "conns"}
 	Sockets      = Unit{"Sockets", "socks"}
 	Avg          = Unit{"Avg", "avg"}
 	Objects      = Unit{"Objects", "objs"}
 	Routines     = Unit{"Routines", "routines"}
 	Metrics      = Unit{"Metrics", "metrics"}
+	Faults       = Unit{"Faults", "faults"}
+	Ops          = Unit{"Operations", "ops"}
 )
 
 func (u Unit) Name() string {

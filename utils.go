@@ -40,7 +40,7 @@ func Fields(line string) []string {
 			insideParens = true
 		case ')':
 			insideParens = false
-		case ';', ':', ' ', '\n':
+		case ';', ':', ' ', '\t', '\n':
 			return insideParens == false
 		}
 		return false
@@ -168,6 +168,16 @@ func GetEnvWithDefaultStrings(env string, def string) []string {
 		sort.Strings(tmp)
 	}
 	return tmp
+}
+
+// Returns a *regexp.Regexp compiled from the env or default
+func GetEnvWithDefaultRegexp(env string, def string) *regexp.Regexp {
+	env = GetEnvWithDefault(env, def)
+	re, err := regexp.Compile(env)
+	if err != nil {
+		FatalError(slog.Context{"fn": "GetEnvWithDefaultRegexp", "env": env, "def": def}, err, "not a valid regex")
+	}
+	return re
 }
 
 // Small wrapper to handle errors on open
