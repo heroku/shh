@@ -89,7 +89,8 @@ func (poller Procs) Poll(tick time.Time) {
 			paging++
 		}
 
-		if poller.regex.MatchString(pInfo.name) {
+		// Ignore processes w/o names, a process may have existed while polling data so we may not have a name
+		if pInfo.name != "" && poller.regex.MatchString(pInfo.name) {
 			proc := processes[pInfo.name]
 
 			proc.numProcs += 1
