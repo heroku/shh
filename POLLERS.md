@@ -189,7 +189,8 @@ environment variable, and should be a fully-qualified domain name.
 
 ### Processes (processes)
 
-The processes reporter reports metrics regarding the count of processes in particular process states. It uses `/proc/<pid>/stat` to get it's information.
+The processes poller submits measurements of the count of processes in the
+various process states. It uses `/proc/<pid>/stat` to get this information.
 
 * `<prefix>.processes.running.count`
 * `<prefix>.processes.sleeping.count`
@@ -197,6 +198,24 @@ The processes reporter reports metrics regarding the count of processes in parti
 * `<prefix>.processes.zombie.count`
 * `<prefix>.processes.stopped.count`
 * `<prefix>.processes.paging.count`
+
+Additionally the processes poller will match the process names found in
+`/proc/<pid>/stat` to the `SHH_PROCESSES_REGEX` and if the name mates it will
+report these additional measurements:
+
+* `<prefix>.processes.<process name>.procs.count`
+* `<prefix>.processes.<process name>.threads.count`
+* `<prefix>.processes.<process name>.cpu.sys.seconds`
+* `<prefix>.processes.<process name>.cpu.user.seconds`
+* `<prefix>.processes.<process name>.mem.pagefaults.minor.count`
+* `<prefix>.processes.<process name>.mem.pagefaults.major.count`
+* `<prefix>.processes.<process name>.mem.rss.bytes`
+* `<prefix>.processes.<process name>.mem.stacksize.bytes`
+* `<prefix>.processes.<process name>.mem.virtual.bytes`
+* `<prefix>.processes.<process name>.io.read.bytes`
+* `<prefix>.processes.<process name>.io.write.bytes`
+* `<prefix>.processes.<process name>.io.read.ops`
+* `<prefix>.processes.<process name>.io.write.ops`
 
 ### SHH self (self)
 

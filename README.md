@@ -39,7 +39,10 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_STATSD_PROTO` | string | Whether the Stats Outputter uses TCP or UDP | udp |
 | `SHH_SYSLOGNG_SOCKET` | string | The location of the syslog-ng socket | /var/lib/syslog-ng/syslog-ng.ctl |
 | `SHH_FULL | list of strings | Pollers that should report full metrics. `shh` defaults to minimal | "" |
-| `SHH_DISK_FILTER` | regexp | | .* |
+| `SHH_DISK_FILTER` | regexp | Scan devices that match this regex | (xv|s)d |
+| `SHH_PROCESSES_REGEX` | regexp | Scan / extract metrics for processes that match this regex | \A\z |
+| `SHH_TICKS` | int | cpu ticks per second: see `getconf CLK_TCK`. Default is probably correct. (temporary until we use cgo) | 100 |
+| `SHH_PAGE_SIZE` | int | system page size in bytes: see `getconf PAGESIZE`. Default is probably correct. (temporary until we use cgo) | 4096 |
 
 For more information on the duration type, see [time.ParseDuration](http://golang.org/pkg/time/#ParseDuration)
 

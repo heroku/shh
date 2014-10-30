@@ -24,13 +24,16 @@ const (
 	DEFAULT_SOCKSTAT_PROTOS         = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
 	DEFAULT_PERCENTAGES             = ""                                                                 // Default pollers where publishing perc metrics is allowed
 	DEFAULT_FULL                    = ""                                                                 // Default list of pollers who should report full metrycs
-	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"
-	DEFAULT_LIBRATO_BATCH_SIZE      = 500
-	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"
-	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"
-	DEFAULT_LIBRATO_ROUND           = true
-	DEFAULT_LISTEN_ADDR             = "unix,#shh"
-	DEFAULT_DISK_FILTER             = "(xv|s)d"
+	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"                       // Default librato url to submit metrics to
+	DEFAULT_LIBRATO_BATCH_SIZE      = 500                                                                // Default submission count
+	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"                                                               // Default timeout when communicating with Librato
+	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"                                                              // Default submission after
+	DEFAULT_LIBRATO_ROUND           = true                                                               // Round measure_time to interval
+	DEFAULT_LISTEN_ADDR             = "unix,#shh"                                                        // listen on UDS #shh
+	DEFAULT_DISK_FILTER             = "(xv|s)d"                                                          // xvd* and sd* by default
+	DEFAULT_PROCESSES_REGEX         = `\A\z`                                                             // Regex of processes to pull additional stats about
+	DEFAULT_TICKS                   = 100                                                                // Default number of clock ticks per second (see _SC_CLK_TCK)
+	DEFAULT_PAGE_SIZE               = 4096                                                               // Default system page size (see getconf PAGESIZE)
 )
 
 var (
@@ -68,6 +71,9 @@ type Config struct {
 	Start                 time.Time
 	DiskFilter            *regexp.Regexp
 	UserAgent             string
+	ProcessesRegex        *regexp.Regexp
+	Ticks                 int
+	PageSize              int
 }
 
 func GetConfig() (config Config) {
@@ -98,6 +104,9 @@ func GetConfig() (config Config) {
 	config.StatsdHost = GetEnvWithDefault("SHH_STATSD_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Statsd Outputter sends it's data
 	config.StatsdProto = GetEnvWithDefault("SHH_STATSD_PROTO", "udp")                                                        // Whether the Stats Outputter uses TCP or UDP
 	config.SyslogngSocket = GetEnvWithDefault("SHH_SYSLOGNG_SOCKET", DEFAULT_SYSLOGNG_SOCKET)                                // The location of the syslog-ng socket
+	config.ProcessesRegex = GetEnvWithDefaultRegexp("SHH_PROCESSES_REGEX", DEFAULT_PROCESSES_REGEX)                          // The regex to match process names against for collecting additional measurements
+	config.Ticks = GetEnvWithDefaultInt("SHH_TICKS", DEFAULT_TICKS)                                                          // Number of ticks per CPU cycle. It's normally 100, but you can check with `getconf CLK_TCK`
+	config.PageSize = GetEnvWithDefaultInt("SHH_PAGE_SIZE", DEFAULT_PAGE_SIZE)                                               // System Page Size. It's usually 4096, but you can check with `getconf PAGESIZE`
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)

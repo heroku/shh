@@ -26,6 +26,7 @@ func (poller Conntrack) Poll(tick time.Time) {
 	count, err := ioutil.ReadFile(CONNTRACK_DATA)
 	if err != nil {
 		LogError(ctx, err, "reading"+CONNTRACK_DATA)
+		return
 	}
 
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"count"}, Atouint64(string(bytes.TrimSpace(count))), Connections}
