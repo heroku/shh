@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.8.4 - 2013-10-30
+
+- Ignore processes w/o names, likely due to a process exiting between
+    enumerating the directory entries and reading /proc/<pid>/stat
+
 ### 0.8.3 - 2013-10-30
 
 - Generate additional process stats for processes that match
