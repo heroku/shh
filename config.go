@@ -34,6 +34,7 @@ const (
 	DEFAULT_PROCESSES_REGEX         = `\A\z`                                                             // Regex of processes to pull additional stats about
 	DEFAULT_TICKS                   = 100                                                                // Default number of clock ticks per second (see _SC_CLK_TCK)
 	DEFAULT_PAGE_SIZE               = 4096                                                               // Default system page size (see getconf PAGESIZE)
+	DEFAULT_NAGIOS3_METRIC_NAMES    = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
 )
 
 var (
@@ -74,6 +75,7 @@ type Config struct {
 	ProcessesRegex        *regexp.Regexp
 	Ticks                 int
 	PageSize              int
+	Nagios3MetricNames    []string
 }
 
 func GetConfig() (config Config) {
@@ -107,6 +109,7 @@ func GetConfig() (config Config) {
 	config.ProcessesRegex = GetEnvWithDefaultRegexp("SHH_PROCESSES_REGEX", DEFAULT_PROCESSES_REGEX)                          // The regex to match process names against for collecting additional measurements
 	config.Ticks = GetEnvWithDefaultInt("SHH_TICKS", DEFAULT_TICKS)                                                          // Number of ticks per CPU cycle. It's normally 100, but you can check with `getconf CLK_TCK`
 	config.PageSize = GetEnvWithDefaultInt("SHH_PAGE_SIZE", DEFAULT_PAGE_SIZE)                                               // System Page Size. It's usually 4096, but you can check with `getconf PAGESIZE`
+	config.Nagios3MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS3_METRIC_NAMES", DEFAULT_NAGIOS3_METRIC_NAMES)           // Which nagios3stats metrics names should we poll
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)
