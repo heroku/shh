@@ -122,7 +122,7 @@ func (poller Procs) Poll(tick time.Time) {
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "procs", "count"}, proc.numProcs, Processes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "threads", "count"}, proc.numThreads, Threads}
 		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{name, "cpu", "sys", "seconds"}, proc.cpuSys, Seconds}
-		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{name, "cpu", "sys", "seconds"}, proc.cpuUser, Seconds}
+		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{name, "cpu", "user", "seconds"}, proc.cpuUser, Seconds}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "pagefaults", "minor", "count"}, proc.pagefaultsMinor, Faults}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "pagefaults", "major", "count"}, proc.pagefaultsMajor, Faults}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "rss", "byts"}, proc.rss, Bytes}
