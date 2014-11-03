@@ -21,7 +21,6 @@ func NewNagios3StatsPoller(measurements chan<- Measurement, config Config) Nagio
 	}
 }
 
-//FIXME: Timeout
 func (poller Nagios3StatsPoller) Poll(tick time.Time) {
 	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
