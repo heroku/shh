@@ -152,6 +152,23 @@ and/or `swap`:
 
 Which represents the total percentage of in use memory / swap (between 0-1).
 
+### Nagios 3 Stats
+
+`shh` can poll the `nagios3stats` program and report on a range of metrics
+reported by that program. `nagios3stats` must be in the path and executable and
+nagios config/stats files needs to be in the default locations.
+
+By default this poller handles the following measurements:
+
+* `<prefix>.nagios3stats.numservices`
+* `<prefix>.nagios3stats.numhosts`
+* `<prefix>.nagios3stats.avgactsvclat`
+* `<prefix>.nagios3stats.avgacthstlat`
+* `<prefix>.nagios3stats.numhstactchk5m`
+* `<prefix>.nagios3stats.numsvcactchk5m`
+* `<prefix>.nagios3stats.numhstactchk1m`
+* `<prefix>.nagios3stats.numsvcactchk1m`
+
 ### Network Interfaces (nif)
 
 `shh` can report network interface status information as reported by
