@@ -2,16 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.8.5 - 2013-10-31
+### 0.8.6 - 2014-11-03
+
+- `nagios3stats` poller
+
+### 0.8.5 - 2014-10-31
 
 - Fix reporting of per processes sys / user cpu
 
-### 0.8.4 - 2013-10-30
+### 0.8.4 - 2014-10-30
 
 - Ignore processes w/o names, likely due to a process exiting between
     enumerating the directory entries and reading /proc/<pid>/stat
 
-### 0.8.3 - 2013-10-30
+### 0.8.3 - 2014-10-30
 
 - Generate additional process stats for processes that match
     `SHH_PROCESSES_REGEX`.
@@ -22,7 +26,7 @@ All notable changes to this project will be documented in this file.
 - `SHH_PAGE_SIZE`: 4096 - kernel page size. Default should be correct for most
     systems. See `getconf PAGESIZE`. Temporary until we use cgo to get it.
 
-## 0.8.2 - 2013-10-28
+## 0.8.2 - 2014-10-28
 
 - `SHH_LIBRATO_ROUND`: true - round measurement times to nearest interval
     during submission
