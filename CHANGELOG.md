@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+### 0.8.7 - 2014-11-03
+
+- nagios2stats bugfix
+
 ### 0.8.6 - 2014-11-03
 
 - `nagios3stats` poller
