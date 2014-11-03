@@ -2,6 +2,7 @@ package shh
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 	"strings"
 	"time"
@@ -37,8 +38,8 @@ func (poller Nagios3StatsPoller) Poll(tick time.Time) {
 		}
 
 		data := strings.Split(stdout.String(), "\n")
-		if len(data) != len(poller.metricNames) {
-			// some sort of error
+		if (len(data) - 1) != len(poller.metricNames) {
+			LogError(ctx, fmt.Errorf("Length of requested metrics and returned metrics differs: %d vs %d", len(poller.metricNames), len(data)-1), "checking stdout")
 		} else {
 			for i, name := range poller.metricNames {
 				poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{strings.ToLower(name)}, Atouint64(data[i]), Empty}
