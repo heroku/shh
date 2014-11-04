@@ -37,6 +37,7 @@ const (
 	DEFAULT_PAGE_SIZE                = 4096                                                               // Default system page size (see getconf PAGESIZE)
 	DEFAULT_NAGIOS3_METRIC_NAMES     = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
 	DEFAULT_SPLUNK_PEERS_SKIP_VERIFY = false
+	DEFAULT_NETWORK_TIMEOUT          = "5s"
 )
 
 var (
@@ -66,6 +67,7 @@ type Config struct {
 	LibratoBatchTimeout   time.Duration
 	LibratoNetworkTimeout time.Duration
 	LibratoRound          bool
+	NetworkTimeout        time.Duration
 	CarbonHost            string
 	SockStatProtos        []string
 	StatsdHost            string
@@ -116,6 +118,8 @@ func GetConfig() (config Config) {
 	config.Nagios3MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS3_METRIC_NAMES", DEFAULT_NAGIOS3_METRIC_NAMES)           // Which nagios3stats metrics names should we poll
 	config.SplunkPeersSkipVerify = GetEnvWithDefaultBool("SHH_SPLUNK_PEERS_SKIP_VERIFY", DEFAULT_SPLUNK_PEERS_SKIP_VERIFY)   // If SHH_SPLUNK_PEERS_URL is https, do we need to skip verification?
 	config.SplunkPeersUrl = GetEnvWithDefaultURL("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                                  // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
+	config.NetworkTimeout = GetEnvWithDefaultDuration("NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT) // The maximum time to wait for network requests to respond (for both dial and first header when applicable)
+
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)

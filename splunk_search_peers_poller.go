@@ -47,9 +47,9 @@ func NewSplunkSearchPeersPoller(measurements chan<- Measurement, config Config) 
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig:       &tls.Config{InsecureSkipVerify: config.SplunkPeersSkipVerify},
-			ResponseHeaderTimeout: 5 * time.Second,
+			ResponseHeaderTimeout: config.NetworkTimeout,
 			Dial: func(network, address string) (net.Conn, error) {
-				return net.DialTimeout(network, address, 5*time.Second)
+				return net.DialTimeout(network, address, config.NetworkTimeout)
 			},
 		},
 	}
