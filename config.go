@@ -2,6 +2,7 @@ package shh
 
 import (
 	"fmt"
+	"net/url"
 	"regexp"
 	"runtime"
 	"time"
@@ -78,7 +79,7 @@ type Config struct {
 	PageSize              int
 	Nagios3MetricNames    []string
 	SplunkPeersSkipVerify bool
-	SplunkPeersUrl        string
+	SplunkPeersUrl        *url.URL
 }
 
 func GetConfig() (config Config) {
@@ -114,7 +115,7 @@ func GetConfig() (config Config) {
 	config.PageSize = GetEnvWithDefaultInt("SHH_PAGE_SIZE", DEFAULT_PAGE_SIZE)                                               // System Page Size. It's usually 4096, but you can check with `getconf PAGESIZE`
 	config.Nagios3MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS3_METRIC_NAMES", DEFAULT_NAGIOS3_METRIC_NAMES)           // Which nagios3stats metrics names should we poll
 	config.SplunkPeersSkipVerify = GetEnvWithDefaultBool("SHH_SPLUNK_PEERS_SKIP_VERIFY", DEFAULT_SPLUNK_PEERS_SKIP_VERIFY)   // If SHH_SPLUNK_PEERS_URL is https, do we need to skip verification?
-	config.SplunkPeersUrl = GetEnvWithDefault("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                                  // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
+	config.SplunkPeersUrl = GetEnvWithDefaultURL("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                                  // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)

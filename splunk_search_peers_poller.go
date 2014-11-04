@@ -34,16 +34,15 @@ type SplunkSearchPeersPoller struct {
 }
 
 func NewSplunkSearchPeersPoller(measurements chan<- Measurement, config Config) SplunkSearchPeersPoller {
-	parsed, err := url.Parse(config.SplunkPeersUrl)
-	if err != nil {
-		ret := SplunkSearchPeersPoller{}
-		ctx := slog.Context{"poller": ret.Name(), "fn": "NewSplunkSearchPeersPoller"}
-		LogError(ctx, err, "creating splunk search peers poller")
-		return ret
-	}
+	var creds *url.Userinfo
+	var url string
 
-	creds := parsed.User
-	parsed.User = nil
+	// Extract the creds from the URL
+	if config.SplunkPeersUrl != nil {
+		creds = config.SplunkPeersUrl.User
+		config.SplunkPeersUrl.User = nil
+		url = config.SplunkPeersUrl.String()
+	}
 
 	client := &http.Client{
 		Transport: &http.Transport{
@@ -57,13 +56,17 @@ func NewSplunkSearchPeersPoller(measurements chan<- Measurement, config Config) 
 
 	return SplunkSearchPeersPoller{
 		measurements: measurements,
-		url:          parsed.String(),
+		url:          url,
 		credentials:  creds,
 		client:       client,
 	}
 }
 
 func (poller SplunkSearchPeersPoller) Poll(tick time.Time) {
+	if poller.url == "" {
+		return
+	}
+
 	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
 	resp, err := poller.doRequest()

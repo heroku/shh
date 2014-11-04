@@ -2,6 +2,7 @@ package shh
 
 import (
 	"log"
+	"net/url"
 	"os"
 	"regexp"
 	"sort"
@@ -178,6 +179,20 @@ func GetEnvWithDefaultRegexp(env string, def string) *regexp.Regexp {
 		FatalError(slog.Context{"fn": "GetEnvWithDefaultRegexp", "env": env, "def": def}, err, "not a valid regex")
 	}
 	return re
+}
+
+// Returns a *url.URL representing the given env, or nil if empty
+func GetEnvWithDefaultURL(env string, def string) *url.URL {
+	env = GetEnvWithDefault(env, def)
+	if env == "" {
+		return nil
+	}
+
+	parsed, err := url.Parse(env)
+	if err != nil {
+		FatalError(slog.Context{"fn": "GetEnvWithDefaultURL", "env": env, "def": def}, err, "not a valid URL")
+	}
+	return parsed
 }
 
 // Small wrapper to handle errors on open
