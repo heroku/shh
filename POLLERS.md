@@ -131,11 +131,12 @@ started by the system:
 
 ### Memory (mem)
 
-The `mem` poller uses `/proc/meminfo` which exposes a variable number of
-measurements depending on the kernel version and configuration. By default,
-`shh` will report a subset of these. Adding `mem` to `SHH__FULL` will tell
-`shh` to report all of them. `shh` reports all measurements in bytes. See [man
-5 proc][proc5] for more information on available data.
+The `mem` poller uses `/proc/meminfo` which exposes a variable number
+of measurements depending on the kernel version and configuration. By
+default, `shh` will report a subset of these. Adding `mem` to
+`SHH__FULL` will tell `shh` to report all of them. `shh` reports all
+measurements in bytes. See [man 5 proc][proc5] for more information on
+available data.
 
 The template for the emitted metrics are:
 
@@ -154,9 +155,10 @@ Which represents the total percentage of in use memory / swap (between 0-1).
 
 ### Nagios 3 Stats
 
-`shh` can poll the `nagios3stats` program and report on a range of metrics
-reported by that program. `nagios3stats` must be in the path and executable and
-nagios config/stats files needs to be in the default locations.
+`shh` can poll the `nagios3stats` program and report on a range of
+metrics reported by that program. `nagios3stats` must be in the path
+and executable and nagios config/stats files needs to be in the
+default locations.
 
 By default this poller handles the following measurements:
 
@@ -206,8 +208,9 @@ environment variable, and should be a fully-qualified domain name.
 
 ### Processes (processes)
 
-The processes poller submits measurements of the count of processes in the
-various process states. It uses `/proc/<pid>/stat` to get this information.
+The processes poller submits measurements of the count of processes in
+the various process states. It uses `/proc/<pid>/stat` to get this
+information.
 
 * `<prefix>.processes.running.count`
 * `<prefix>.processes.sleeping.count`
@@ -216,9 +219,9 @@ various process states. It uses `/proc/<pid>/stat` to get this information.
 * `<prefix>.processes.stopped.count`
 * `<prefix>.processes.paging.count`
 
-Additionally the processes poller will match the process names found in
-`/proc/<pid>/stat` to the `SHH_PROCESSES_REGEX` and if the name mates it will
-report these additional measurements:
+Additionally the processes poller will match the process names found
+in `/proc/<pid>/stat` to the `SHH_PROCESSES_REGEX` and if the name
+mates it will report these additional measurements:
 
 * `<prefix>.processes.<process name>.procs.count`
 * `<prefix>.processes.<process name>.threads.count`
@@ -236,7 +239,9 @@ report these additional measurements:
 
 ### SHH self (self)
 
-The self poller provides metrics by introspecting itself. The Go programming language makes this rather trivial through the [runtime][goruntime] package.
+The self poller provides metrics by introspecting itself. The Go
+programming language makes this rather trivial through the
+[runtime][goruntime] package.
 
 * `<prefix>.self.memstats.goroutines.num`
 * `<prefix>.self.memstats.general.alloc`
@@ -244,7 +249,8 @@ The self poller provides metrics by introspecting itself. The Go programming lan
 * `<prefix>.self.memstats.heap.alloc.bytes`
 * `<prefix>.self.memstats.heap.inuse.bytes`
 
-If the environment variable `SHH_FULL` contains "self", it also reports the following:
+If the environment variable `SHH_FULL` contains "self", it also
+reports the following:
 
 * `<prefix>.self.measurements.length`
 * `<prefix>.self.memstats.general.sys.bytes`
@@ -268,13 +274,35 @@ If the environment variable `SHH_FULL` contains "self", it also reports the foll
 
 ### Sockstat (sockstat)
 
-The sockstat poller uses that socket statistics found in `/proc/net/sockstat` and `/proc/net/sockstat6`. The collected metrics can be controlled by the comma separated list of protocols specified in the environment variable `SHH_SOCKSTAT_PROTOS`.
+The sockstat poller uses that socket statistics found in
+`/proc/net/sockstat` and `/proc/net/sockstat6`. The collected metrics
+can be controlled by the comma separated list of protocols specified
+in the environment variable `SHH_SOCKSTAT_PROTOS`.
 
 * `<prefix>.sockstat.<protocol>.alloc`
 * `<prefix>.sockstat.<protocol>.inuse`
 * `<prefix>.sockstat.<protocol>.mem`
 * `<prefix>.sockstat.<protocol>.orphan`
 * `<prefix>.sockstat.<protocol>.tw`
+
+### Splunk Distributed Search Peers (splunksearchpeers)
+
+Splunk provides an API endpoint that provides an Atom feed describing
+the state of it's peers, including replication status and whether or
+not they're actually up. This poller uses a single environment variable
+`SHH_SPLUNK_PEERS_URL` which includes the authentication information
+in the URL pointing to the api. This is usually something like:
+
+`https://user:pass@localhost:8089/services/search/distributed/peers?count=-1`
+
+If the URL is an HTTPS endpoint, setting `SHH_SPLUNK_PEERS_SKIP_VERIFY=true`
+may be required.
+
+* `<prefix>.splunksearchpeers.down`
+* `<prefix>.splunksearchpeers.up`
+* `<prefix>.splunksearchpeers.replication.failure`
+* `<prefix>.splunksearchpeers.replication.success`
+* `<prefix>.splunksearchpeers.total`
 
 ## Writing your own poller
 

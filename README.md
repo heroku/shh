@@ -44,6 +44,8 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_TICKS` | int | cpu ticks per second: see `getconf CLK_TCK`. Default is probably correct. (temporary until we use cgo) | 100 |
 | `SHH_PAGE_SIZE` | int | system page size in bytes: see `getconf PAGESIZE`. Default is probably correct. (temporary until we use cgo) | 4096 |
 | `SHH_NAGIOS3_METRIC_NAMES` | list of strings | list of nagios 3 metric names to report stats on, see `nagios3stats -h` | NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M |
+| `SHH_SPLUNK_PEERS_SKIP_VERIFY` | bool | whether or not to skip verification of HTTPS cert on splunk peers endpoint | false |
+| `SHH_SPLUNK_PEERS_URL` | string | URL of splunk distributed peers status (e.g. https://user:pass@localhost:8089/services/search/distributed/peers?count=-1 | |
 
 For more information on the duration type, see [time.ParseDuration](http://golang.org/pkg/time/#ParseDuration)
 

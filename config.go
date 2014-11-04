@@ -8,33 +8,34 @@ import (
 )
 
 const (
-	VERSION                         = "0.8.7"
-	DEFAULT_EMPTY_STRING            = ""
-	DEFAULT_INTERVAL                = "60s"                                                              // Default tick interval for pollers
-	DEFAULT_OUTPUTTER               = "stdoutl2metder"                                                   // Default outputter
-	DEFAULT_POLLERS                 = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
-	DEFAULT_PROFILE_PORT            = "0"                                                                // Default profile port, 0 disables
-	DEFAULT_DF_TYPES                = "btrfs,ext3,ext4,xfs"                                              // Default fs types to report df for
-	DEFAULT_DF_LOOP                 = false                                                              // Default to not reporting df metrics for loop back filesystems
-	DEFAULT_NIF_DEVICES             = "eth0,lo"                                                          // Default interfaces to report stats for
-	DEFAULT_NTPDATE_SERVERS         = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
-	DEFAULT_CPU_AGGR                = true                                                               // Default whether to only report aggregate CPU
-	DEFAULT_SYSLOGNG_SOCKET         = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
-	DEFAULT_SELF_POLLER_MODE        = "minimal"                                                          // Default to only minimal set of self metrics
-	DEFAULT_SOCKSTAT_PROTOS         = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
-	DEFAULT_PERCENTAGES             = ""                                                                 // Default pollers where publishing perc metrics is allowed
-	DEFAULT_FULL                    = ""                                                                 // Default list of pollers who should report full metrycs
-	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"                       // Default librato url to submit metrics to
-	DEFAULT_LIBRATO_BATCH_SIZE      = 500                                                                // Default submission count
-	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"                                                               // Default timeout when communicating with Librato
-	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"                                                              // Default submission after
-	DEFAULT_LIBRATO_ROUND           = true                                                               // Round measure_time to interval
-	DEFAULT_LISTEN_ADDR             = "unix,#shh"                                                        // listen on UDS #shh
-	DEFAULT_DISK_FILTER             = "(xv|s)d"                                                          // xvd* and sd* by default
-	DEFAULT_PROCESSES_REGEX         = `\A\z`                                                             // Regex of processes to pull additional stats about
-	DEFAULT_TICKS                   = 100                                                                // Default number of clock ticks per second (see _SC_CLK_TCK)
-	DEFAULT_PAGE_SIZE               = 4096                                                               // Default system page size (see getconf PAGESIZE)
-	DEFAULT_NAGIOS3_METRIC_NAMES    = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
+	VERSION                          = "0.8.7"
+	DEFAULT_EMPTY_STRING             = ""
+	DEFAULT_INTERVAL                 = "60s"                                                              // Default tick interval for pollers
+	DEFAULT_OUTPUTTER                = "stdoutl2metder"                                                   // Default outputter
+	DEFAULT_POLLERS                  = "conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self" // Default pollers
+	DEFAULT_PROFILE_PORT             = "0"                                                                // Default profile port, 0 disables
+	DEFAULT_DF_TYPES                 = "btrfs,ext3,ext4,xfs"                                              // Default fs types to report df for
+	DEFAULT_DF_LOOP                  = false                                                              // Default to not reporting df metrics for loop back filesystems
+	DEFAULT_NIF_DEVICES              = "eth0,lo"                                                          // Default interfaces to report stats for
+	DEFAULT_NTPDATE_SERVERS          = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
+	DEFAULT_CPU_AGGR                 = true                                                               // Default whether to only report aggregate CPU
+	DEFAULT_SYSLOGNG_SOCKET          = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
+	DEFAULT_SELF_POLLER_MODE         = "minimal"                                                          // Default to only minimal set of self metrics
+	DEFAULT_SOCKSTAT_PROTOS          = "TCP,UDP,TCP6,UDP6"                                                // Default protocols to report sockstats on
+	DEFAULT_PERCENTAGES              = ""                                                                 // Default pollers where publishing perc metrics is allowed
+	DEFAULT_FULL                     = ""                                                                 // Default list of pollers who should report full metrycs
+	DEFAULT_LIBRATO_URL              = "https://metrics-api.librato.com/v1/metrics"                       // Default librato url to submit metrics to
+	DEFAULT_LIBRATO_BATCH_SIZE       = 500                                                                // Default submission count
+	DEFAULT_LIBRATO_NETWORK_TIMEOUT  = "5s"                                                               // Default timeout when communicating with Librato
+	DEFAULT_LIBRATO_BATCH_TIMEOUT    = "10s"                                                              // Default submission after
+	DEFAULT_LIBRATO_ROUND            = true                                                               // Round measure_time to interval
+	DEFAULT_LISTEN_ADDR              = "unix,#shh"                                                        // listen on UDS #shh
+	DEFAULT_DISK_FILTER              = "(xv|s)d"                                                          // xvd* and sd* by default
+	DEFAULT_PROCESSES_REGEX          = `\A\z`                                                             // Regex of processes to pull additional stats about
+	DEFAULT_TICKS                    = 100                                                                // Default number of clock ticks per second (see _SC_CLK_TCK)
+	DEFAULT_PAGE_SIZE                = 4096                                                               // Default system page size (see getconf PAGESIZE)
+	DEFAULT_NAGIOS3_METRIC_NAMES     = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
+	DEFAULT_SPLUNK_PEERS_SKIP_VERIFY = false
 )
 
 var (
@@ -76,6 +77,8 @@ type Config struct {
 	Ticks                 int
 	PageSize              int
 	Nagios3MetricNames    []string
+	SplunkPeersSkipVerify bool
+	SplunkPeersUrl        string
 }
 
 func GetConfig() (config Config) {
@@ -110,6 +113,8 @@ func GetConfig() (config Config) {
 	config.Ticks = GetEnvWithDefaultInt("SHH_TICKS", DEFAULT_TICKS)                                                          // Number of ticks per CPU cycle. It's normally 100, but you can check with `getconf CLK_TCK`
 	config.PageSize = GetEnvWithDefaultInt("SHH_PAGE_SIZE", DEFAULT_PAGE_SIZE)                                               // System Page Size. It's usually 4096, but you can check with `getconf PAGESIZE`
 	config.Nagios3MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS3_METRIC_NAMES", DEFAULT_NAGIOS3_METRIC_NAMES)           // Which nagios3stats metrics names should we poll
+	config.SplunkPeersSkipVerify = GetEnvWithDefaultBool("SHH_SPLUNK_PEERS_SKIP_VERIFY", DEFAULT_SPLUNK_PEERS_SKIP_VERIFY)   // If SHH_SPLUNK_PEERS_URL is https, do we need to skip verification?
+	config.SplunkPeersUrl = GetEnvWithDefault("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                                  // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
 	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)

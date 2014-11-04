@@ -27,6 +27,7 @@ var (
 	Metrics      = Unit{"Metrics", "metrics"}
 	Faults       = Unit{"Faults", "faults"}
 	Ops          = Unit{"Operations", "ops"}
+	Peers        = Unit{"Peers", "peers"}
 )
 
 func (u Unit) Name() string {
