@@ -130,5 +130,3 @@ func (poller SplunkSearchPeersPoller) Name() string {
 }
 
 func (poller SplunkSearchPeersPoller) Exit() {}
-
-// https://monitor:4275af8d68720980bbb3493ddc940529@localhost:8089/services/search/distributed/peers
