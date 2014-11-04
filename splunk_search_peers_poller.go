@@ -2,15 +2,14 @@ package shh
 
 import (
 	"crypto/tls"
-	"fmt"
 	"encoding/xml"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/heroku/slog"
-
 )
 
 type SplunkPeers struct {
@@ -18,20 +17,20 @@ type SplunkPeers struct {
 }
 
 type SplunkPeerEntry struct {
-	Title string `xml:"title"`
-	Keys []SplunkPeerKey `xml:"content>dict>key"`
+	Title string          `xml:"title"`
+	Keys  []SplunkPeerKey `xml:"content>dict>key"`
 }
 
 type SplunkPeerKey struct {
-	Name string `xml:"name,attr"`
+	Name  string `xml:"name,attr"`
 	Value string `xml:",chardata"`
 }
 
 type SplunkSearchPeersPoller struct {
 	measurements chan<- Measurement
-	url string
-	credentials *url.Userinfo
-	client *http.Client
+	url          string
+	credentials  *url.Userinfo
+	client       *http.Client
 }
 
 func NewSplunkSearchPeersPoller(measurements chan<- Measurement, config Config) SplunkSearchPeersPoller {
@@ -47,20 +46,20 @@ func NewSplunkSearchPeersPoller(measurements chan<- Measurement, config Config) 
 	parsed.User = nil
 
 	client := &http.Client{
-	Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: config.SplunkPeersSkipVerify},
-		ResponseHeaderTimeout: 5 * time.Second,
-		Dial: func(network, address string) (net.Conn, error) {
-				return net.DialTimeout(network, address, 5 * time.Second)
+		Transport: &http.Transport{
+			TLSClientConfig:       &tls.Config{InsecureSkipVerify: config.SplunkPeersSkipVerify},
+			ResponseHeaderTimeout: 5 * time.Second,
+			Dial: func(network, address string) (net.Conn, error) {
+				return net.DialTimeout(network, address, 5*time.Second)
 			},
 		},
 	}
 
 	return SplunkSearchPeersPoller{
 		measurements: measurements,
-	  url:  parsed.String(),
-	  credentials: creds,
-  	client: client,
+		url:          parsed.String(),
+		credentials:  creds,
+		client:       client,
 	}
 }
 
@@ -104,7 +103,6 @@ func (poller SplunkSearchPeersPoller) Poll(tick time.Time) {
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"replication", "failed"}, stats["replicationStatus:Failed"], Peers}
 }
 
-
 func (poller SplunkSearchPeersPoller) doRequest() (*http.Response, error) {
 	req, err := http.NewRequest("GET", poller.url, nil)
 	if err != nil {
@@ -132,16 +130,5 @@ func (poller SplunkSearchPeersPoller) Name() string {
 }
 
 func (poller SplunkSearchPeersPoller) Exit() {}
-
-
-
-
-
-
-
-
-
-
-
 
 // https://monitor:4275af8d68720980bbb3493ddc940529@localhost:8089/services/search/distributed/peers
