@@ -53,7 +53,7 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 
 	config := GetConfig()
 	config.LibratoUrl, _ = url.Parse(server.URL)
-	config.LibratoNetworkTimeout = 1 * time.Second
+	config.NetworkTimeout = 1 * time.Second
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
