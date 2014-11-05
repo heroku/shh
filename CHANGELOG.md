@@ -2,38 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
-### 0.8.7 - 2014-11-03
+## 0.8.8 - pending
+
+### Added
+
+- Splunk Search Peers poller (splunksearchpeers), which adds the
+  ability to monitor Splunk search clusters. See the
+  [docs](POLLERS.md) for more info.
+
+### Changed (Breaking)
+
+- Removed LibratoNetworkTimeout, use NetworkTimeout
+  (`SHH_NETWORK_TIMEOUT`) instead.
+
+## 0.8.7 - 2014-11-03
 
 - nagios2stats bugfix
 
-### 0.8.6 - 2014-11-03
+## 0.8.6 - 2014-11-03
 
 - `nagios3stats` poller
 
-### 0.8.5 - 2014-10-31
+## 0.8.5 - 2014-10-31
 
 - Fix reporting of per processes sys / user cpu
 
-### 0.8.4 - 2014-10-30
+## 0.8.4 - 2014-10-30
 
 - Ignore processes w/o names, likely due to a process exiting between
     enumerating the directory entries and reading /proc/<pid>/stat
 
-### 0.8.3 - 2014-10-30
+## 0.8.3 - 2014-10-30
 
 - Generate additional process stats for processes that match
     `SHH_PROCESSES_REGEX`.
 - `SHH_PROCESSES_REGEX`: \A\z - Regex of process names to poll and extra
     additional measurements for
-- `SHH_TICKS`: 100 - cpu ticks per second. Default should be correct for most
-    systems. see `getconf CLK_TCK`. Temporary until we use cgo to get it
-- `SHH_PAGE_SIZE`: 4096 - kernel page size. Default should be correct for most
-    systems. See `getconf PAGESIZE`. Temporary until we use cgo to get it.
+- `SHH_TICKS`: 100 - cpu ticks per second. Default should be correct
+    for most systems. see `getconf CLK_TCK`. Temporary until we use
+    cgo to get it
+- `SHH_PAGE_SIZE`: 4096 - kernel page size. Default should be correct
+    for most systems. See `getconf PAGESIZE`. Temporary until we use
+    cgo to get it.
 
 ## 0.8.2 - 2014-10-28
 
-- `SHH_LIBRATO_ROUND`: true - round measurement times to nearest interval
-    during submission
+- `SHH_LIBRATO_ROUND`: true - round measurement times to nearest
+    interval during submission
 
 ## 0.8.1 - 2014-10-24
 

@@ -221,7 +221,7 @@ information.
 
 Additionally the processes poller will match the process names found
 in `/proc/<pid>/stat` to the `SHH_PROCESSES_REGEX` and if the name
-mates it will report these additional measurements:
+matches it will report these additional measurements:
 
 * `<prefix>.processes.<process name>.procs.count`
 * `<prefix>.processes.<process name>.threads.count`

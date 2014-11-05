@@ -3,6 +3,8 @@ package shh
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"os"
 	"testing"
 	"time"
 )
@@ -50,7 +52,7 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	defer server.Close()
 
 	config := GetConfig()
-	config.LibratoUrl = server.URL
+	config.LibratoUrl, _ = url.Parse(server.URL)
 	config.LibratoNetworkTimeout = 1 * time.Second
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
@@ -69,7 +71,7 @@ func TestLibrato_ServerErrorBackoff(t *testing.T) {
 	defer server.Close()
 
 	config := GetConfig()
-	config.LibratoUrl = server.URL
+	config.LibratoUrl, _ = url.Parse(server.URL)
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
@@ -87,7 +89,7 @@ func TestLibrato_IndefiniteBackoff(t *testing.T) {
 	defer server.Close()
 
 	config := GetConfig()
-	config.LibratoUrl = server.URL
+	config.LibratoUrl, _ = url.Parse(server.URL)
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
@@ -105,7 +107,7 @@ func TestLibrato_ClientError(t *testing.T) {
 	defer server.Close()
 
 	config := GetConfig()
-	config.LibratoUrl = server.URL
+	config.LibratoUrl, _ = url.Parse(server.URL)
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
@@ -123,7 +125,7 @@ func TestLibrato_UserAgent(t *testing.T) {
 	defer server.Close()
 
 	config := GetConfig()
-	config.LibratoUrl = server.URL
+	config.LibratoUrl, _ = url.Parse(server.URL)
 	config.LibratoUser = "user"
 	config.LibratoToken = "token"
 
@@ -141,5 +143,51 @@ func TestLibrato_UserAgent(t *testing.T) {
 
 	if h[0] != config.UserAgent {
 		t.Errorf("Incorrect User-Agent Header value")
+	}
+}
+
+func TestLibrato_UserPassFromEnv(t *testing.T) {
+	os.Setenv("SHH_LIBRATO_USER", "foo")
+	os.Setenv("SHH_LIBRATO_TOKEN", "bar")
+	os.Setenv("SHH_LIBRATO_URL", "http://baz:quux@librato.com")
+
+	config := GetConfig()
+
+	measurements := make(chan Measurement, 10)
+	librato := NewLibratoOutputter(measurements, config)
+
+	if librato.Url != "http://librato.com" {
+		t.Errorf("Incorrect url for librato. Found: '%s', expected: '%s'", librato.Url, "http://librato.com")
+	}
+
+	if librato.User != "foo" {
+		t.Errorf("Incorrect user for librato. Found: '%s', expected: '%s'", librato.User, "foo")
+	}
+
+	if librato.Token != "bar" {
+		t.Errorf("Incorrect token for librato. Found: '%s', expected: '%s'", librato.Token, "bar")
+	}
+}
+
+func TestLibrato_UserPassFromURL(t *testing.T) {
+	os.Setenv("SHH_LIBRATO_USER", "")
+	os.Setenv("SHH_LIBRATO_TOKEN", "")
+	os.Setenv("SHH_LIBRATO_URL", "http://baz:quux@librato.com")
+
+	config := GetConfig()
+
+	measurements := make(chan Measurement, 10)
+	librato := NewLibratoOutputter(measurements, config)
+
+	if librato.Url != "http://librato.com" {
+		t.Errorf("Incorrect url for librato. Found: '%s', expected: '%s'", librato.Url, "http://librato.com")
+	}
+
+	if librato.User != "baz" {
+		t.Errorf("Incorrect user for librato. Found: '%s', expected: '%s'", librato.User, "baz")
+	}
+
+	if librato.Token != "quux" {
+		t.Errorf("Incorrect token for librato. Found: '%s', expected: '%s'", librato.Token, "quux")
 	}
 }

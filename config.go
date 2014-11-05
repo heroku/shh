@@ -27,7 +27,6 @@ const (
 	DEFAULT_FULL                     = ""                                                                 // Default list of pollers who should report full metrycs
 	DEFAULT_LIBRATO_URL              = "https://metrics-api.librato.com/v1/metrics"                       // Default librato url to submit metrics to
 	DEFAULT_LIBRATO_BATCH_SIZE       = 500                                                                // Default submission count
-	DEFAULT_LIBRATO_NETWORK_TIMEOUT  = "5s"                                                               // Default timeout when communicating with Librato
 	DEFAULT_LIBRATO_BATCH_TIMEOUT    = "10s"                                                              // Default submission after
 	DEFAULT_LIBRATO_ROUND            = true                                                               // Round measure_time to interval
 	DEFAULT_LISTEN_ADDR              = "unix,#shh"                                                        // listen on UDS #shh
@@ -60,12 +59,11 @@ type Config struct {
 	NifDevices            []string
 	NtpdateServers        []string
 	CpuOnlyAggregate      bool
-	LibratoUrl            string
+	LibratoUrl            *url.URL
 	LibratoUser           string
 	LibratoToken          string
 	LibratoBatchSize      int
 	LibratoBatchTimeout   time.Duration
-	LibratoNetworkTimeout time.Duration
 	LibratoRound          bool
 	NetworkTimeout        time.Duration
 	CarbonHost            string
@@ -100,12 +98,11 @@ func GetConfig() (config Config) {
 	config.NifDevices = GetEnvWithDefaultStrings("SHH_NIF_DEVICES", DEFAULT_NIF_DEVICES)                                     // Devices to poll
 	config.NtpdateServers = GetEnvWithDefaultStrings("SHH_NTPDATE_SERVERS", DEFAULT_NTPDATE_SERVERS)                         // NTP Servers
 	config.CpuOnlyAggregate = GetEnvWithDefaultBool("SHH_CPU_AGGR", DEFAULT_CPU_AGGR)                                        // Whether to only report aggregate CPU usage
-	config.LibratoUrl = GetEnvWithDefault("SHH_LIBRATO_URL", DEFAULT_LIBRATO_URL)                                            // The Librato API End-Point
+	config.LibratoUrl = GetEnvWithDefaultURL("SHH_LIBRATO_URL", DEFAULT_LIBRATO_URL)                                            // The Librato API End-Point
 	config.LibratoUser = GetEnvWithDefault("SHH_LIBRATO_USER", DEFAULT_EMPTY_STRING)                                         // The Librato API User
 	config.LibratoToken = GetEnvWithDefault("SHH_LIBRATO_TOKEN", DEFAULT_EMPTY_STRING)                                       // The Librato API TOken
 	config.LibratoBatchSize = GetEnvWithDefaultInt("SHH_LIBRATO_BATCH_SIZE", DEFAULT_LIBRATO_BATCH_SIZE)                     // The max number of metrics to submit in a single request
 	config.LibratoBatchTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_BATCH_TIMEOUT", DEFAULT_LIBRATO_BATCH_TIMEOUT)       // The max time metrics will sit un-delivered
-	config.LibratoNetworkTimeout = GetEnvWithDefaultDuration("SHH_LIBRATO_NETWORK_TIMEOUT", DEFAULT_LIBRATO_NETWORK_TIMEOUT) // The maximum time to wait for Librato to respond (for both dial and first header)
 	config.LibratoRound = GetEnvWithDefaultBool("SHH_LIBRATO_ROUND", DEFAULT_LIBRATO_ROUND)                                  // Should we round measurement times to the nearest Interval when submitting to Librato
 	config.CarbonHost = GetEnvWithDefault("SHH_CARBON_HOST", DEFAULT_EMPTY_STRING)                                           // Where the Carbon Outputter sends it's data
 	config.SockStatProtos = GetEnvWithDefaultStrings("SHH_SOCKSTAT_PROTOS", DEFAULT_SOCKSTAT_PROTOS)                         // Protocols to report sockstats about

@@ -55,6 +55,23 @@ type Librato struct {
 }
 
 func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
+	var user string
+	var token string
+
+	if config.LibratoUrl.User != nil {
+		user = config.LibratoUrl.User.Username()
+		token, _ = config.LibratoUrl.User.Password()
+		config.LibratoUrl.User = nil
+	}
+
+	// override settings in URL if they were present
+	if config.LibratoUser != "" {
+		user = config.LibratoUser
+	}
+	if config.LibratoToken != "" {
+		token = config.LibratoToken
+	}
+
 	return &Librato{
 		measurements: measurements,
 		prefix:       config.Prefix,
@@ -62,16 +79,16 @@ func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librat
 		batches:      make(chan []Measurement, LibratoBacklog),
 		Timeout:      config.LibratoBatchTimeout,
 		BatchSize:    config.LibratoBatchSize,
-		User:         config.LibratoUser,
-		Token:        config.LibratoToken,
-		Url:          config.LibratoUrl,
+		User:         user,
+		Token:        token,
+		Url:          config.LibratoUrl.String(),
 		interval:     config.Interval,
 		round:        config.LibratoRound,
 		client: &http.Client{
 			Transport: &http.Transport{
-				ResponseHeaderTimeout: config.LibratoNetworkTimeout,
+				ResponseHeaderTimeout: config.NetworkTimeout,
 				Dial: func(network, address string) (net.Conn, error) {
-					return net.DialTimeout(network, address, config.LibratoNetworkTimeout)
+					return net.DialTimeout(network, address, config.NetworkTimeout)
 				},
 			},
 		},
