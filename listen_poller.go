@@ -27,7 +27,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/heroku/slog"
@@ -38,48 +38,13 @@ var (
 	UnitRegexp       = regexp.MustCompile("^([a-zA-Z$%#]+)(,([a-zA-Z$%#]+))?$") // <unit 1>,<abbr 3>
 )
 
-// Used to track global listen stats
-type ListenStats struct {
-	sync.RWMutex
-	counts map[string]uint64
-}
-
-func (ls *ListenStats) New(what string, initialValue uint64) {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.counts[what] = initialValue
-}
-
-func (ls *ListenStats) Increment(what string) {
-	ls.Lock()
-	defer ls.Unlock()
-	ls.counts[what]++
-}
-
-func (ls *ListenStats) CountOf(what string) uint64 {
-	ls.RLock()
-	defer ls.RUnlock()
-	return ls.counts[what]
-}
-
-func (ls *ListenStats) Keys() []string {
-	ls.RLock()
-	defer ls.RUnlock()
-
-	keys := make([]string, 0, len(ls.counts))
-
-	for k, _ := range ls.counts {
-		keys = append(keys, k)
-	}
-
-	return keys
-}
-
 type Listen struct {
 	measurements chan<- Measurement
 	listener     net.Listener
-	stats        *ListenStats
 	Timeout      time.Duration
+	metricCount,
+	connectionCount,
+	parseErrorCount uint64
 }
 
 func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
@@ -117,22 +82,13 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 		FatalError(ctx, err, "unable to listen on "+listenNet+listenLaddr)
 	}
 
-	ls := &ListenStats{counts: make(map[string]uint64)}
-	ls.New("connections", 0)
-	ls.New("time.parse.errors", 0)
-	ls.New("value.parse.errors", 0)
-	ls.New("metrics", 0)
-
 	poller := Listen{
 		measurements: measurements,
 		listener:     listener,
-		stats:        ls,
 		Timeout:      config.ListenTimeout,
 	}
 
 	go func(poller *Listen) {
-		ctx := slog.Context{"poller": poller.Name(), "fn": "acceptor"}
-
 		for {
 			conn, err := poller.listener.Accept()
 			if err != nil {
@@ -140,7 +96,7 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 				continue
 			}
 
-			go handleListenConnection(poller, conn)
+			go poller.HandleListenConnection(conn)
 		}
 	}(&poller)
 
@@ -148,17 +104,17 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 }
 
 func (poller Listen) Poll(tick time.Time) {
-	for _, k := range poller.stats.Keys() {
-		poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), poller.stats.CountOf(k), Empty}
-	}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "metric", "count"}, poller.metricCount, Empty}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "connection", "count"}, poller.connectionCount, Empty}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "parse", "error", "count"}, poller.parseErrorCount, Empty}
 }
 
-func handleListenConnection(poller *Listen, conn net.Conn) {
+func (poller *Listen) HandleListenConnection(conn net.Conn) {
 	defer conn.Close()
 
 	ctx := slog.Context{"poller": poller.Name(), "fn": "handleListenConnection", "conn": conn}
 
-	poller.stats.Increment("connection.count")
+	atomic.AddUint64(&poller.connectionCount, 1)
 
 	rdr := bufio.NewReader(conn)
 
@@ -174,12 +130,13 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 
 		measurement, err := poller.parseLine(line)
 		if err != nil {
+			atomic.AddUint64(&poller.parseErrorCount, 1)
 			LogError(ctx, err, "parse error")
 			break
 		}
 
 		poller.measurements <- measurement
-		poller.stats.Increment("metrics")
+		atomic.AddUint64(&poller.metricCount, 1)
 	}
 }
 
@@ -207,7 +164,7 @@ func (poller Listen) parseLine(line string) (Measurement, error) {
 
 	when, err = poller.parseDate(fields[0])
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse date: %q", fields[0])
+		return nil, err
 	}
 
 	if !MetricNameRegexp.MatchString(fields[1]) {
@@ -216,7 +173,7 @@ func (poller Listen) parseLine(line string) (Measurement, error) {
 
 	value, mType, err = poller.parseValue(fields[2])
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse value: %s", err)
+		return nil, err
 	}
 
 	if flen >= 4 {
@@ -230,7 +187,6 @@ func (poller Listen) parseLine(line string) (Measurement, error) {
 		} else if fields[3] == "g" || fields[3] == "gauge" {
 			mType = "g"
 		} else {
-			poller.stats.Increment("meta.parse.errors")
 			return nil, fmt.Errorf("type specified, but wasn't counter or gauge")
 		}
 	}
@@ -240,7 +196,6 @@ func (poller Listen) parseLine(line string) (Measurement, error) {
 		if len(subs) == 4 {
 			unit = Unit{subs[1], subs[3]}
 		} else {
-			poller.stats.Increment("meta.parse.errors")
 			return nil, fmt.Errorf("invalid unit specified in: %q", fields[4])
 		}
 	}
@@ -259,6 +214,7 @@ func (poller Listen) parseLine(line string) (Measurement, error) {
 	}
 }
 
+// Parse a string containing either an RFC3339 timestamp or a unix epoch timestamp
 func (poller Listen) parseDate(ds string) (time.Time, error) {
 	if when, err := time.Parse(time.RFC3339, ds); err == nil {
 		return when, nil
@@ -266,7 +222,6 @@ func (poller Listen) parseDate(ds string) (time.Time, error) {
 
 	// unix ts?
 	if ts, terr := strconv.ParseUint(ds, 10, 64); terr != nil {
-		poller.stats.Increment("time.parse.errors")
 		return time.Now(), fmt.Errorf("Invalid timestamp: %q", ds)
 	} else {
 		return time.Unix(int64(ts), 0), nil
@@ -278,7 +233,6 @@ func (poller Listen) parseValue(vs string) (interface{}, string, error) {
 	if err != nil {
 		fval, err := strconv.ParseFloat(vs, 64)
 		if err != nil {
-			poller.stats.Increment("value.parse.errors")
 			return nil, "", fmt.Errorf("Couldn't parse %q as value", vs)
 		}
 		return fval, "g", nil
