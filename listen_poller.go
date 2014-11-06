@@ -41,72 +41,38 @@ var (
 // Used to track global listen stats
 type ListenStats struct {
 	sync.RWMutex
-	counts map[string]interface{}
+	counts map[string]uint64
 }
 
-func (ls *ListenStats) New(what string, initialValue interface{}) {
+func (ls *ListenStats) New(what string, initialValue uint64) {
 	ls.Lock()
 	defer ls.Unlock()
-	switch initialValue.(type) {
-	case float64, uint64:
-		ls.counts[what] = initialValue
-	case int:
-		ls.counts[what] = uint64(initialValue.(int))
-	}
+	ls.counts[what] = initialValue
 }
 
 func (ls *ListenStats) Increment(what string) {
 	ls.Lock()
 	defer ls.Unlock()
-	v := ls.counts[what]
-	switch v.(type) {
-	case float64:
-		tmp := v.(float64)
-		tmp++
-		ls.counts[what] = tmp
-	case uint64, int:
-		tmp := v.(uint64)
-		tmp++
-		ls.counts[what] = tmp
-	}
+	ls.counts[what]++
 }
 
-func (ls *ListenStats) Decrement(what string) {
-	ls.Lock()
-	defer ls.Unlock()
-	v := ls.counts[what]
-	switch v.(type) {
-	case float64:
-		tmp := v.(float64)
-		tmp--
-		ls.counts[what] = tmp
-	case uint64, int:
-		tmp := v.(uint64)
-		tmp--
-		ls.counts[what] = tmp
-	}
-}
-
-func (ls *ListenStats) CountOf(what string) interface{} {
+func (ls *ListenStats) CountOf(what string) uint64 {
 	ls.RLock()
 	defer ls.RUnlock()
 	return ls.counts[what]
 }
 
-func (ls *ListenStats) Keys() <-chan string {
+func (ls *ListenStats) Keys() []string {
 	ls.RLock()
+	defer ls.RUnlock()
 
-	c := make(chan string)
+	keys := make([]string, 0, len(ls.counts))
 
-	go func(c chan<- string) {
-		defer ls.RUnlock()
-		defer close(c)
-		for k, _ := range ls.counts {
-			c <- k
-		}
-	}(c)
+	for k, _ := range ls.counts {
+		keys = append(keys, k)
+	}
 
-	return c
+	return keys
 }
 
 type Listen struct {
@@ -151,8 +117,8 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 		FatalError(ctx, err, "unable to listen on "+listenNet+listenLaddr)
 	}
 
-	ls := &ListenStats{counts: make(map[string]interface{})}
-	ls.New("connection.count", 0.0)
+	ls := &ListenStats{counts: make(map[string]uint64)}
+	ls.New("connections", 0)
 	ls.New("time.parse.errors", 0)
 	ls.New("value.parse.errors", 0)
 	ls.New("metrics", 0)
@@ -182,16 +148,8 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 }
 
 func (poller Listen) Poll(tick time.Time) {
-	for k := range poller.stats.Keys() {
-		v := poller.stats.CountOf(k)
-		switch v.(type) {
-		case float64:
-			poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(float64), Empty}
-		case uint64:
-			poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), v.(uint64), Empty}
-		case int:
-			poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), uint64(v.(int)), Empty}
-		}
+	for _, k := range poller.stats.Keys() {
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), strings.Split("stats."+k, "."), poller.stats.CountOf(k), Empty}
 	}
 }
 
@@ -201,17 +159,16 @@ func handleListenConnection(poller *Listen, conn net.Conn) {
 	ctx := slog.Context{"poller": poller.Name(), "fn": "handleListenConnection", "conn": conn}
 
 	poller.stats.Increment("connection.count")
-	defer poller.stats.Decrement("connection.count")
 
-	r := bufio.NewReader(conn)
+	rdr := bufio.NewReader(conn)
 
 	for {
-		conn.SetDeadline(time.Now().Add(poller.Timeout))
-		line, err := r.ReadString('\n')
-		if err == io.EOF {
-			break
-		} else if err != nil {
-			LogError(ctx, err, "reading string")
+		conn.SetReadDeadline(time.Now().Add(poller.Timeout))
+		line, err := rdr.ReadString('\n')
+		if err != nil {
+			if err != io.EOF {
+				LogError(ctx, err, "reading string")
+			}
 			break
 		}
 
