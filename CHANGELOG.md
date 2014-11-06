@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.8.8 - pending
+## 0.8.8 - 2014-11-06
 
 ### Added
 
@@ -14,6 +14,15 @@ All notable changes to this project will be documented in this file.
 
 - Removed LibratoNetworkTimeout, use NetworkTimeout
   (`SHH_NETWORK_TIMEOUT`) instead.
+- Merged listen poller metrics into 3 (all parse errors are treated
+  the same) and added prefix `meta` to them all.
+
+### Changed (Non-breaking)
+
+- Refactored listen poller stats counters to avoid mutex
+- Removed a bunch of useless logging
+- handleListenConnection now part of Listen poller instead of bare.
+
 
 ## 0.8.7 - 2014-11-03
 
