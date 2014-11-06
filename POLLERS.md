@@ -312,10 +312,9 @@ The metrics will be emitted as:
     
 The listen poller also emits metrics about itself:
 
-* `<prefix>.listen.stats.connection.count`
-* `<prefix>.listen.stats.time.parse.errors`
-* `<prefix>.listen.stats.value.parse.errors`
-* `<prefix>.listen.stats.metrics`
+* `<prefix>.listen._meta_.connection.count`
+* `<prefix>.listen._meta_.parse.error.count`
+* `<prefix>.listen._meta_.metric.count`
 
 #### Interpretation of SHH_LISTEN
 
