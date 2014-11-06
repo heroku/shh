@@ -9,7 +9,7 @@ func TestListenPollerParser_HappyPath(t *testing.T) {
 	var m Measurement
 	var err error
 
-	listen := Listen{stats: &ListenStats{counts: make(map[string]uint64)}}
+	listen := Listen{stats: &ListenStats{}}
 
 	m, err = listen.parseLine("90210 beverly.hills 10")
 	if err != nil {
@@ -80,7 +80,7 @@ func TestListenPollerParser_HappyPath(t *testing.T) {
 func TestListenPollerParser_Errors(t *testing.T) {
 	var err error
 
-	listen := Listen{stats: &ListenStats{counts: make(map[string]uint64)}}
+	listen := Listen{stats: &ListenStats{}}
 
 	failure_cases := []string{
 		"timestamp metric",
