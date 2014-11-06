@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"net"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/heroku/slog"
@@ -33,9 +31,9 @@ type LibratoPostBody struct {
 }
 
 const (
-	LibratoBacklog               = 8 // No more than N pending batches in-flight
-	LibratoMaxAttempts           = 4 // Max attempts before dropping batch
-	LibratoStartingBackoffMillis = 200 * time.Millisecond
+	LibratoBacklog         = 8 // No more than N pending batches in-flight
+	LibratoMaxAttempts     = 4 // Max attempts before dropping batch
+	LibratoStartingBackoff = 500 * time.Millisecond
 )
 
 type Librato struct {
@@ -84,15 +82,8 @@ func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librat
 		Url:          config.LibratoUrl.String(),
 		interval:     config.Interval,
 		round:        config.LibratoRound,
-		client: &http.Client{
-			Transport: &http.Transport{
-				ResponseHeaderTimeout: config.NetworkTimeout,
-				Dial: func(network, address string) (net.Conn, error) {
-					return net.DialTimeout(network, address, config.NetworkTimeout)
-				},
-			},
-		},
-		userAgent: config.UserAgent,
+		userAgent:    config.UserAgent,
+		client:       &http.Client{Timeout: config.NetworkTimeout},
 	}
 }
 
@@ -189,33 +180,32 @@ func (out *Librato) deliver() {
 }
 
 func (out *Librato) sendWithBackoff(payload []byte) bool {
-	ctx := slog.Context{"fn": "retry", "outputter": "librato"}
-	attempts := 0
-	bo := 0 * time.Millisecond
+	ctx := slog.Context{"fn": "sendWithBackoff", "outputter": "librato", "backoff": LibratoStartingBackoff, "attempts": 0}
 
-	for attempts < LibratoMaxAttempts {
-		retry, err := out.send(ctx, payload)
+	for ctx["attempts"].(int) < LibratoMaxAttempts {
+		retry, err := out.send(payload)
 		if retry {
 			LogError(ctx, err, "backoffing off")
-			bo = backoff(bo)
-		} else if err != nil {
-			LogError(ctx, err, "error sending")
-			return false
+			ctx["backoff"] = backoff(ctx["backoff"].(time.Duration))
 		} else {
-			return true
+			if err != nil {
+				LogError(ctx, err, "error sending, no retry")
+				return false
+			} else {
+				return true
+			}
 		}
-
-		resetCtx(ctx)
-		attempts++
+		ctx["attempts"] = ctx["attempts"].(int) + 1
 	}
 	return false
 }
 
-func (out *Librato) send(ctx slog.Context, payload []byte) (retry bool, e error) {
-	body := bytes.NewBuffer(payload)
+// Attempts to send the payload and signals retries on errors
+func (out *Librato) send(payload []byte) (bool, error) {
+	body := bytes.NewReader(payload)
 	req, err := http.NewRequest("POST", out.Url, body)
 	if err != nil {
-		FatalError(ctx, err, "creating new request")
+		return false, err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -224,50 +214,33 @@ func (out *Librato) send(ctx slog.Context, payload []byte) (retry bool, e error)
 
 	resp, err := out.client.Do(req)
 	if err != nil {
-		if nerr, ok := err.(net.Error); ok && (nerr.Temporary() || nerr.Timeout()) {
-			retry = true
-			e = fmt.Errorf("Backing off due to transport error")
-		} else if strings.Contains(err.Error(), "timeout awaiting response") {
-			retry = false
-			e = err
-		} else if err == io.EOF {
-			retry = true
-			e = fmt.Errorf("Backing off due to EOF")
+		if err == io.EOF {
+			return true, err
 		} else {
-			FatalError(ctx, err, "doing request")
+			return false, err
 		}
 	} else {
 		defer resp.Body.Close()
 
 		if resp.StatusCode >= 300 {
 			b, _ := ioutil.ReadAll(resp.Body)
-			ctx["body"] = string(b)
-			ctx["code"] = resp.StatusCode
 
 			if resp.StatusCode >= 500 {
-				retry = true
-				e = fmt.Errorf("Backing off due to server error")
+				err = fmt.Errorf("server error: %d, body: %+q", resp.StatusCode, string(b))
+				return true, err
 			} else {
-				e = fmt.Errorf("Client error")
+				err = fmt.Errorf("client error: %d, body: %+q", resp.StatusCode, string(b))
+				return false, err
 			}
+
 		}
 	}
 
-	return
+	return false, nil
 }
 
-// Sleeps `bo` and then returns double, unless 0, in which case
-// returns the initial starting sleep time.
+// Sleeps `bo` and then returns double
 func backoff(bo time.Duration) time.Duration {
-	if bo > 0 {
-		time.Sleep(bo)
-		return bo * 2
-	} else {
-		return LibratoStartingBackoffMillis
-	}
-}
-
-func resetCtx(ctx slog.Context) {
-	delete(ctx, "body")
-	delete(ctx, "code")
+	time.Sleep(bo)
+	return bo * 2
 }
