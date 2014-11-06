@@ -19,9 +19,11 @@ func (s *HappyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 type SleepyHandler struct {
 	Amt     time.Duration
 	ReqIncr time.Duration
+	times   int
 }
 
 func (s *SleepyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	s.times++
 	time.Sleep(s.Amt)
 	w.WriteHeader(http.StatusOK)
 	s.Amt += s.ReqIncr
@@ -45,7 +47,7 @@ func (g *GrumpyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
-	handler := &SleepyHandler{2 * time.Second, -400 * time.Millisecond}
+	handler := &SleepyHandler{2 * time.Second, -400 * time.Millisecond, 0}
 	server := httptest.NewServer(handler)
 	defer server.Close()
 
@@ -60,6 +62,10 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 
 	if librato.sendWithBackoff([]byte(`{}`)) {
 		t.Errorf("Request should have errored with a sleepy handler")
+	}
+
+	if handler.times != 1 {
+		t.Errorf("Request should have only been tried once, instead it was tried: ", handler.times)
 	}
 }
 

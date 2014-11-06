@@ -26,7 +26,7 @@ const (
 	DEFAULT_FULL                    = ""                                                                 // Default list of pollers who should report full metrycs
 	DEFAULT_LIBRATO_URL             = "https://metrics-api.librato.com/v1/metrics"                       // Default librato url to submit metrics to
 	DEFAULT_LIBRATO_BATCH_SIZE      = 500                                                                // Default submission count
-	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "5s"                                                               // Default timeout when communicating with Librato
+	DEFAULT_LIBRATO_NETWORK_TIMEOUT = "10s"                                                              // Default timeout when communicating with Librato
 	DEFAULT_LIBRATO_BATCH_TIMEOUT   = "10s"                                                              // Default submission after
 	DEFAULT_LIBRATO_ROUND           = true                                                               // Round measure_time to interval
 	DEFAULT_LISTEN_ADDR             = "unix,#shh"                                                        // listen on UDS #shh
