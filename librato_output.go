@@ -215,11 +215,8 @@ func (out *Librato) send(payload []byte) (bool, error) {
 
 	resp, err := out.client.Do(req)
 	if err != nil {
-		err, ok := err.(*url.Error)
-		if ok {
-			if err.Err == io.EOF {
-				return true, err
-			}
+		if err, ok := err.(*url.Error); ok && err.Err == io.EOF {
+			return true, err
 		}
 		return false, err
 	} else {
