@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/heroku/slog"
@@ -214,11 +215,10 @@ func (out *Librato) send(payload []byte) (bool, error) {
 
 	resp, err := out.client.Do(req)
 	if err != nil {
-		if err == io.EOF {
+		if err, ok := err.(*url.Error); ok && err.Err == io.EOF {
 			return true, err
-		} else {
-			return false, err
 		}
+		return false, err
 	} else {
 		defer resp.Body.Close()
 

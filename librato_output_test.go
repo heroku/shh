@@ -1,6 +1,7 @@
 package shh
 
 import (
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -195,5 +196,51 @@ func TestLibrato_UserPassFromURL(t *testing.T) {
 
 	if librato.Token != "quux" {
 		t.Errorf("Incorrect token for librato. Found: '%s', expected: '%s'", librato.Token, "quux")
+	}
+}
+
+type ClosingHandler struct {
+	times, maxCloses int
+	data             []byte
+	headers          http.Header
+}
+
+func (c *ClosingHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	c.times++
+	if c.times <= c.maxCloses {
+		conn, _, _ := w.(http.Hijacker).Hijack()
+		conn.Close()
+		return
+	}
+
+	d, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		panic(err)
+	}
+
+	c.data = append(c.data, d...)
+	c.headers = req.Header
+}
+
+func TestLibrato_EOF(t *testing.T) {
+	handler := &ClosingHandler{maxCloses: 1}
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	config := GetConfig()
+	config.LibratoUrl, _ = url.Parse(server.URL)
+	config.NetworkTimeout = 1 * time.Second
+	config.LibratoUser = "user"
+	config.LibratoToken = "token"
+
+	measurements := make(chan Measurement, 10)
+	librato := NewLibratoOutputter(measurements, config)
+
+	if !librato.sendWithBackoff([]byte(`{}`)) {
+		t.Errorf("Request should not have errored with a closing handler")
+	}
+
+	if handler.times != 2 {
+		t.Errorf("Request should have only been tried twice, instead it was tried: %d", handler.times)
 	}
 }
