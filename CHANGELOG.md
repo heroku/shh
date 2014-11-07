@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.0 - 2014-11-07
+
+### Changed (Breaking)
+
+- MetricsNameNormalizer was changed so some metrics names may change.
+```
+    Old # -> _
+        - -> _
+    New # -> .
+        _ -> -
+```
+
 ## 0.8.9 - 2014-11-06
 
 - Actually catch io.EOFs so we can re-try them. Experience has shown they are
