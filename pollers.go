@@ -48,6 +48,8 @@ func NewMultiPoller(measurements chan<- Measurement, config Config) Multi {
 			mp.RegisterPoller(NewSockStatPoller(measurements, config))
 		case "splunksearchpeers":
 			mp.RegisterPoller(NewSplunkSearchPeersPoller(measurements, config))
+		case "folsom":
+			mp.RegisterPoller(NewFolsomPoller(measurements, config))
 		}
 	}
 
