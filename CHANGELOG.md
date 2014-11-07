@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.8.9 - 2014-11-06
+
+- Actually catch io.EOFs so we can re-try them. Experience has shown they are
+    most likely dropped connections.
+
 ## 0.8.8 - 2014-11-06
 
 ### Added
