@@ -186,7 +186,7 @@ func (out *Librato) sendWithBackoff(payload []byte) bool {
 	for ctx["attempts"].(int) < LibratoMaxAttempts {
 		retry, err := out.send(payload)
 		if retry {
-			LogError(ctx, err, "backoffing off")
+			LogError(ctx, err, "backing off")
 			ctx["backoff"] = backoff(ctx["backoff"].(time.Duration))
 		} else {
 			if err != nil {
