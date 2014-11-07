@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	MetricNameNormalizer = strings.NewReplacer("#", "_", "-", "_")
+	MetricNameNormalizer = strings.NewReplacer("#", ".", "_", "-")
 )
 
 type MeasurementType int
