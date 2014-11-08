@@ -10,7 +10,6 @@ import(
   "github.com/heroku/slog"
 )
 
-// {"atom_used":485956,"binary":1004525112,"code":11971352,"ets":4219429600}
 type FolsomMemory struct {
   Total uint64 `json:"total"`
   Processes uint64 `json:"processes"`
@@ -21,6 +20,65 @@ type FolsomMemory struct {
   Binary uint64 `json:"binary"`
   Code uint64 `json:"code"`
   Ets uint64 `json:"ets"`
+}
+
+// {
+//   "context_switches": 60171,
+//   "garbage_collection": {
+//     "number_of_gcs": 5900,
+//     "words_reclaimed": 13293574
+//   },
+//   "io": {
+//     "input": 9030419,
+//     "output": 2403356
+//   },
+//   "reductions": {
+//     "total_reductions": 5634158,
+//     "reductions_since_last_call": 10400
+//   },
+//   "run_queue": 0,
+//   "runtime": {
+//     "total_run_time": 2170,
+//     "time_since_last_call": 20
+//   },
+//   "wall_clock": {
+//     "total_wall_clock_time": 1875376,
+//     "wall_clock_time_since_last_call": 14518
+//   }
+// }
+type FolsomStatistics struct {
+  ContextSwitches uint64 `json:"context_switches"`
+  GarbageCollection FolsomGarbageCollection `json:"garbage_collection"`
+  Io FolsomIo `json:"io"`
+  Reductions FolsomReductions `json:"reductions"`
+  RunQueue uint64 `json:"run_queue"`
+  Runtime FolsomRuntime `json:"runtime"`
+  WallClock FolsomWallClock `json:"wall_clock"`
+}
+
+type FolsomGarbageCollection struct {
+  NumOfGcs uint64 `json:"number_of_gcs"`
+  WordsReclaimed uint64 `json:"words_reclaimed"`
+}
+
+type FolsomIo struct {
+  Input uint64 `json:"input"`
+  Output uint64 `json:"output"`
+}
+
+type FolsomReductions struct {
+  Total uint64 `json:"total_reductions"`
+  SinceLast uint64 `json:"reductions_since_last_call"`
+}
+
+type FolsomRuntime struct {
+  Total uint64 `json:"total_run_time"`
+  SinceLast uint64 `json:"time_since_last_call"`
+}
+
+type FolsomWallClock struct {
+  Total uint64 `json:"total_wall_clock_time"`
+  SinceLast uint64 `json:"wall_clock_time_since_last_call"`
 }
 
 type FolsomMetrics struct {
@@ -69,8 +127,8 @@ func (poller FolsomPoller) Poll(tick time.Time) {
 	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
   poller.doMemoryPoll(ctx, tick)
+  poller.doStatisticsPoll(ctx, tick)
   // poller.doMetricsPoll(ctx, tick)
-  // poller.doSystemPoll()
 
 }
 
@@ -101,7 +159,31 @@ func (poller FolsomPoller) doMemoryPoll(ctx slog.Context, tick time.Time) () {
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"mem", "ets"}, memory.Ets, Bytes}
 }
 
-func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) () {
+func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) () {
+	resp, err := poller.doRequest("/_statistics")
+	if err != nil {
+		LogError(ctx, err, "while performing request for this tick")
+		return
+	}
+
+	defer resp.Body.Close()
+
+	decoder := json.NewDecoder(resp.Body)
+	stats := FolsomStatistics{}
+	if derr := decoder.Decode(&stats); derr != nil {
+		LogError(ctx, derr, "while performing decode on response body")
+		return
+	}
+
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "context-switches"}, stats.ContextSwitches, ContextSwitches}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "gc", "num"}, stats.GarbageCollection.NumOfGcs, Empty}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "gc", "reclaimed"}, stats.GarbageCollection.WordsReclaimed, Words}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "io", "input"}, stats.Io.Input, Bytes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "io", "output"}, stats.Io.Output, Bytes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "reductions"}, stats.Reductions.SinceLast, Reductions}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "run-queue"}, stats.RunQueue, Processes}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "runtime"}, stats.Runtime.SinceLast, MilliSeconds}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "wall-clock"}, stats.WallClock.SinceLast, MilliSeconds}
 }
 
 func (poller FolsomPoller) doRequest(path string) (*http.Response, error) {
@@ -122,7 +204,7 @@ func (poller FolsomPoller) doRequest(path string) (*http.Response, error) {
 }
 
 func (poller FolsomPoller) Name() string {
-	return "erlfolsom"
+	return "erlang"
 }
 
 func (poller FolsomPoller) Exit() {}
