@@ -22,30 +22,6 @@ type FolsomMemory struct {
   Ets uint64 `json:"ets"`
 }
 
-// {
-//   "context_switches": 60171,
-//   "garbage_collection": {
-//     "number_of_gcs": 5900,
-//     "words_reclaimed": 13293574
-//   },
-//   "io": {
-//     "input": 9030419,
-//     "output": 2403356
-//   },
-//   "reductions": {
-//     "total_reductions": 5634158,
-//     "reductions_since_last_call": 10400
-//   },
-//   "run_queue": 0,
-//   "runtime": {
-//     "total_run_time": 2170,
-//     "time_since_last_call": 20
-//   },
-//   "wall_clock": {
-//     "total_wall_clock_time": 1875376,
-//     "wall_clock_time_since_last_call": 14518
-//   }
-// }
 type FolsomStatistics struct {
   ContextSwitches uint64 `json:"context_switches"`
   GarbageCollection FolsomGarbageCollection `json:"garbage_collection"`
@@ -133,18 +109,10 @@ func (poller FolsomPoller) Poll(tick time.Time) {
 }
 
 func (poller FolsomPoller) doMemoryPoll(ctx slog.Context, tick time.Time) () {
-	resp, err := poller.doRequest("/_memory")
-	if err != nil {
-		LogError(ctx, err, "while performing request for this tick")
-		return
-	}
-
-	defer resp.Body.Close()
-
-	decoder := json.NewDecoder(resp.Body)
 	memory := FolsomMemory{}
-	if derr := decoder.Decode(&memory); derr != nil {
-		LogError(ctx, derr, "while performing decode on response body")
+
+	if err := poller.decodeReq("/_memory", &memory); err != nil {
+		LogError(ctx, err, "while performing request for this tick")
 		return
 	}
 
@@ -160,18 +128,9 @@ func (poller FolsomPoller) doMemoryPoll(ctx slog.Context, tick time.Time) () {
 }
 
 func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) () {
-	resp, err := poller.doRequest("/_statistics")
-	if err != nil {
-		LogError(ctx, err, "while performing request for this tick")
-		return
-	}
-
-	defer resp.Body.Close()
-
-	decoder := json.NewDecoder(resp.Body)
 	stats := FolsomStatistics{}
-	if derr := decoder.Decode(&stats); derr != nil {
-		LogError(ctx, derr, "while performing decode on response body")
+	if err := poller.decodeReq("/_statistics", &stats); err != nil {
+		LogError(ctx, err, "while performing request for this tick")
 		return
 	}
 
@@ -186,21 +145,28 @@ func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) ()
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "wall-clock"}, stats.WallClock.SinceLast, MilliSeconds}
 }
 
-func (poller FolsomPoller) doRequest(path string) (*http.Response, error) {
+func (poller FolsomPoller) decodeReq(path string, v interface{}) (error) {
 	req, err := http.NewRequest("GET", poller.baseUrl + path, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	resp, rerr := poller.client.Do(req)
 	if rerr != nil {
-		return nil, rerr
+		return rerr
 	} else if resp.StatusCode >= 300 {
 		resp.Body.Close()
-		return nil, fmt.Errorf("Response returned a %d", resp.StatusCode)
+		return fmt.Errorf("Response returned a %d", resp.StatusCode)
 	}
 
-	return resp, nil
+	defer resp.Body.Close()
+
+	decoder := json.NewDecoder(resp.Body)
+	if derr := decoder.Decode(v); derr != nil {
+		return derr
+	}
+
+	return nil
 }
 
 func (poller FolsomPoller) Name() string {
