@@ -63,7 +63,7 @@ type FolsomMetrics struct {
 
 type FolsomValue struct {
   Name string
-  Value string `json:"value"`
+  Value uint64 `json:"value"`
 }
 
 type FolsomPoller struct {
@@ -104,8 +104,7 @@ func (poller FolsomPoller) Poll(tick time.Time) {
 
   poller.doMemoryPoll(ctx, tick)
   poller.doStatisticsPoll(ctx, tick)
-  // poller.doMetricsPoll(ctx, tick)
-
+  poller.doMetricsPoll(ctx, tick)
 }
 
 func (poller FolsomPoller) doMemoryPoll(ctx slog.Context, tick time.Time) () {
@@ -143,6 +142,24 @@ func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) ()
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "run-queue"}, stats.RunQueue, Processes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "runtime"}, stats.Runtime.SinceLast, MilliSeconds}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "wall-clock"}, stats.WallClock.SinceLast, MilliSeconds}
+}
+
+func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) () {
+	keys := []string{}
+	if err := poller.decodeReq("/_metrics", &keys); err != nil {
+		LogError(ctx, err, "while performing request for this tick")
+		return
+	}
+
+  for i := range keys {
+    value := FolsomValue{}
+    if err := poller.decodeReq("/_metrics/" + keys[i], &value); err != nil {
+      LogError(ctx, err, "while performing request for " + keys[i] + "this tick")
+      return
+    }
+
+    poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{keys[i]}, value.Value, Empty}
+  }
 }
 
 func (poller FolsomPoller) decodeReq(path string, v interface{}) (error) {
