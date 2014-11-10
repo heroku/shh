@@ -7,6 +7,7 @@ import(
   "net/http"
   "time"
   "strings"
+  "errors"
 
   "github.com/heroku/slog"
 )
@@ -154,35 +155,49 @@ func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) () {
 	}
 
   for i := range keys {
-    value := FolsomValue{}
-    if err := poller.decodeReq("/_metrics/" + keys[i], &value); err != nil {
-      LogError(ctx, err, "while performing request for " + keys[i] + "this tick")
+    v := FolsomValue{Name: keys[i]}
+    if err := poller.decodeReq("/_metrics/" + v.Name, &v); err != nil {
+      LogError(ctx, err, "while performing request for " + v.Name + "this tick")
       return
     }
 
-    switch value.Type {
-    case "counter":
-      val, err := value.Value.Int64();
-      if err != nil {
-        LogError(ctx, err, "error parsing int counter for " + keys[i] + " this tick")
+    if m, err := poller.genMeasurement(tick, &v); err != nil {
+      LogError(ctx, err, "while performing request for " + v.Name + "this tick")
+      return
+    } else {
+      poller.measurements <- m
+    }
+  }
+}
+
+func (poller FolsomPoller) genMeasurement(tick time.Time, v *FolsomValue) (Measurement, error) {
+  var err error
+
+  switch v.Type {
+  case "counter":
+    var val int64
+    if val, err = v.Value.Int64(); err == nil {
+      return CounterMeasurement{tick, poller.Name(), []string{v.Name}, uint64(val), Empty}, nil
+    }
+  case "gauge":
+    if (strings.Contains(v.Value.String(), ".")) {
+      var val float64
+      if val, err = v.Value.Float64(); err == nil {
+        return FloatGaugeMeasurement{tick, poller.Name(), []string{v.Name}, val, Empty}, nil
       }
-      poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{keys[i]}, uint64(val), Empty}
-    case "gauge":
-      if (strings.Contains(value.Value.String(), ".")) {
-        val, err := value.Value.Float64()
-        if err != nil {
-          LogError(ctx, err, "error parsing float gauge for " + keys[i] + " this tick")
-        }
-        poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{keys[i]}, val, Empty}
-      } else {
-        val, err := value.Value.Int64()
-        if err != nil {
-          LogError(ctx, err, "error parsing int counter for " + keys[i] + " this tick")
-        }
-        poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{keys[i]}, uint64(val), Empty}
+    } else {
+      var val int64
+      if val, err = v.Value.Int64(); err == nil {
+        return GaugeMeasurement{tick, poller.Name(), []string{v.Name}, uint64(val), Empty}, nil
       }
     }
   }
+
+  if err == nil {
+    err = errors.New("Unsupported metric type: " + v.Type)
+  }
+  
+  return nil, err
 }
 
 func (poller FolsomPoller) decodeReq(path string, v interface{}) (error) {
