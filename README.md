@@ -46,6 +46,7 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_NAGIOS3_METRIC_NAMES` | list of strings | list of nagios 3 metric names to report stats on, see `nagios3stats -h` | NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M |
 | `SHH_SPLUNK_PEERS_SKIP_VERIFY` | bool | whether or not to skip verification of HTTPS cert on splunk peers endpoint | false |
 | `SHH_SPLUNK_PEERS_URL` | string | URL of splunk distributed peers status (e.g. https://user:pass@localhost:8089/services/search/distributed/peers?count=-1 | |
+| `SHH_FOLSOM_BASE_URL` | string | URL of exported folsom metrics via folsome\_cowboy or folsom\_webmachine (e.g. https://localhost:5564/) | |
 
 For more information on the duration type, see [time.ParseDuration](http://golang.org/pkg/time/#ParseDuration)
 
@@ -53,7 +54,7 @@ The regexp type supports valid regexps documented [here](http://golang.org/pkg/r
 
 ### A note about SHH_OUTPUTTER
 
-The SHH_OUTPUTTER variable *may* not be enough on it's own to get the desired result. For instance, the Librato outputter, requires that `SHH_LIBRATO_USER` and `SHH_LIBRATO_TOKEN` be set. 
+The SHH_OUTPUTTER variable *may* not be enough on it's own to get the desired result. For instance, the Librato outputter, requires that `SHH_LIBRATO_USER` and `SHH_LIBRATO_TOKEN` be set.
 
 ### A note about SHH_PERCENTAGES
 
