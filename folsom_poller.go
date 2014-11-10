@@ -6,6 +6,7 @@ import(
   "net"
   "net/http"
   "time"
+  "strings"
 
   "github.com/heroku/slog"
 )
@@ -63,7 +64,8 @@ type FolsomMetrics struct {
 
 type FolsomValue struct {
   Name string
-  Value uint64 `json:"value"`
+  Type string `json:"type"`
+  Value json.Number `json:"value"`
 }
 
 type FolsomPoller struct {
@@ -133,11 +135,11 @@ func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) ()
 		return
 	}
 
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "context-switches"}, stats.ContextSwitches, ContextSwitches}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "gc", "num"}, stats.GarbageCollection.NumOfGcs, Empty}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "gc", "reclaimed"}, stats.GarbageCollection.WordsReclaimed, Words}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "io", "input"}, stats.Io.Input, Bytes}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "io", "output"}, stats.Io.Output, Bytes}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"stats", "context-switches"}, stats.ContextSwitches, ContextSwitches}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"stats", "gc", "num"}, stats.GarbageCollection.NumOfGcs, Empty}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"stats", "gc", "reclaimed"}, stats.GarbageCollection.WordsReclaimed, Words}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"stats", "io", "input"}, stats.Io.Input, Bytes}
+	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"stats", "io", "output"}, stats.Io.Output, Bytes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "reductions"}, stats.Reductions.SinceLast, Reductions}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "run-queue"}, stats.RunQueue, Processes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "runtime"}, stats.Runtime.SinceLast, MilliSeconds}
@@ -158,7 +160,28 @@ func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) () {
       return
     }
 
-    poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{keys[i]}, value.Value, Empty}
+    switch value.Type {
+    case "counter":
+      val, err := value.Value.Int64();
+      if err != nil {
+        LogError(ctx, err, "error parsing int counter for " + keys[i] + " this tick")
+      }
+      poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{keys[i]}, uint64(val), Empty}
+    case "gauge":
+      if (strings.Contains(value.Value.String(), ".")) {
+        val, err := value.Value.Float64()
+        if err != nil {
+          LogError(ctx, err, "error parsing float gauge for " + keys[i] + " this tick")
+        }
+        poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{keys[i]}, val, Empty}
+      } else {
+        val, err := value.Value.Int64()
+        if err != nil {
+          LogError(ctx, err, "error parsing int counter for " + keys[i] + " this tick")
+        }
+        poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{keys[i]}, uint64(val), Empty}
+      }
+    }
   }
 }
 
@@ -187,7 +210,7 @@ func (poller FolsomPoller) decodeReq(path string, v interface{}) (error) {
 }
 
 func (poller FolsomPoller) Name() string {
-	return "erlang"
+	return "folsom"
 }
 
 func (poller FolsomPoller) Exit() {}
