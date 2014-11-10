@@ -161,7 +161,7 @@ func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) {
 			return
 		}
 
-		if m, err := poller.genMeasurement(tick, &v); err != nil {
+		if m, err := poller.genMeasurement(tick, v); err != nil {
 			LogError(ctx, err, "while performing request for "+v.Name+"this tick")
 			return
 		} else {
@@ -170,7 +170,7 @@ func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) {
 	}
 }
 
-func (poller FolsomPoller) genMeasurement(tick time.Time, v *FolsomValue) (Measurement, error) {
+func (poller FolsomPoller) genMeasurement(tick time.Time, v FolsomValue) (Measurement, error) {
 	var err error
 
 	switch v.Type {
@@ -191,9 +191,7 @@ func (poller FolsomPoller) genMeasurement(tick time.Time, v *FolsomValue) (Measu
 				return GaugeMeasurement{tick, poller.Name(), []string{v.Name}, uint64(val), Empty}, nil
 			}
 		}
-	}
-
-	if err == nil {
+	default:
 		err = errors.New("Unsupported metric type: " + v.Type)
 	}
 
