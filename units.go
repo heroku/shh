@@ -28,9 +28,9 @@ var (
 	Faults          = Unit{"Faults", "faults"}
 	Ops             = Unit{"Operations", "ops"}
 	Peers           = Unit{"Peers", "peers"}
-  ContextSwitches = Unit{"ContextSwitches", "cswit"}
-  Words           = Unit{"Words", "words"}
-  Reductions      = Unit{"Reductions", "rdux"}
+	ContextSwitches = Unit{"ContextSwitches", "cswit"}
+	Words           = Unit{"Words", "words"}
+	Reductions      = Unit{"Reductions", "rdux"}
 )
 
 func (u Unit) Name() string {
