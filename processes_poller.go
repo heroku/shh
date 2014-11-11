@@ -125,7 +125,7 @@ func (poller Procs) Poll(tick time.Time) {
 		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{name, "cpu", "user", "seconds"}, proc.cpuUser, Seconds}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "pagefaults", "minor", "count"}, proc.pagefaultsMinor, Faults}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "pagefaults", "major", "count"}, proc.pagefaultsMajor, Faults}
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "rss", "byts"}, proc.rss, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "rss", "bytes"}, proc.rss, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "stacksize", "bytes"}, proc.stacksize, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "mem", "virtual", "bytes"}, proc.vm, Bytes}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{name, "io", "read", "bytes"}, proc.diskOctetsRead, Bytes}
