@@ -50,7 +50,10 @@ func (g *GrumpyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
-	handler := &SleepyHandler{2 * time.Second, -400 * time.Millisecond, 0}
+	handler := &SleepyHandler{
+		Amt:     2 * time.Second,
+		ReqIncr: -600 * time.Millisecond,
+	}
 	server := httptest.NewServer(handler)
 	defer server.Close()
 
@@ -63,12 +66,12 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	measurements := make(chan Measurement, 10)
 	librato := NewLibratoOutputter(measurements, config)
 
-	if librato.sendWithBackoff([]byte(`{}`)) {
-		t.Errorf("Request should have errored with a sleepy handler")
+	if !librato.sendWithBackoff([]byte(`{}`)) {
+		t.Errorf("Request should not have errored with a sleepy handler")
 	}
 
-	if handler.times != 1 {
-		t.Errorf("Request should have only been tried once, instead it was tried: ", handler.times)
+	if handler.times != 3 {
+		t.Errorf("Request should have been tried 3 times, instead it was tried: ", handler.times)
 	}
 }
 
