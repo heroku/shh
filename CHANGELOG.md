@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.1 - 2014-11-11
+
+- Retry all low-level delivery errors
+
+### Changed (Breaking)
+
+- Fixed a typo in the per-processes rss metric. byts -> bytes
+
 ## 0.9.0 - 2014-11-07
 
 ### Changed (Breaking)
