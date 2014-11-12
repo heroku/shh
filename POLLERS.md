@@ -304,6 +304,40 @@ may be required.
 * `<prefix>.splunksearchpeers.replication.success`
 * `<prefix>.splunksearchpeers.total`
 
+### Erlang Folsom Metrics (folsom)
+
+The [folsom](https://github.com/boundary/folsom) poller uses an API exposed on a running erlang Node to fetch various
+Erlang VM metrics. It understands the API provided by either [folsom_cowboy](https://github.com/boundary/folsom_cowboy)
+or [folsom_webmachine](https://github.com/boundary/folsom_webmachine). This poller uses a single environment variable
+`SHH_FOLSOM_BASE_URL` which should contain the base URL pointing to the api. This is
+usually something like:
+
+`https://localhost:5565/`
+
+The poller will use the base URL to construct calls to a few known endpoints.
+It will even query the special `<BASE_URL>/_metrics` endpoint to discover and
+query any dynamically generated folsom metrics.
+
+* `<prefix>.folsom.mem.total`
+* `<prefix>.folsom.mem.procs.total`
+* `<prefix>.folsom.mem.procs.used`
+* `<prefix>.folsom.mem.system`
+* `<prefix>.folsom.mem.atom.total`
+* `<prefix>.folsom.mem.atom.used`
+* `<prefix>.folsom.mem.binary`
+* `<prefix>.folsom.mem.code`
+* `<prefix>.folsom.mem.ets`
+* `<prefix>.folsom.stats.context-switches`
+* `<prefix>.folsom.stats.gc.num`
+* `<prefix>.folsom.stats.gc.reclaimed`
+* `<prefix>.folsom.stats.io.input`
+* `<prefix>.folsom.stats.io.output`
+* `<prefix>.folsom.stats.reductions`
+* `<prefix>.folsom.stats.run-queue`
+* `<prefix>.folsom.stats.runtime`
+* `<prefix>.folsom.stats.wall-clock`
+* `<prefix>.folsom.<dynamic-metric-name>`
+
 ## Writing your own poller
 
 `shh` is written in the Go programming language, which doesn't support
@@ -328,7 +362,7 @@ without receiving any data.
 Data is then communicated in the following format:
 
     <RFC3339 date stamp> <what> <value>\n
-    
+
 `<what>` is the metric name, and the interpretation of `<value>` is somewhat arbitrary:
 
 The Poller will create a FloatGauge if the value parses as a floating
@@ -337,7 +371,7 @@ point number, and a counter otherwise.
 The metrics will be emitted as:
 
     `<prefix>.listen.stats.<what>`
-    
+
 The listen poller also emits metrics about itself:
 
 * `<prefix>.listen._meta_.connection.count`

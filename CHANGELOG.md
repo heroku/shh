@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.2 - 2014-11-12
+
+### Added
+
+- Folsom Poller (folsom), which adds the ability to fetch metrics from a
+  runinning Erlang system. See the [docs](POLLERS.md) for more info.
+
 ## 0.9.1 - 2014-11-11
 
 - Retry all low-level delivery errors

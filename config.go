@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	VERSION                          = "0.9.1"
+	VERSION                          = "0.9.2"
 	DEFAULT_EMPTY_STRING             = ""
 	DEFAULT_INTERVAL                 = "60s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER                = "stdoutl2metder"                                                   // Default outputter
@@ -80,6 +80,7 @@ type Config struct {
 	Nagios3MetricNames    []string
 	SplunkPeersSkipVerify bool
 	SplunkPeersUrl        *url.URL
+	FolsomBaseUrl         *url.URL
 }
 
 func GetConfig() (config Config) {
@@ -115,6 +116,7 @@ func GetConfig() (config Config) {
 	config.Nagios3MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS3_METRIC_NAMES", DEFAULT_NAGIOS3_METRIC_NAMES)         // Which nagios3stats metrics names should we poll
 	config.SplunkPeersSkipVerify = GetEnvWithDefaultBool("SHH_SPLUNK_PEERS_SKIP_VERIFY", DEFAULT_SPLUNK_PEERS_SKIP_VERIFY) // If SHH_SPLUNK_PEERS_URL is https, do we need to skip verification?
 	config.SplunkPeersUrl = GetEnvWithDefaultURL("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                             // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
+	config.FolsomBaseUrl = GetEnvWithDefaultURL("SHH_FOLSOM_BASE_URL", DEFAULT_EMPTY_STRING)                               // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
 	config.NetworkTimeout = GetEnvWithDefaultDuration("NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT)                          // The maximum time to wait for network requests to respond (for both dial and first header when applicable)
 
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
