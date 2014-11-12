@@ -45,6 +45,7 @@ type Listen struct {
 	metricCount,
 	connectionCount,
 	parseErrorCount uint64
+	closeDown chan struct{}
 }
 
 func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
@@ -86,21 +87,40 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 		measurements: measurements,
 		listener:     listener,
 		Timeout:      config.ListenTimeout,
+		closeDown:    make(chan struct{}, 1),
 	}
 
-	go func(poller *Listen) {
-		for {
-			conn, err := poller.listener.Accept()
-			if err != nil {
+	go poller.Accept()
+
+	return poller
+}
+
+func (poller *Listen) Accept() {
+	ctx := slog.Context{"poller": poller.Name(), "fn": "Accept"}
+	for {
+		conn, err := poller.listener.Accept()
+		if err != nil {
+			select {
+			case <-poller.closeDown:
+				LogError(ctx, err, "shutting down")
+				return
+			default:
 				LogError(ctx, err, "accepting connection")
 				continue
 			}
-
-			go poller.HandleListenConnection(conn)
 		}
-	}(&poller)
 
-	return poller
+		go poller.HandleListenConnection(conn)
+	}
+}
+
+func (poller Listen) Name() string {
+	return "listen"
+}
+
+func (poller Listen) Exit() {
+	poller.closeDown <- struct{}{}
+	poller.listener.Close()
 }
 
 func (poller Listen) Poll(tick time.Time) {
@@ -138,14 +158,6 @@ func (poller *Listen) HandleListenConnection(conn net.Conn) {
 		poller.measurements <- measurement
 		atomic.AddUint64(&poller.metricCount, 1)
 	}
-}
-
-func (poller Listen) Name() string {
-	return "listen"
-}
-
-func (poller Listen) Exit() {
-	poller.listener.Close()
 }
 
 func (poller Listen) parseLine(line string) (Measurement, error) {
