@@ -37,8 +37,10 @@ func main() {
 
 	go func() {
 		for sig := range signalChannel {
+			now := time.Now()
+			shh.ErrLogger.Println(slog.Context{"signal": sig, "finishing": now, "runtime": time.Since(config.Start)})
 			mp.Exit()
-			shh.ErrLogger.Fatal(slog.Context{"signal": sig, "finished": time.Now(), "duration": time.Since(config.Start)})
+			shh.ErrLogger.Fatalln(slog.Context{"signal": sig, "finished": time.Now(), "duration": time.Since(now)})
 		}
 	}()
 
