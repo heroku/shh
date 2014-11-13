@@ -26,7 +26,7 @@ deb: bin/shh bin/shh-value
 	mkdir -p $(installpath)
 	install bin/shh $(installpath)/shh
 	install bin/shh-value $(installpath)/shh-value
-	fakeroot dpkg-deb --build $(tempdir) .
+	fakeroot dpkg-deb -Z bzip2 --build $(tempdir) .
 	rm -rf $(tempdir)
 
 clean:
