@@ -59,13 +59,13 @@ type FolsomWallClock struct {
 	SinceLast uint64 `json:"wall_clock_time_since_last_call"`
 }
 
-type FolsomMetrics struct {
-	Metrics []string `json:""`
+type FolsomType struct {
+	Type string `json:"type"`
 }
 
 type FolsomValue struct {
 	Name  string
-	Type  string      `json:"type"`
+	Type  string
 	Value json.Number `json:"value"`
 }
 
@@ -148,14 +148,14 @@ func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) {
 }
 
 func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) {
-	keys := []string{}
-	if err := poller.decodeReq("/_metrics", &keys); err != nil {
+	metrics := make(map[string]FolsomType)
+	if err := poller.decodeReq("/_metrics?info=true", &metrics); err != nil {
 		LogError(ctx, err, "while performing request for this tick")
 		return
 	}
 
-	for i := range keys {
-		v := FolsomValue{Name: keys[i]}
+	for key, ft := range metrics {
+		v := FolsomValue{Name: key, Type: ft.Type}
 		if err := poller.decodeReq("/_metrics/"+v.Name, &v); err != nil {
 			LogError(ctx, err, "while performing request for "+v.Name+"this tick")
 			return
