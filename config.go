@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	VERSION                          = "0.9.2"
+	VERSION                          = "0.9.3"
 	DEFAULT_EMPTY_STRING             = ""
 	DEFAULT_INTERVAL                 = "60s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER                = "stdoutl2metder"                                                   // Default outputter

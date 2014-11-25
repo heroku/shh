@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.3 - 2014-11-25
+
+### Changed
+
+- Folsom Poller (folsom) now uses native `folsom_cowboy` API calls to determine
+  metric types.
+
 ## 0.9.2 - 2014-11-12
 
 ### Added
