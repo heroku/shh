@@ -31,6 +31,7 @@ var (
 	ContextSwitches = Unit{"ContextSwitches", "cswit"}
 	Words           = Unit{"Words", "words"}
 	Reductions      = Unit{"Reductions", "rdux"}
+	Terms           = Unit{"Terms", "terms"}
 )
 
 func (u Unit) Name() string {

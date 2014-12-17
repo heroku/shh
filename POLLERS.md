@@ -336,6 +336,8 @@ query any dynamically generated folsom metrics.
 * `<prefix>.folsom.stats.run-queue`
 * `<prefix>.folsom.stats.runtime`
 * `<prefix>.folsom.stats.wall-clock`
+* `<prefix>.folsom.ets.<ets-tab-name>.memory`
+* `<prefix>.folsom.ets.<ets-tab-name>.size`
 * `<prefix>.folsom.<dynamic-metric-name>`
 
 ## Writing your own poller

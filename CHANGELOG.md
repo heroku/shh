@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.4 - 2014-12-16
+
+### Changed
+
+- Folsom Poller (folsom) now polls for ETS table size and memory.
+
 ## 0.9.3 - 2014-11-25
 
 ### Changed

@@ -12,6 +12,20 @@ import (
 	"github.com/heroku/slog"
 )
 
+type FolsomEts struct {
+	Compressed bool   `json:"compressed"`
+	Memory     uint64 `json:"memory"`
+	Owner      string `json:"owner"`
+	Heir       string `json:"heir"`
+	Name       string `json:"name"`
+	Size       uint64 `json:"size"`
+	Node       string `json:"node"`
+	NamedTable bool   `json:"named_table"`
+	Type       string `json:"type"`
+	KeyPos     uint64 `json:"keyos"`
+	Protection string `json:"protection"`
+}
+
 type FolsomMemory struct {
 	Total         uint64 `json:"total"`
 	Processes     uint64 `json:"processes"`
@@ -107,6 +121,7 @@ func (poller FolsomPoller) Poll(tick time.Time) {
 
 	poller.doMemoryPoll(ctx, tick)
 	poller.doStatisticsPoll(ctx, tick)
+	poller.doEtsPoll(ctx, tick)
 	poller.doMetricsPoll(ctx, tick)
 }
 
@@ -145,6 +160,19 @@ func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) {
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "run-queue"}, stats.RunQueue, Processes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "runtime"}, stats.Runtime.SinceLast, MilliSeconds}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "wall-clock"}, stats.WallClock.SinceLast, MilliSeconds}
+}
+func (poller FolsomPoller) doEtsPoll(ctx slog.Context, tick time.Time) {
+	tables := make(map[string]FolsomEts)
+
+	if err := poller.decodeReq("/_ets", &tables); err != nil {
+		LogError(ctx, err, "while performing request for this tick")
+		return
+	}
+
+	for _, tab := range tables {
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"ets", tab.Name, "memory"}, tab.Memory, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"ets", tab.Name, "size"}, tab.Size, Terms}
+	}
 }
 
 func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) {
