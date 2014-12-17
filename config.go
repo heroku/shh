@@ -37,6 +37,8 @@ const (
 	DEFAULT_NAGIOS3_METRIC_NAMES     = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
 	DEFAULT_SPLUNK_PEERS_SKIP_VERIFY = false
 	DEFAULT_NETWORK_TIMEOUT          = "5s"
+	DEFAULT_REDIS_INFO               = "clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec"
+	DEFAULT_REDIS_URL                = "tcp://localhost:6379/0?timeout=10s&maxidle=1"
 )
 
 var (
@@ -81,6 +83,8 @@ type Config struct {
 	SplunkPeersSkipVerify bool
 	SplunkPeersUrl        *url.URL
 	FolsomBaseUrl         *url.URL
+	RedisUrl              *url.URL
+	RedisInfo             string
 }
 
 func GetConfig() (config Config) {
@@ -117,6 +121,8 @@ func GetConfig() (config Config) {
 	config.SplunkPeersSkipVerify = GetEnvWithDefaultBool("SHH_SPLUNK_PEERS_SKIP_VERIFY", DEFAULT_SPLUNK_PEERS_SKIP_VERIFY) // If SHH_SPLUNK_PEERS_URL is https, do we need to skip verification?
 	config.SplunkPeersUrl = GetEnvWithDefaultURL("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                             // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
 	config.FolsomBaseUrl = GetEnvWithDefaultURL("SHH_FOLSOM_BASE_URL", DEFAULT_EMPTY_STRING)                               // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
+	config.RedisUrl = GetEnvWithDefaultURL("SHH_REDIS_URL", DEFAULT_REDIS_URL)                                             // URL of redis endpoint. Ex: tcp://auth:pass@localhost:6379/0?timeout=10s&maxidle=1"
+	config.RedisInfo = GetEnvWithDefault("SHH_REDIS_INFO", DEFAULT_REDIS_INFO)                                             // section:key1,key2;section2:key1,key2
 	config.NetworkTimeout = GetEnvWithDefaultDuration("NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT)                          // The maximum time to wait for network requests to respond (for both dial and first header when applicable)
 
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
