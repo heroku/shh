@@ -340,6 +340,25 @@ query any dynamically generated folsom metrics.
 * `<prefix>.folsom.ets.<ets-tab-name>.size`
 * `<prefix>.folsom.<dynamic-metric-name>`
 
+### Redis Info Poller (redis)
+
+The Redis poller will run the [INFO](http://redis.io/commands/info)
+command at every interval and record stats as specified within
+`SHH_REDIS_INFO`, which is specified in the following way:
+
+    section0:key0,key1;section1:key0,key1
+
+By default the setting is:
+
+    clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec
+
+This will then report:
+
+* `<prefix>.clients.connected-clients`
+* `<prefix>.memory.used-memory`
+* `<prefix>.memory.used-memory-rss`
+* `<prefix>.stats.instantaneous-ops-per-sec`
+
 ## Writing your own poller
 
 `shh` is written in the Go programming language, which doesn't support
