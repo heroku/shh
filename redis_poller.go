@@ -12,20 +12,24 @@ import (
 
 var (
 	RedisKnownGauges = map[string]struct{}{
-		"clients:connected_clients":                   struct{}{},
-		"clients:client_longest_output_list":          struct{}{},
-		"clients:client_biggest_input_buf":            struct{}{},
-		"clients:blocked_clients":                     struct{}{},
-		"stats:instantaneous_ops_per_sec":             struct{}{},
-		"stats:pubsub_channels":                       struct{}{},
-		"stats:pubsub_patterns":                       struct{}{},
-		"stats:latest_fork_usec":                      struct{}{},
+		"clients:connected_clients":          struct{}{},
+		"clients:client_longest_output_list": struct{}{},
+		"clients:client_biggest_input_buf":   struct{}{},
+		"clients:blocked_clients":            struct{}{},
+
+		"keyspace:db0.keys": struct{}{},
+
 		"replication:master_last_io_seconds_ago":      struct{}{},
 		"replication:master_sync_in_progress":         struct{}{},
 		"replication:master_sync_left_bytes":          struct{}{},
 		"replication:master_sync_last_io_seconds_ago": struct{}{},
 		"replication:master_link_down_since_seconds":  struct{}{},
 		"replication:connected_slaves":                struct{}{},
+
+		"stats:instantaneous_ops_per_sec": struct{}{},
+		"stats:pubsub_channels":           struct{}{},
+		"stats:pubsub_patterns":           struct{}{},
+		"stats:latest_fork_usec":          struct{}{},
 	}
 )
 
@@ -78,6 +82,20 @@ func (poller Redis) Poll(tick time.Time) {
 				} else {
 					poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{section, key}, value, Empty}
 				}
+			} else if strings.Contains(rawValue, "=") {
+				kvs := parseKeyValues(rawValue)
+
+				for k, v := range kvs {
+					subKey := key + "." + k
+					if SliceContainsString(sectionKeys, subKey) {
+						value := Atouint64(v)
+						if _, ok := RedisKnownGauges[section+":"+subKey]; ok {
+							poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{section, subKey}, value, Empty}
+						} else {
+							poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{section, subKey}, value, Empty}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -91,6 +109,20 @@ func parseInfoLine(line string) (key, value string) {
 		return bits[0], bits[1]
 	}
 	return "", ""
+}
+
+func parseKeyValues(values string) map[string]string {
+	kvs := make(map[string]string)
+	pairs := strings.Split(values, ",")
+	for _, pair := range pairs {
+		bits := strings.Split(pair, "=")
+		if len(bits) == 2 {
+			kvs[bits[0]] = bits[1]
+		} else {
+			break // TODO: probably want to signal an error here?
+		}
+	}
+	return kvs
 }
 
 func (poller Redis) Name() string {
