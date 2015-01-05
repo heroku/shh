@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.5 - 2015-01-05
+
+### Changed
+
+- Redis poller.
+- Update Go Version to 1.4.
+- Travis CI Updates
+
 ## 0.9.4 - 2014-12-16
 
 ### Changed
