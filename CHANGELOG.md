@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.9.6 - 2015-01-06
+## 0.9.7 - 2015-01-05
+
+### Changed
+
+- Bugfix: Used memory is a gauge, report it as such.
+
+## 0.9.6 - 2015-01-05
 
 ### Changed
 
@@ -11,9 +17,12 @@ All notable changes to this project will be documented in this file.
 
 ## 0.9.5 - 2015-01-05
 
-### Changed
+### Added
 
 - Redis poller.
+
+### Changed
+
 - Update Go Version to 1.4.
 - Travis CI Updates
 
