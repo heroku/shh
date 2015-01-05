@@ -11,6 +11,7 @@ import (
 )
 
 var (
+	// RedisKnownGauges lists the metrics that are known Gauges
 	RedisKnownGauges = map[string]struct{}{
 		"clients:connected_clients":          struct{}{},
 		"clients:client_longest_output_list": struct{}{},
@@ -33,12 +34,16 @@ var (
 	}
 )
 
+// Redis poller
+// info contains a mapping for the section to the keys that you want for each key.
+// See DEFAULT_REDIS_INFO comment
 type Redis struct {
 	measurements chan<- Measurement
 	url          *url.URL
 	info         map[string][]string
 }
 
+// NewRedisPoller constructs a functioning Redis poller from the provided config and reports on the provided channel
 func NewRedisPoller(measurements chan<- Measurement, config Config) Redis {
 	ctx := slog.Context{"poller": "redis", "fn": "NewRedisPoller"}
 	info := make(map[string][]string)
@@ -55,6 +60,7 @@ func NewRedisPoller(measurements chan<- Measurement, config Config) Redis {
 	return Redis{measurements: measurements, url: config.RedisUrl, info: info}
 }
 
+// Poll executes the polling of the provided redis server.
 func (poller Redis) Poll(tick time.Time) {
 	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 
@@ -75,25 +81,16 @@ func (poller Redis) Poll(tick time.Time) {
 
 		for _, line := range strings.Split(result, "\r\n") {
 			key, rawValue := parseInfoLine(line)
-			if SliceContainsString(sectionKeys, key) {
-				value := Atouint64(rawValue)
-				if _, ok := RedisKnownGauges[section+":"+key]; ok {
-					poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{section, key}, value, Empty}
-				} else {
-					poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{section, key}, value, Empty}
-				}
-			} else if strings.Contains(rawValue, "=") {
+			switch {
+			case SliceContainsString(sectionKeys, key):
+				poller.report(section, key, rawValue, tick)
+			case strings.Contains(rawValue, "="):
 				kvs := parseKeyValues(rawValue)
 
 				for k, v := range kvs {
 					subKey := key + "." + k
 					if SliceContainsString(sectionKeys, subKey) {
-						value := Atouint64(v)
-						if _, ok := RedisKnownGauges[section+":"+subKey]; ok {
-							poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{section, subKey}, value, Empty}
-						} else {
-							poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{section, subKey}, value, Empty}
-						}
+						poller.report(section, subKey, v, tick)
 					}
 				}
 			}
@@ -101,6 +98,15 @@ func (poller Redis) Poll(tick time.Time) {
 	}
 
 	defer cli.ClosePool()
+}
+
+func (poller Redis) report(section, subKey, rawValue string, tick time.Time) {
+	value := Atouint64(rawValue)
+	if _, ok := RedisKnownGauges[section+":"+subKey]; ok {
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{section, subKey}, value, Empty}
+	} else {
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{section, subKey}, value, Empty}
+	}
 }
 
 func parseInfoLine(line string) (key, value string) {
@@ -119,14 +125,16 @@ func parseKeyValues(values string) map[string]string {
 		if len(bits) == 2 {
 			kvs[bits[0]] = bits[1]
 		} else {
-			break // TODO: probably want to signal an error here?
+			LogError(slog.Context{"poller": "redis", "fn": "parseKeyValues"}, fmt.Errorf("Unexpected Format: len == %d", len(bits)), "")
 		}
 	}
 	return kvs
 }
 
+// Name reports the name of this poller
 func (poller Redis) Name() string {
 	return "redis"
 }
 
+// Exit is a noop
 func (poller Redis) Exit() {}
