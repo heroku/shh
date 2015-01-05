@@ -18,7 +18,7 @@ type Df struct {
 func NewDfPoller(measurements chan<- Measurement, config Config) Df {
 	return Df{
 		measurements: measurements,
-		percentage:   LinearSliceContainsString(config.Percentages, "df"),
+		percentage:   SliceContainsString(config.Percentages, "df"),
 		Types:        config.DfTypes,
 		Loop:         config.DfLoop,
 	}

@@ -20,8 +20,8 @@ type Memory struct {
 }
 
 func NewMemoryPoller(measurements chan<- Measurement, config Config) Memory {
-	memPerc := LinearSliceContainsString(config.Percentages, "mem")
-	swapPerc := LinearSliceContainsString(config.Percentages, "swap")
+	memPerc := SliceContainsString(config.Percentages, "mem")
+	swapPerc := SliceContainsString(config.Percentages, "swap")
 	mem := Memory{
 		measurements:   measurements,
 		memPercentage:  memPerc,
