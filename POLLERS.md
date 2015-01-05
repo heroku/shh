@@ -350,7 +350,7 @@ command at every interval and record stats as specified within
 
 By default the setting is:
 
-    clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec
+    clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec;keyspace:db0.keys
 
 This will then report:
 
@@ -358,6 +358,7 @@ This will then report:
 * `<prefix>.memory.used-memory`
 * `<prefix>.memory.used-memory-rss`
 * `<prefix>.stats.instantaneous-ops-per-sec`
+* `<prefix>.keyspace.db0.keys`
 
 ## Writing your own poller
 
