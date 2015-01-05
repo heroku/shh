@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.6 - 2015-01-06
+
+### Changed
+
+- Bugfix: Renamed LinearSliceContainsString to SliceContainsString, removing
+    the old implementation, so that we only match on exact matches
+
 ## 0.9.5 - 2015-01-05
 
 ### Changed
