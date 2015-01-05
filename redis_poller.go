@@ -20,6 +20,11 @@ var (
 
 		"keyspace:db0.keys": struct{}{},
 
+		"memory:used_memory":      struct{}{},
+		"memory:used_memory_rss":  struct{}{},
+		"memory:used_memory_peak": struct{}{},
+		"memory:used_memory_lua":  struct{}{},
+
 		"replication:master_last_io_seconds_ago":      struct{}{},
 		"replication:master_sync_in_progress":         struct{}{},
 		"replication:master_sync_left_bytes":          struct{}{},
