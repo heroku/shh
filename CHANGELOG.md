@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.8 - 2015-01-05
+
+### Changed
+
+- Bugfix: ETS table memory to report in words not bytes.
+
 ## 0.9.7 - 2015-01-05
 
 ### Changed
