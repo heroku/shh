@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## 0.9.6 - 2015-01-06
+## 0.9.7 - 2015-01-05
+
+### Changed
+
+- Fixed ETS table memory to report in words not bytes.
+
+## 0.9.6 - 2015-01-05
 
 ### Changed
 

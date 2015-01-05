@@ -170,7 +170,7 @@ func (poller FolsomPoller) doEtsPoll(ctx slog.Context, tick time.Time) {
 	}
 
 	for _, tab := range tables {
-		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"ets", tab.Name, "memory"}, tab.Memory, Bytes}
+		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"ets", tab.Name, "memory"}, tab.Memory, Words}
 		poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"ets", tab.Name, "size"}, tab.Size, Terms}
 	}
 }
