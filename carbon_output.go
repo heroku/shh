@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/heroku/slog"
+	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
 )
 
 type Carbon struct {

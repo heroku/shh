@@ -1,0 +1,7 @@
+Package: shh
+Version: {{GO_LINKER_VALUE}}
+Architecture: amd64
+Maintainer: "Telemetry" <telemetry@heroku.com>
+Section: heroku
+Priority: optional
+Description: Systems statistics to formatted log lines

@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/heroku/slog"
+	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
 )
 
 type LibratoMetric struct {

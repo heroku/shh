@@ -1,42 +1,16 @@
-#!/usr/bin/env make -f
+GO_LINKER_SYMBOL := "main.version"
 
-VERSION := $(shell cat config.go  | grep VERSION | head -n1 | cut -d \" -f 2)
+all: test
 
-tempdir        := $(shell mktemp -d)
-controldir     := $(tempdir)/DEBIAN
-installpath    := $(tempdir)/usr/bin
-buildpath      := .build
-buildpackcache := $(buildpath)/cache
+test:
+	go test ./...
 
-define DEB_CONTROL
-Package: shh
-Version: $(VERSION)
-Architecture: amd64
-Maintainer: "Edward Muller" <edward@heroku.com>
-Section: heroku
-Priority: optional
-Description: Systems statistics to formatted log lines
-endef
-export DEB_CONTROL
+install:
+	$(eval GO_LINKER_VALUE := $(shell git describe --tags --always | sed s/^v//))
+	go install -a -ldflags "-X ${GO_LINKER_SYMBOL} ${GO_LINKER_VALUE}" ./...
 
-deb: bin/shh bin/shh-value
-	echo "making deb"
-	mkdir -p -m 0755 $(controldir)
-	echo "$$DEB_CONTROL" > $(controldir)/control
-	mkdir -p $(installpath)
-	install bin/shh $(installpath)/shh
-	install bin/shh-value $(installpath)/shh-value
-	fakeroot dpkg-deb -Z bzip2 --build $(tempdir) .
-	rm -rf $(tempdir)
+update-deps: godep
+	godep save -r ./...
 
-clean:
-	rm -rf $(buildpath)
-	rm -f shh*.deb
-
-bin/shh:
-	git clone git://github.com/kr/heroku-buildpack-go.git $(buildpath)
-	$(buildpath)/bin/compile . $(buildpackcache)
-
-bin/shh-value: 
-	git clone git://github.com/kr/heroku-buildpack-go.git $(buildpath)
-	$(buildpath)/bin/compile . $(buildpackcache)
+godep:
+	go get -u github.com/tools/godep

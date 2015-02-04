@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/heroku/slog"
-	redis "github.com/xuyu/goredis"
+	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
+	redis "github.com/heroku/shh/Godeps/_workspace/src/github.com/xuyu/goredis"
 )
 
 var (

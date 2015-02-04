@@ -1,12 +1,26 @@
 language: go
 go:
-- 1.3.3
-before_install:
-- go get github.com/tools/godep
-- export PATH=$HOME/gopath/bin:$PATH
-install: godep go version
+- 1.4.1
 script:
-- godep go test -v ./...
+- make test
+before_deploy:
+- make install
+- echo $GOPATH
+- export GOPATH=$(echo ${GOPATH} | cut -d: "-f 1)"
+- export GO_LINKER_VALUE=$(git describe --tags --always | sed s/^v//)
+- export TMP=$(mktemp -d -t shh.XXXXX)
+- export DEB_ROOT=${TMP}/build
+- export DEB_OUT=${TMP}/deb
+- mkdir -p ${DEB_ROOT}/DEBIAN
+- mkdir -p ${DEB_OUT}
+- export CONTROL_FILE=${TMP}/build/DEBIAN/control
+- export INSTALL_PATH=${DEB_ROOT}/usr/bin
+- sed s/{{GO_LINKER_VALUE}}/${GO_LINKER_VALUE}/ < misc/DEBIAN.control > ${CONTROL_FILE}
+- cat ${CONTROL_FILE}
+- mkdir -p ${INSTALL_PATH}
+- install ${GOPATH}/bin/shh ${INSTALL_PATH}/shh
+- install ${GOPATH}/bin/shh-value ${INSTALL_PATH}/shh-value
+- fakeroot dpkg-deb --build ${DEB_ROOT} ${DEB_OUT}
 notifications:
   email: false
   hipchat:
@@ -16,3 +30,17 @@ notifications:
     - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
       (<a href="%{build_url}">Details</a> | <a href="%{compare_url}">Change view</a>)'
     format: html
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key:
+    secure: cdMqjfyDdFqtEs4lJNgDjZl63OrzWQzY30xI3rKI3IBTnFKg9MMcd+6Gee8C9BXaKja43UVwdz0VWiCYD6MQbWUvM6FlF0v4FvIeVLC3KmD614VbzNa+Hc0GLBMTa6Ho3fVWjCcLrBmXqXqZPwr0GrbI6fXy/RipHmRRyaxYxCI=
+  file:
+    - ${DEB_OUT}/shh_${GO_LINKER_VALUE}_amd64.deb
+    - ${GOPATH}/bin/shh
+    - ${GOPATH}/bin/shh-value
+  file: bin/shh
+  on:
+    all_branches: true
+    tags: true
+    repo: heroku/shh
