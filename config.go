@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	VERSION                          = "0.9.8"
+	VERSION                          = "0.9.9"
 	DEFAULT_EMPTY_STRING             = ""
 	DEFAULT_INTERVAL                 = "60s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER                = "stdoutl2metder"                                                   // Default outputter
@@ -17,7 +17,7 @@ const (
 	DEFAULT_PROFILE_PORT             = "0"                                                                // Default profile port, 0 disables
 	DEFAULT_DF_TYPES                 = "btrfs,ext3,ext4,xfs"                                              // Default fs types to report df for
 	DEFAULT_DF_LOOP                  = false                                                              // Default to not reporting df metrics for loop back filesystems
-	DEFAULT_NIF_DEVICES              = "eth0,lo"                                                          // Default interfaces to report stats for
+	DEFAULT_NIF_DEVICES              = "eth0"                                                             // Default interfaces to report stats for
 	DEFAULT_NTPDATE_SERVERS          = "0.pool.ntp.org,1.pool.ntp.org"                                    // Default to the pool.ntp.org servers
 	DEFAULT_CPU_AGGR                 = true                                                               // Default whether to only report aggregate CPU
 	DEFAULT_SYSLOGNG_SOCKET          = "/var/lib/syslog-ng/syslog-ng.ctl"                                 // Default location of the syslog-ng socket
@@ -39,6 +39,7 @@ const (
 	DEFAULT_NETWORK_TIMEOUT          = "5s"
 	DEFAULT_REDIS_INFO               = "clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec;keyspace:db0.keys" // semi colon seperated section:keya,keyb list
 	DEFAULT_REDIS_URL                = "tcp://localhost:6379/0?timeout=10s&maxidle=1"
+	DEFAULT_VERBOSE                  = true
 )
 
 var (
@@ -49,6 +50,7 @@ type Config struct {
 	Interval              time.Duration
 	Outputter             string
 	Pollers               []string
+	PollerBlacklist       []string
 	Source                string
 	Prefix                string
 	ProfilePort           string
@@ -85,12 +87,14 @@ type Config struct {
 	FolsomBaseUrl         *url.URL
 	RedisUrl              *url.URL
 	RedisInfo             string
+	Verbose               bool
 }
 
 func GetConfig() (config Config) {
 	config.Interval = GetEnvWithDefaultDuration("SHH_INTERVAL", DEFAULT_INTERVAL)                                          // Polling Interval
 	config.Outputter = GetEnvWithDefault("SHH_OUTPUTTER", DEFAULT_OUTPUTTER)                                               // Outputter
 	config.Pollers = GetEnvWithDefaultStrings("SHH_POLLERS", DEFAULT_POLLERS)                                              // Pollers to poll
+	config.PollerBlacklist = GetEnvWithDefaultStrings("SHH_POLLER_BLACKLIST", "")                                          // Pollers that should never be enabled, even if they appear in Pollers. Pollers essentially becomes Pollers - PollerBlacklist
 	config.Source = GetEnvWithDefault("SHH_SOURCE", DEFAULT_EMPTY_STRING)                                                  // Source to emit
 	config.Prefix = GetEnvWithDefault("SHH_PREFIX", DEFAULT_EMPTY_STRING)                                                  // Metric prefix to use
 	config.ProfilePort = GetEnvWithDefault("SHH_PROFILE_PORT", DEFAULT_PROFILE_PORT)                                       // Profile Port
@@ -124,6 +128,7 @@ func GetConfig() (config Config) {
 	config.RedisUrl = GetEnvWithDefaultURL("SHH_REDIS_URL", DEFAULT_REDIS_URL)                                             // URL of redis endpoint. Ex: tcp://auth:pass@localhost:6379/0?timeout=10s&maxidle=1"
 	config.RedisInfo = GetEnvWithDefault("SHH_REDIS_INFO", DEFAULT_REDIS_INFO)                                             // section:key1,key2;section2:key1,key2
 	config.NetworkTimeout = GetEnvWithDefaultDuration("NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT)                          // The maximum time to wait for network requests to respond (for both dial and first header when applicable)
+	config.Verbose = GetEnvWithDefaultBool("SHH_VERBOSE", DEFAULT_VERBOSE)                                                 // Should report meta measurements, such as batch sizes for outputters, etc.
 
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)

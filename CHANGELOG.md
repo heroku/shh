@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.9 - 2015-03-06
+
+### Added
+
+- SHH_VERBOSE: On by default, this turns on meta data reporting, currently
+  reported in the Librato outputter (number of guages, counters), the multi
+  poller's stats, and the listen poller's meta data.
+- SHH_POLLER_BLACKLIST: Removes listed pollers from the Pollers list.
+
+### Removed
+
+- Removed `lo` from the default NIF_DEVICES
+- pid.last from the load poller. This is useless on a time series plot.
+
 ## 0.9.8 - 2015-01-05
 
 ### Changed

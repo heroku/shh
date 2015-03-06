@@ -44,7 +44,6 @@ func (poller Load) Poll(tick time.Time) {
 	entities := strings.Split(fields[3], "/")
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"scheduling", "entities", "executing"}, Atouint64(entities[0]), Processes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"scheduling", "entities", "total"}, Atouint64(entities[1]), Processes}
-	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"pid", "last"}, Atouint64(fields[4]), Empty}
 }
 
 func (poller Load) Name() string {
