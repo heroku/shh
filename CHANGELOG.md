@@ -6,10 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 
-- SHH_VERBOSE: On by default, this turns on meta data reporting, currently
-  reported in the Librato outputter (number of guages, counters), the multi
-  poller's stats, and the listen poller's meta data.
-- SHH_POLLER_BLACKLIST: Removes listed pollers from the Pollers list.
+- SHH_META: Off by default. This controls meta stats collection and
+  reporting. Turn this on to get:
+
+  - Librato stats (number of gauges, number of counters)
+  - multi poller's stats
+  - listen poller's meta stats
 
 ### Removed
 

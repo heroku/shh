@@ -14,10 +14,9 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | Environment Var | Type | Explanation | Default |
 |:----------------|:-----|:------------|:--------|
 | `SHH_INTERVAL` | duration | Polling Interval | 10s |
-| `SHH_VERBOSE` | bool | Report meta metrics | false |
+| `SHH_META` | bool | Report/Collect meta stats | false |
 | `SHH_OUTPUTTER` | string | Outputter | stdoutl2metder |
 | `SHH_POLLERS` | list of string | Pollers to poll | conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self |
-| `SHH_POLLER_BLACKLIST` | list of string | Pollers to blacklist | conntrack,cpu,df,disk,listen,load,mem,nif,ntpdate,processes,self |
 | `SHH_SOURCE` | string | Source to emit | |
 | `SHH_PREFIX` | string | Metric prefix to use | |
 | `SHH_PROFILE_PORT` | string | Profile Port | 0 (off) |

@@ -49,7 +49,7 @@ type Librato struct {
 	userAgent    string
 	interval     time.Duration
 	round        bool
-	verbose      bool
+	meta         bool
 }
 
 func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
@@ -84,7 +84,7 @@ func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librat
 		round:        config.LibratoRound,
 		userAgent:    config.UserAgent,
 		client:       &http.Client{Timeout: config.NetworkTimeout},
-		verbose:      config.Verbose,
+		meta:         config.Meta,
 	}
 }
 
@@ -159,7 +159,7 @@ func (out *Librato) deliver() {
 			counters, gauges = out.appendLibratoMetric(counters, gauges, mm)
 		}
 
-		if out.verbose {
+		if out.meta {
 			counters, gauges = out.appendLibratoMetric(
 				counters,
 				gauges,
