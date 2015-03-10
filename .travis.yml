@@ -6,7 +6,7 @@ script:
 before_deploy:
 - make install
 - echo $GOPATH
-- "export GOPATH=$(echo ${GOPATH} | cut -d: -f 1)"
+- "export GOPATH=$(echo ${GOPATH} | cut -d: -f 2)"
 - export GO_LINKER_VALUE=$(git describe --tags --always | sed s/^v//)
 - export TMP=$(mktemp -d -t shh.XXXXX)
 - export DEB_ROOT=${TMP}/build
