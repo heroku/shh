@@ -45,6 +45,7 @@ type Listen struct {
 	metricCount,
 	connectionCount,
 	parseErrorCount uint64
+	meta      bool
 	closeDown chan struct{}
 }
 
@@ -88,6 +89,7 @@ func NewListenPoller(measurements chan<- Measurement, config Config) Listen {
 		listener:     listener,
 		Timeout:      config.ListenTimeout,
 		closeDown:    make(chan struct{}, 1),
+		meta:         config.Meta,
 	}
 
 	go poller.Accept()
@@ -124,9 +126,11 @@ func (poller Listen) Exit() {
 }
 
 func (poller Listen) Poll(tick time.Time) {
-	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "metric", "count"}, poller.metricCount, Empty}
-	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "connection", "count"}, poller.connectionCount, Empty}
-	poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "parse", "error", "count"}, poller.parseErrorCount, Empty}
+	if poller.meta {
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "metric", "count"}, poller.metricCount, Empty}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "connection", "count"}, poller.connectionCount, Empty}
+		poller.measurements <- CounterMeasurement{tick, poller.Name(), []string{"_meta_", "parse", "error", "count"}, poller.parseErrorCount, Empty}
+	}
 }
 
 func (poller *Listen) HandleListenConnection(conn net.Conn) {

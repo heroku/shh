@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.9 - 2015-03-06
+
+### Added
+
+- SHH_META: Off by default. This controls meta stats collection and
+  reporting. Turn this on to get:
+
+  - Librato stats (number of gauges, number of counters)
+  - multi poller's stats
+  - listen poller's meta stats
+
+### Removed
+
+- Removed `lo` from the default NIF_DEVICES
+- pid.last from the load poller. This is useless on a time series plot.
+
 ## 0.9.8 - 2015-01-05
 
 ### Changed

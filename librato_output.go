@@ -49,6 +49,7 @@ type Librato struct {
 	userAgent    string
 	interval     time.Duration
 	round        bool
+	meta         bool
 }
 
 func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librato {
@@ -83,6 +84,7 @@ func NewLibratoOutputter(measurements <-chan Measurement, config Config) *Librat
 		round:        config.LibratoRound,
 		userAgent:    config.UserAgent,
 		client:       &http.Client{Timeout: config.NetworkTimeout},
+		meta:         config.Meta,
 	}
 }
 
@@ -157,16 +159,18 @@ func (out *Librato) deliver() {
 			counters, gauges = out.appendLibratoMetric(counters, gauges, mm)
 		}
 
-		counters, gauges = out.appendLibratoMetric(
-			counters,
-			gauges,
-			GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "guage", "size"}, uint64(len(gauges) + 2), Metrics},
-		)
-		counters, gauges = out.appendLibratoMetric(
-			counters,
-			gauges,
-			GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "counter", "size"}, uint64(len(counters)), Metrics},
-		)
+		if out.meta {
+			counters, gauges = out.appendLibratoMetric(
+				counters,
+				gauges,
+				GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "guage", "size"}, uint64(len(gauges) + 2), Metrics},
+			)
+			counters, gauges = out.appendLibratoMetric(
+				counters,
+				gauges,
+				GaugeMeasurement{time.Now(), "librato-outlet", []string{"batch", "counter", "size"}, uint64(len(counters)), Metrics},
+			)
+		}
 
 		payload := LibratoPostBody{gauges, counters}
 		j, err := json.Marshal(payload)

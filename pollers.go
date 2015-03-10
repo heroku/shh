@@ -12,7 +12,7 @@ type Poller interface {
 }
 
 func NewMultiPoller(measurements chan<- Measurement, config Config) Multi {
-	mp := Multi{pollers: make(map[string]Poller), measurements: measurements}
+	mp := Multi{pollers: make(map[string]Poller), measurements: measurements, meta: config.Meta}
 
 	for _, poller := range config.Pollers {
 		switch poller {
@@ -63,6 +63,7 @@ type Multi struct {
 	sync.WaitGroup
 	measurements chan<- Measurement
 	pollers      map[string]Poller
+	meta         bool
 }
 
 func (mp Multi) RegisterPoller(poller Poller) {
@@ -70,7 +71,9 @@ func (mp Multi) RegisterPoller(poller Poller) {
 }
 
 func (mp Multi) durationMetric(tick time.Time, name string, start time.Time) {
-	mp.measurements <- FloatGaugeMeasurement{tick, mp.Name(), []string{"duration", name, "seconds"}, time.Since(start).Seconds(), Seconds}
+	if mp.meta {
+		mp.measurements <- FloatGaugeMeasurement{tick, mp.Name(), []string{"duration", name, "seconds"}, time.Since(start).Seconds(), Seconds}
+	}
 }
 
 func (mp Multi) Poll(tick time.Time) {
