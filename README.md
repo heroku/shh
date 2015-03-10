@@ -24,7 +24,7 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_DF_TYPES` | list of string | Default DF types | btrfs,ext3,ext4,tmpfs,xfs |
 | `SHH_LISTEN` | string | Default network socket info for listen | unix,#shh |
 | `SHH_LISTEN_TIMEOUT` | string | Socket timeout duration | `SHH_INTERVAL` |
-| `SHH_NIF_DEVICES` | list of string | Devices to poll | eth0,lo |
+| `SHH_NIF_DEVICES` | list of string | Devices to poll | eth0 |
 | `SHH_NTPDATE_SERVERS` | list of string | NTP Servers | 0.pool.ntp.org,1.pool.ntp.org |
 | `SHH_CPU_AGGR` | bool | Whether to only report aggregate CPU usage | true |
 | `SHH_LIBRATO_USER` | string | The Librato API User | |
