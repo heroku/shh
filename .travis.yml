@@ -39,7 +39,6 @@ deploy:
     - ${DEB_OUT}/shh_${GO_LINKER_VALUE}_amd64.deb
     - ${GOPATH}/bin/shh
     - ${GOPATH}/bin/shh-value
-  file: bin/shh
   on:
     all_branches: true
     tags: true
