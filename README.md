@@ -1,4 +1,4 @@
-![Travis](https://img.shields.io/travis/heroku/shh.svg)
+[![Travis](https://img.shields.io/travis/heroku/shh.svg)](https://travis-ci.org/heroku/shh)
 
 System Heuristics Herald (aka Shh)
 ----
