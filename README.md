@@ -1,4 +1,6 @@
 [![Travis](https://img.shields.io/travis/heroku/shh.svg)](https://travis-ci.org/heroku/shh)
+[![Releases](https://img.shields.io/github/release/heroku/shh.svg)](https://github.com/heroku/shh/releases)
+
 
 System Heuristics Herald (aka Shh)
 ----
@@ -70,8 +72,6 @@ This variable works on "virtual" pollers and computes "percentage used", reporti
 * df (from the df_poller)
 
 ## Building Debs
-
-![Latest Release Deb](https://img.shields.io/github/release/heroku/shh.svg)
 
 Requirements:
 
