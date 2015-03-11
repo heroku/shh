@@ -137,5 +137,5 @@ func GetConfig() (config Config) {
 }
 
 func Version() string {
-	return "v" + version
+	return version
 }
