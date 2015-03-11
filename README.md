@@ -69,8 +69,9 @@ This variable works on "virtual" pollers and computes "percentage used", reporti
 * swap (from the mem poller)
 * df (from the df_poller)
 
-
 ## Building Debs
+
+![Latest Release Deb](https://img.shields.io/github/release/heroku/shh.svg)
 
 Requirements:
 
