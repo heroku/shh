@@ -14,10 +14,10 @@ import (
 )
 
 var (
-	versionFlag = flag.Bool("version", false, "Display version info and exit")
+	versionFlag     = flag.Bool("version", false, "Display version info and exit")
 	measurementType = flag.String("t", "g", "Measurement type gauge(g) or counter(c)")
-	shhAddr = flag.String("a", shh.DEFAULT_LISTEN_ADDR, "Address of a listening shh (protocol,addr)")
-	unitFlag = flag.String("u", "", "Unit of measurement and an optional abbreviation (ex. Bytes,b)")
+	shhAddr         = flag.String("a", shh.DEFAULT_LISTEN_ADDR, "Address of a listening shh (protocol,addr)")
+	unitFlag        = flag.String("u", "", "Unit of measurement and an optional abbreviation (ex. Bytes,b)")
 
 	unitRegexp = regexp.MustCompile("[a-zA-Z$%#]+(,[a-zA-Z$%#]+)?")
 )
@@ -86,7 +86,7 @@ func formatLine(metric string, value interface{}, mtype string, unit string) str
 }
 
 func main() {
-	flag.Usage = func () {
+	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [options] <metric-name> <value>\n", os.Args[0])
 		flag.PrintDefaults()
 	}
@@ -94,7 +94,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println(shh.VERSION)
+		fmt.Println(shh.Version())
 		os.Exit(0)
 	}
 

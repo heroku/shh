@@ -1,5 +1,5 @@
 Package: shh
-Version: {{GO_LINKER_VALUE}}
+Version: {{DEB_VERSION}}
 Architecture: amd64
 Maintainer: "Telemetry" <telemetry@heroku.com>
 Section: heroku

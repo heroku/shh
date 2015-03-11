@@ -23,7 +23,7 @@ func main() {
 	flag.Parse()
 
 	if *versionFlag {
-		fmt.Println(shh.VERSION)
+		fmt.Println(shh.Version())
 		os.Exit(0)
 	}
 

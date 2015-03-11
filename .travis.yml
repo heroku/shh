@@ -4,23 +4,8 @@ go:
 script:
 - make test
 before_deploy:
-- make install
-- echo $GOPATH
-- "export GOPATH=$(echo ${GOPATH} | cut -d: -f 2)"
-- export GO_LINKER_VALUE=$(git describe --tags --always | sed s/^v//)
-- export TMP=$(mktemp -d -t shh.XXXXX)
-- export DEB_ROOT=${TMP}/build
-- export DEB_OUT=${TMP}/deb
-- mkdir -p ${DEB_ROOT}/DEBIAN
-- mkdir -p ${DEB_OUT}
-- export CONTROL_FILE=${TMP}/build/DEBIAN/control
-- export INSTALL_PATH=${DEB_ROOT}/usr/bin
-- sed s/{{GO_LINKER_VALUE}}/${GO_LINKER_VALUE}/ < misc/DEBIAN.control > ${CONTROL_FILE}
-- cat ${CONTROL_FILE}
-- mkdir -p ${INSTALL_PATH}
-- install ${GOPATH}/bin/shh ${INSTALL_PATH}/shh
-- install ${GOPATH}/bin/shh-value ${INSTALL_PATH}/shh-value
-- fakeroot dpkg-deb --build ${DEB_ROOT} ${DEB_OUT}
+- make debs
+- export DEB_VERSION=$(git describe --tags --always | sed s/^v//)
 notifications:
   email: false
   hipchat:
@@ -36,9 +21,7 @@ deploy:
   api_key:
     secure: cdMqjfyDdFqtEs4lJNgDjZl63OrzWQzY30xI3rKI3IBTnFKg9MMcd+6Gee8C9BXaKja43UVwdz0VWiCYD6MQbWUvM6FlF0v4FvIeVLC3KmD614VbzNa+Hc0GLBMTa6Ho3fVWjCcLrBmXqXqZPwr0GrbI6fXy/RipHmRRyaxYxCI=
   file:
-    - ${DEB_OUT}/shh_${GO_LINKER_VALUE}_amd64.deb
-    - ${GOPATH}/bin/shh
-    - ${GOPATH}/bin/shh-value
+    - shh_${DEB_VERSION}_amd64.deb
   on:
     all_branches: true
     tags: true

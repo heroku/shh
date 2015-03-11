@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	VERSION                          = "0.9.9"
 	DEFAULT_EMPTY_STRING             = ""
 	DEFAULT_INTERVAL                 = "60s"                                                              // Default tick interval for pollers
 	DEFAULT_OUTPUTTER                = "stdoutl2metder"                                                   // Default outputter
@@ -43,10 +42,12 @@ const (
 )
 
 var (
-	start = time.Now()
+	start   = time.Now()
+	version string
 )
 
 type Config struct {
+	version               string
 	Interval              time.Duration
 	Outputter             string
 	Pollers               []string
@@ -130,7 +131,11 @@ func GetConfig() (config Config) {
 
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
-	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", VERSION, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)
+	config.UserAgent = fmt.Sprintf("shh/%s (%s; %s; %s; %s)", version, runtime.Version(), runtime.GOOS, runtime.GOARCH, runtime.Compiler)
 	config.Start = start // Start time
 	return
+}
+
+func Version() string {
+	return "v" + version
 }
