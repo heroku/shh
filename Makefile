@@ -31,3 +31,13 @@ debs: gox glv
 glv:
 	$(eval GO_LINKER_VALUE := $(shell git describe --tags --always))
 
+ver:
+	$(eval VERSION := $(shell echo ${GO_LINKER_VALUE} | sed s/^v//))
+
+docker: gox glv ver clean_docker_build
+	gox -osarch="linux/amd64" -output=".docker_build/{{.Dir}}_{{.OS}}_{{.Arch}}" -ldflags "-X ${GO_LINKER_SYMBOL} ${GO_LINKER_VALUE}" ./...
+	docker build -t heroku/shh:${VERSION} ./
+	rm -rf .docker_build
+
+clean_docker_build:
+	rm -rf .docker_build
