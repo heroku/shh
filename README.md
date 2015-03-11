@@ -1,5 +1,6 @@
 [![Travis](https://img.shields.io/travis/heroku/shh.svg)](https://travis-ci.org/heroku/shh)
 [![Releases](https://img.shields.io/github/release/heroku/shh.svg)](https://github.com/heroku/shh/releases)
+([![GoDoc](https://godoc.org/github.com/heroku/shh?status.svg)](http://godoc.org/github.com/heroku/shh)
 
 
 System Heuristics Herald (aka Shh)
