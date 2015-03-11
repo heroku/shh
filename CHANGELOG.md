@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 0.9.10 - 2015-03-06
+
+- Added a deb target to the Makefile using gox
+- Doc update
+
 ## 0.9.9 - 2015-03-06
 
 ### Added

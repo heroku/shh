@@ -68,26 +68,28 @@ This variable works on "virtual" pollers and computes "percentage used", reporti
 * df (from the df_poller)
 
 
-## Building Debs on Heroku
+## Building Debs
+
+Requirements:
+
+* dpkg (see also `brew install dpkg`)
+* go & [gox](https://github.com/mitchellh/gox), which is installed via the Makefile
 
 ```bash
-heroku apps:create freeformz-build-shh --buildpack git://github.com/kr/heroku-buildpack-go.git
-git push heroku
-heroku open
+make debs
 ```
 
-Wait for the deb to be available, download and do what you want with it.
+Note: You can find debs on the [Github release page](https://github.com/heroku/shh/releases)
 
 ## 'Local' Development
 
 1. Obtain a Linux system (only really tested on Ubuntu ATM)
-2. Install Go (version 1.3 works fine)
-3. Set GOPATH [appropriately](http://golang.org/doc/code.html)
-4. `go get github.com/tool/godep`
-3. `go get github.com/heroku/shh`
-4. cd $GOPATH/src/github.com/heroku/shh
-5. godep go install ./...
-6. $GOPATH/bin/shh
+1. Install Go (version 1.4+)
+1. Set GOPATH [appropriately](http://golang.org/doc/code.html)
+1. `go get github.com/tool/godep`
+1. `go get github.com/heroku/shh`
+1. cd $GOPATH/src/github.com/heroku/shh
+1. go test -v ./...
 
 hack away
 
@@ -107,7 +109,7 @@ to contribute changes, please fork and submit a pull request.
 
 ## License
 
-Copyright 2013 - 2014, Edward Muller, and contributors
+Copyright 2013 - 2015, Edward Muller, and contributors
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
