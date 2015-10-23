@@ -35,10 +35,10 @@ func sanitizeMetricName(name string) string {
 	return strings.Replace(strings.Replace(name, ".", "-", -1), "/", "--", -1)
 }
 
-// parsePercent parses a line from cpuacct.stat like "user 12345678",
+// handlePercentCpu parses a line from cpuacct.stat like "user 12345678",
 // calculates the delta from the last measurement, calculates the
 // average percentage of one CPU core used, and submits the data point.
-func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string) {
+func (poller Cgroup) handlePercentCpu(line string, tick time.Time, cgroup string) {
 	fields := strings.Fields(line)
 
 	// "user" or "system"
@@ -60,7 +60,9 @@ func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string)
 	poller.last[key] = centis
 }
 
-func (poller Cgroup) parseMaxMemory(metric string, fileName string, tick time.Time, cgroup string) {
+// handleMaxMemory reads one kind of memory high-water mark, emits a metric,
+// and resets the HWM for the next interval.
+func (poller Cgroup) handleMaxMemory(metric string, fileName string, tick time.Time, cgroup string) {
 	path := CGROUPS_PATH + "/memory/" + cgroup + "/" + fileName
 	data, err := ioutil.ReadFile(path)
 
@@ -75,20 +77,20 @@ func (poller Cgroup) parseMaxMemory(metric string, fileName string, tick time.Ti
 
 func (poller Cgroup) Poll(tick time.Time) {
 	for _, cgroup := range poller.cgroups {
-		// I can't use the FileLineChannel here because I don't want
-		// to raise a fatal error if the cgroup doesn't exist yet.
+		// I can't use the FileLineChannel in utils.go here because I
+		// don't want to raise a fatal error if the cgroup doesn't exist yet.
 
 		cpuStat, err := filechan.FileLineChannel(CGROUPS_PATH + "/cpuacct/" + cgroup + "/cpuacct.stat")
 
 		if err == nil {
 			for line := range cpuStat {
-				poller.parsePercentCpu(line, tick, cgroup)
+				poller.handlePercentCpu(line, tick, cgroup)
 			}
 		}
 
-		poller.parseMaxMemory("user", "memory.max_usage_in_bytes", tick, cgroup)
-		poller.parseMaxMemory("kernel", "memory.kmem.max_usage_in_bytes", tick, cgroup)
-		poller.parseMaxMemory("kernel.tcp", "memory.kmem.tcp.max_usage_in_bytes", tick, cgroup)
+		poller.handleMaxMemory("user", "memory.max_usage_in_bytes", tick, cgroup)
+		poller.handleMaxMemory("kernel", "memory.kmem.max_usage_in_bytes", tick, cgroup)
+		poller.handleMaxMemory("kernel.tcp", "memory.kmem.tcp.max_usage_in_bytes", tick, cgroup)
 	}
 }
 
