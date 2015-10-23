@@ -47,7 +47,7 @@ func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string)
 	// absolute number of centiseconds of CPU time used
 	centis := Atouint64(fields[1])
 
-        key := cgroup + "." + metric
+	key := cgroup + "." + metric
 	last, exists := poller.last[key]
 
 	if exists {

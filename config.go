@@ -39,7 +39,7 @@ const (
 	DEFAULT_REDIS_INFO               = "clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec;keyspace:db0.keys" // semi colon seperated section:keya,keyb list
 	DEFAULT_REDIS_URL                = "tcp://localhost:6379/0?timeout=10s&maxidle=1"
 	DEFAULT_META                     = false
-        DEFAULT_CGROUPS                  = ""
+	DEFAULT_CGROUPS                  = ""
 )
 
 var (
@@ -89,7 +89,7 @@ type Config struct {
 	RedisUrl              *url.URL
 	RedisInfo             string
 	Meta                  bool
-        Cgroups               []string
+	Cgroups               []string
 }
 
 func GetConfig() (config Config) {
