@@ -50,7 +50,8 @@ func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string)
 	// absolute number of centiseconds of CPU time used
 	centis := Atouint64(fields[1])
 
-	last, exists := poller.last[metric]
+        key := cgroup + "." + metric
+	last, exists := poller.last[key]
 
 	if exists {
 		delta := centis - last
@@ -59,7 +60,7 @@ func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string)
 		poller.measurements <- FloatGaugeMeasurement{tick, poller.Name(), []string{sanitizeMetricName(cgroup), "cpu", metric}, percent, Percent}
 	}
 
-	poller.last[metric] = centis
+	poller.last[key] = centis
 }
 
 func (poller Cgroup) parseMaxMemory(metric string, fileName string, tick time.Time, cgroup string) {
