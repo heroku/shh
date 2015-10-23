@@ -22,7 +22,6 @@ type Cgroup struct {
 }
 
 func NewCgroupPoller(measurements chan<- Measurement, config Config) Cgroup {
-	println("constructed")
 	return Cgroup{
 		measurements: measurements,
 		last:         make(map[string]uint64),
@@ -40,8 +39,6 @@ func sanitizeMetricName(name string) string {
 // calculates the delta from the last measurement, calculates the
 // average percentage of one CPU core used, and submits the data point.
 func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string) {
-	println("cpu " + line)
-
 	fields := strings.Fields(line)
 
 	// "user" or "system"
@@ -64,8 +61,6 @@ func (poller Cgroup) parsePercentCpu(line string, tick time.Time, cgroup string)
 }
 
 func (poller Cgroup) parseMaxMemory(metric string, fileName string, tick time.Time, cgroup string) {
-	println("memory " + metric)
-
 	path := CGROUPS_PATH + "/memory/" + cgroup + "/" + fileName
 	data, err := ioutil.ReadFile(path)
 
@@ -79,11 +74,7 @@ func (poller Cgroup) parseMaxMemory(metric string, fileName string, tick time.Ti
 }
 
 func (poller Cgroup) Poll(tick time.Time) {
-	println("poll")
-
 	for _, cgroup := range poller.cgroups {
-		println(cgroup)
-
 		// I can't use the FileLineChannel here because I don't want
 		// to raise a fatal error if the cgroup doesn't exist yet.
 
