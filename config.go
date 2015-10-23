@@ -39,6 +39,7 @@ const (
 	DEFAULT_REDIS_INFO               = "clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec;keyspace:db0.keys" // semi colon seperated section:keya,keyb list
 	DEFAULT_REDIS_URL                = "tcp://localhost:6379/0?timeout=10s&maxidle=1"
 	DEFAULT_META                     = false
+        DEFAULT_CGROUPS                  = ""
 )
 
 var (
@@ -88,6 +89,7 @@ type Config struct {
 	RedisUrl              *url.URL
 	RedisInfo             string
 	Meta                  bool
+        Cgroups               []string
 }
 
 func GetConfig() (config Config) {
@@ -128,6 +130,7 @@ func GetConfig() (config Config) {
 	config.RedisInfo = GetEnvWithDefault("SHH_REDIS_INFO", DEFAULT_REDIS_INFO)                                             // section:key1,key2;section2:key1,key2
 	config.NetworkTimeout = GetEnvWithDefaultDuration("NETWORK_TIMEOUT", DEFAULT_NETWORK_TIMEOUT)                          // The maximum time to wait for network requests to respond (for both dial and first header when applicable)
 	config.Meta = GetEnvWithDefaultBool("SHH_META", DEFAULT_META)                                                          // Should report meta measurements, such as batch sizes for outputters, etc.
+	config.Cgroups = GetEnvWithDefaultStrings("SHH_CGROUPS", DEFAULT_CGROUPS)                                              // Cgroups to report stats on
 
 	tmp := GetEnvWithDefault("SHH_DISK_FILTER", DEFAULT_DISK_FILTER)
 	config.DiskFilter = regexp.MustCompile(tmp)
