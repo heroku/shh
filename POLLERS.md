@@ -360,6 +360,25 @@ This will then report:
 * `<prefix>.stats.instantaneous-ops-per-sec`
 * `<prefix>.keyspace.db0.keys`
 
+### Cgroup resource usage poller (cgroup)
+
+The Cgroup poller retrieves resource usage metrics for a list of cgroups. It fetches information for the processes in each group from two cgroup controllers: cpuacct and memory.
+
+From cpuacct, it fetches user and system CPU time used by the group expressed as a percentage of a single core. For example, a value of 125 would mean that process in the group used CPU time equivalent to one and one quarter of a CPU core for the entire polling interval.
+
+From memory, it fetches the MAXIMUM memory usage of the group over the entire interval (the high-water mark). It attempts to request that the kernel reset this value after each poll by writing a zero to the memory.max_memory_usage file in the group's directory. This will only work if the SHH process has permissions to the file. You can simply chown/chgrp the file appropriately to grant that access. Failing to do this will result in this poller reporting only the historical maximum memory usage irrespective of the interval.
+
+Three memory high-water marks are reported: "user", "kernel", and "tcp". "user" is standard memory usage (RSS). "Kernel" is kernel buffers and the like required by system calls made by processes in the group. "tcp" is just kernel memory required for TCP sessions. "Kernel" and "tcp" will always report 0 unless a respective memory limit for the cgroup has been set, due to limitations in the memory cgroup controller.
+
+Metrics produced:
+  * `<prefix>.cgroup.<cgroup name>.cpu.user`
+  * `<prefix>.cgroup.<cgroup name>.cpu.system`
+  * `<prefix>.cgroup.<cgroup name>.mem.user`
+  * `<prefix>.cgroup.<cgroup name>.mem.kernel`
+  * `<prefix>.cgroup.<cgroup name>.mem.kernel.tcp`
+
+These 5 metrics will be emitted for each cgroup in SHH_CGROUPS.  If a given cgroup does not exist in either controller, it will be silently ignored and the metrics for that controller/cgroup will not be emitted.
+
 ## Writing your own poller
 
 `shh` is written in the Go programming language, which doesn't support

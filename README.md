@@ -55,6 +55,8 @@ Configuration of shh doesn't use a config file, instead it uses environment vari
 | `SHH_FOLSOM_BASE_URL` | string | URL of exported folsom metrics via folsome\_cowboy or folsom\_webmachine (e.g. https://localhost:5564/) | |
 | `SHH_REDIS_URL` | string | URL for Redis as defined by [goredis](https://github.com/xuyu/goredis) (e.g. tcp://auth:password@127.0.0.1:6379/0?timeout=10s&maxidle=1) | tcp://localhost:6379/0?timeout=10s&maxidle=1 |
 | `SHH_REDIS_INFO` | string | Description of [INFO](http://redis.io/commands/info): `section0:key0,key1;section1:key0,key1` to pull | clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec;keyspace:db0.keys |
+| `SHH_CGROUPS` | list of string | cgroups to report stats on | group1,group2,group3 | empty (none) |
+
 
 For more information on the duration type, see [time.ParseDuration](http://golang.org/pkg/time/#ParseDuration)
 
