@@ -92,7 +92,7 @@ Note: You can find debs on the [Github release page](https://github.com/heroku/s
 1. Obtain a Linux system (only really tested on Ubuntu ATM)
 1. Install Go (version 1.4+)
 1. Set GOPATH [appropriately](http://golang.org/doc/code.html)
-1. `go get github.com/tool/godep`
+1. `go get github.com/tools/godep`
 1. `go get github.com/heroku/shh`
 1. cd $GOPATH/src/github.com/heroku/shh
 1. go test -v ./...
