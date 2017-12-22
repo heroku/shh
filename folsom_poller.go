@@ -73,6 +73,22 @@ type FolsomWallClock struct {
 	SinceLast uint64 `json:"wall_clock_time_since_last_call"`
 }
 
+type FolsomHistogram struct {
+	ArithmeticMean    float64            `json:"arithmetic_mean"`
+	GeometricMean     float64            `json:"geometric_mean"`
+	HarmonicMean      float64            `json:"harmonic_mean"`
+	Histogram         map[string]float64 `json:"histogram"`
+	Kurtosis          float64            `json:"kurtosis"`
+	N                 uint64             `json:"n"`
+	Max               float64            `json:"max"`
+	Median            float64            `json:"median"`
+	Min               float64            `json:"min"`
+	Percentile        map[string]float64 `json:"percentile"`
+	Skewness          float64            `json:"skewness"`
+	StandardDeviation float64            `json:"standard_deviation"`
+	Variance          float64            `json:"variance"`
+}
+
 type FolsomType struct {
 	Type string `json:"type"`
 }
@@ -183,17 +199,37 @@ func (poller FolsomPoller) doMetricsPoll(ctx slog.Context, tick time.Time) {
 	}
 
 	for key, ft := range metrics {
-		v := FolsomValue{Name: key, Type: ft.Type}
-		if err := poller.decodeReq("/_metrics/"+v.Name, &v); err != nil {
-			LogError(ctx, err, "while performing request for "+v.Name+"this tick")
-			return
-		}
+		switch ft.Type {
+		case "counter", "gauge":
+			v := FolsomValue{Name: key, Type: ft.Type}
+			if err := poller.decodeReq("/_metrics/"+v.Name, &v); err != nil {
+				LogError(ctx, err, "while performing request for "+v.Name+" this tick")
+				return
+			}
 
-		if m, err := poller.genMeasurement(tick, v); err != nil {
-			LogError(ctx, err, "while performing request for "+v.Name+"this tick")
+			if m, err := poller.genMeasurement(tick, v); err != nil {
+				LogError(ctx, err, "while performing request for "+v.Name+" this tick")
+				return
+			} else {
+				poller.measurements <- m
+			}
+		case "histogram":
+			v := struct {
+				Value FolsomHistogram `json:"value"`
+			}{}
+
+			if err := poller.decodeReq("/_metrics/"+key, &v); err != nil {
+				LogError(ctx, err, "while performing request for "+key+" this tick")
+				return
+			}
+
+			if err := poller.genHistogram(tick, key, v.Value); err != nil {
+				LogError(ctx, err, "while performing request for "+key+" this tick")
+				return
+			}
+		default:
+			LogError(ctx, errors.New("Unsupported metric type: "+ft.Type), "while performing request for "+key+" this tick")
 			return
-		} else {
-			poller.measurements <- m
 		}
 	}
 }
@@ -224,6 +260,34 @@ func (poller FolsomPoller) genMeasurement(tick time.Time, v FolsomValue) (Measur
 	}
 
 	return nil, err
+}
+
+func (poller FolsomPoller) genHistogram(tick time.Time, name string, histogram FolsomHistogram) error {
+	// number of samples in histogram
+	n := GaugeMeasurement{tick, poller.Name(), []string{name, "n"}, histogram.N, Empty}
+	poller.measurements <- n
+
+	max := FloatGaugeMeasurement{tick, poller.Name(), []string{name, "max"}, histogram.Max, Empty}
+	poller.measurements <- max
+
+	median := FloatGaugeMeasurement{tick, poller.Name(), []string{name, "median"}, histogram.Median, Empty}
+	poller.measurements <- median
+
+	if v, ok := histogram.Percentile["95"]; !ok {
+		return errors.New("failed to extract p95 from histogram")
+	} else {
+		p95 := FloatGaugeMeasurement{tick, poller.Name(), []string{name, "p95"}, v, Empty}
+		poller.measurements <- p95
+	}
+
+	if v, ok := histogram.Percentile["99"]; !ok {
+		return errors.New("failed to extract p99 from histogram")
+	} else {
+		p99 := FloatGaugeMeasurement{tick, poller.Name(), []string{name, "p99"}, v, Empty}
+		poller.measurements <- p99
+	}
+
+	return nil
 }
 
 func (poller FolsomPoller) decodeReq(path string, v interface{}) error {
