@@ -22,7 +22,7 @@ debs: gox glv
 	$(eval LINUX_AMD64 := ${TMP}/linux/amd64)
 	$(eval DEB_ROOT := ${LINUX_AMD64}/DEBIAN)
 	$(eval VERSION := $(shell echo ${GO_LINKER_VALUE} | sed s/^v//))
-	gox -osarch="linux/amd64" -output="${TMP}/{{.OS}}/{{.Arch}}/usr/bin/{{.Dir}}" -ldflags "-X ${GO_LINKER_SYMBOL} ${GO_LINKER_VALUE}" ./...
+	gox -osarch="linux/amd64" -output="${TMP}/{{.OS}}/{{.Arch}}/usr/bin/{{.Dir}}" -ldflags "-X ${GO_LINKER_SYMBOL}=${GO_LINKER_VALUE}" ./...
 	mkdir -p ${DEB_ROOT}
 	cat misc/DEBIAN.control | sed s/{{VERSION}}/${VERSION}/ > ${DEB_ROOT}/control
 	dpkg-deb -Zgzip -b ${LINUX_AMD64} shh_${VERSION}_amd64.deb
