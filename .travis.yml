@@ -1,6 +1,6 @@
 language: go
 go:
-- 1.4.2
+- go1.9.3
 script:
 - make test
 before_deploy:
@@ -8,13 +8,6 @@ before_deploy:
 - export DEB_VERSION=$(git describe --tags --always | sed s/^v//)
 notifications:
   email: false
-  hipchat:
-    rooms:
-      secure: iA9RWtRVb+JLcUIt0dZKArASnHVeWrHSSuLGqslvI9JuLigAEszO/L29CCz/njPNj/cwDY99KIKfNIWOPuwlAZgzVQnqdMo/3OFgwQY2yNPiL+KqY6oLIPo6v3gx4mcQ2LdOdZ6YT2TgboK5gLYPI+ljZXLlTBWEMheBe6U49fg=
-    template:
-    - '%{repository}#%{build_number} (%{branch} - %{commit} : %{author}): %{message}
-      (<a href="%{build_url}">Details</a> | <a href="%{compare_url}">Change view</a>)'
-    format: html
 deploy:
   skip_cleanup: true
   provider: releases
