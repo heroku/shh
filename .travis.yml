@@ -23,7 +23,7 @@ deploy:
       repo: heroku/shh
   - provider: releases
     api_key:
-      secure: cdMqjfyDdFqtEs4lJNgDjZl63OrzWQzY30xI3rKI3IBTnFKg9MMcd+6Gee8C9BXaKja43UVwdz0VWiCYD6MQbWUvM6FlF0v4FvIeVLC3KmD614VbzNa+Hc0GLBMTa6Ho3fVWjCcLrBmXqXqZPwr0GrbI6fXy/RipHmRRyaxYxCI=
+      secure: RSOvXJgI2/zxXUJT/XCyGJCb82gNSTO0Ey8aSTZq3BfkFUj3uDcrIVuwp1iHRguLKnisTYwDqdJ3KCW4j9grDz2D40KA1Efz0HLnAifONPZiNOd5QwWJt8YP+l0s5s/eMMUaj7G4sxxfAr13Y3aQubFd6R1jNtan2x9LSN757g4=
     file: shh_${DEB_VERSION}_amd64.deb
     on:
       tags: true
