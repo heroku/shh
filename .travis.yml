@@ -9,12 +9,22 @@ before_deploy:
 notifications:
   email: false
 deploy:
-  skip_cleanup: true
-  provider: releases
-  api_key:
-    secure: cdMqjfyDdFqtEs4lJNgDjZl63OrzWQzY30xI3rKI3IBTnFKg9MMcd+6Gee8C9BXaKja43UVwdz0VWiCYD6MQbWUvM6FlF0v4FvIeVLC3KmD614VbzNa+Hc0GLBMTa6Ho3fVWjCcLrBmXqXqZPwr0GrbI6fXy/RipHmRRyaxYxCI=
-  file: shh_${DEB_VERSION}_amd64.deb
-  on:
-    all_branches: true
-    tags: true
-    repo: heroku/shh
+  - provider: packagecloud
+    username: heroku
+    repository: open
+    dist: 'ubuntu/trusty'
+    token:
+      # packagecloud.io api token for user heroku-runtime-bot
+      secure: GP762EzC/CoBAqWvDv6NCVmn6jgdK81SdX4/0OBYlgUs27EAQRI6WP8XC7W868h6qy1EK2lSz+MnCZrUa1UxWXIt22udbW4uWD3rC/UJPsVoggAiJFcyvm4V4QQjGCWo+1S1qn6aPAWAYyScnJ/4Q+6z4LvmeE9bSqIwlps2jv0=
+    skip_cleanup: true
+    file: shh_${DEB_VERSION}_amd64.deb
+    on:
+      tags: true
+      repo: heroku/shh
+  - provider: releases
+    api_key:
+      secure: cdMqjfyDdFqtEs4lJNgDjZl63OrzWQzY30xI3rKI3IBTnFKg9MMcd+6Gee8C9BXaKja43UVwdz0VWiCYD6MQbWUvM6FlF0v4FvIeVLC3KmD614VbzNa+Hc0GLBMTa6Ho3fVWjCcLrBmXqXqZPwr0GrbI6fXy/RipHmRRyaxYxCI=
+    file: shh_${DEB_VERSION}_amd64.deb
+    on:
+      tags: true
+      repo: heroku/shh
