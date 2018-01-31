@@ -11,7 +11,7 @@ notifications:
 deploy:
   - provider: packagecloud
     username: heroku
-    repository: open
+    repository: open-test
     dist: 'ubuntu/trusty'
     token:
       # packagecloud.io api token for user heroku-runtime-bot
