@@ -24,6 +24,7 @@ deploy:
   - provider: releases
     api_key:
       secure: RSOvXJgI2/zxXUJT/XCyGJCb82gNSTO0Ey8aSTZq3BfkFUj3uDcrIVuwp1iHRguLKnisTYwDqdJ3KCW4j9grDz2D40KA1Efz0HLnAifONPZiNOd5QwWJt8YP+l0s5s/eMMUaj7G4sxxfAr13Y3aQubFd6R1jNtan2x9LSN757g4=
+    skip_cleanup: true
     file: shh_${DEB_VERSION}_amd64.deb
     on:
       tags: true
