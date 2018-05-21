@@ -1,6 +1,6 @@
 language: go
 go:
-- go1.9.3
+- go1.10.2
 script:
 - make test
 before_deploy:
