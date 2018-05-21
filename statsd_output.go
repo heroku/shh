@@ -5,7 +5,7 @@ import (
 	"net"
 	"strconv"
 
-	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
+	"github.com/heroku/slog"
 )
 
 type Statsd struct {

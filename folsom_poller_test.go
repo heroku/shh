@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
+	"github.com/heroku/slog"
 )
 
 var sampleHistogram = `

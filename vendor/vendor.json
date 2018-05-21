@@ -1,0 +1,22 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "T8mH2uUZ900qll92klGRZ0XqwgA=",
+			"path": "github.com/freeformz/filechan",
+			"revision": "f0a3eeb53e2ed90ccb6da805949219cc36affdf1"
+		},
+		{
+			"checksumSHA1": "4Mo2BthnD6R6pHdEbGR2LF5jkn8=",
+			"path": "github.com/heroku/slog",
+			"revision": "7fea2d3038fa544293ba03f260cdc51d6674a20c"
+		},
+		{
+			"checksumSHA1": "Oz0vQp5qhXF83bYI2iznWnnf1W4=",
+			"path": "github.com/xuyu/goredis",
+			"revision": "517ef62abb23d535e4c1891e8507551d7ee65113"
+		}
+	],
+	"rootPath": "github.com/heroku/shh"
+}

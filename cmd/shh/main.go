@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/heroku/shh"
-	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
+	"github.com/heroku/slog"
 )
 
 var (
