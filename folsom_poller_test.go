@@ -46,7 +46,7 @@ func TestPollHistogram(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/_metrics" {
 			if r.URL.Query().Get("info") != "true" {
-				t.Error("invalid query string in request: %v", r)
+				t.Errorf("invalid query string in request: %v", r)
 				http.Error(w, "unexpected request", http.StatusInternalServerError)
 			}
 			w.Write([]byte("{\"test\":{\"type\":\"histogram\"}}"))
