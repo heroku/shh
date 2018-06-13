@@ -14,66 +14,67 @@ func TestListenPollerParser_HappyPath(t *testing.T) {
 	m, err = listen.parseLine("90210 beverly.hills 10")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
-	} else {
-		if c, ok := m.(CounterMeasurement); !ok {
-			t.Errorf("Should have returned a CounterMeasurement, was= %u", m)
-		} else if c.value != 10 {
-			t.Errorf("Value should equal 10")
-		} else if c.time != time.Unix(90210, 0) {
-			t.Errorf("Time should be equal to Unix(90210), was=%s", c.time)
-		} else if c.unit.Name() != "" {
-			t.Errorf("Unit should be empty, was=%u", c.unit)
-		} else if len(c.what) != 1 {
-			t.Errorf("Metric name should have 1 component, was=%d", len(c.what))
-		}
+	}
+	c, ok := m.(CounterMeasurement)
+	if !ok {
+		t.Errorf("Should have returned a CounterMeasurement, got=%T", m)
+	}
+	if c.value != 10 {
+		t.Errorf("Value should equal 10")
+	}
+	if c.time != time.Unix(90210, 0) {
+		t.Errorf("Time should be equal to Unix(90210), was=%s", c.time)
+	}
+	if n := c.unit.Name(); n != "" {
+		t.Errorf("Unit should be empty, was=%s", n)
+	}
+	if len(c.what) != 1 {
+		t.Errorf("Metric name should have 1 component, was=%d", len(c.what))
 	}
 
 	m, err = listen.parseLine("2014-10-13T22:00:16Z beverly.hills 10")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!: got=%s", err)
-	} else {
-		if c, ok := m.(CounterMeasurement); !ok {
-			t.Errorf("Should have returned a CounterMeasurement, was= %u", m)
-			t.Errorf("Value should equal 10")
-		} else if c.time != time.Date(2014, 10, 13, 22, 0, 16, 0, time.UTC) {
-			t.Errorf("Time should be equal to 2014-10-13T22:00:16Z, was=%s", c.time)
-		}
+	}
+	c, ok = m.(CounterMeasurement)
+	if !ok {
+		t.Errorf("Should have returned a CounterMeasurement, was=%T", m)
+		t.Errorf("Value should equal 10")
+	}
+	if c.time != time.Date(2014, 10, 13, 22, 0, 16, 0, time.UTC) {
+		t.Errorf("Time should be equal to 2014-10-13T22:00:16Z, was=%s", c.time)
 	}
 
 	m, err = listen.parseLine("90210 beverly.hills 10 g")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
-	} else {
-		if c, ok := m.(GaugeMeasurement); !ok {
-			t.Errorf("Should have returned a GaugeMeasurement, was= %u", c)
-		}
+	}
+	if _, ok := m.(GaugeMeasurement); !ok {
+		t.Errorf("Should have returned a GaugeMeasurement, was=%T", m)
 	}
 
 	m, err = listen.parseLine("90210 beverly.hills 10 c")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
-	} else {
-		if c, ok := m.(CounterMeasurement); !ok {
-			t.Errorf("Should have returned a CounterMeasurement, was=%u", c)
-		}
+	}
+	if _, ok := m.(CounterMeasurement); !ok {
+		t.Errorf("Should have returned a CounterMeasurement, was=%T", m)
 	}
 
 	m, err = listen.parseLine("90210 beverly.hills 10 c Millionaires")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
-	} else {
-		if m.Unit().Name() != "Millionaires" || m.Unit().Abbr() != "" {
-			t.Errorf("Unit should have been name=Millionaires, abbr=, was=%u", m)
-		}
+	}
+	if m.Unit().Name() != "Millionaires" || m.Unit().Abbr() != "" {
+		t.Errorf("Unit should have been name=Millionaires, abbr='' got name=%q, abbr=%q", m.Unit().Name(), m.Unit().Abbr())
 	}
 
 	m, err = listen.parseLine("90210 beverly.hills 10 c Millionaires,$$")
 	if err != nil {
 		t.Errorf("Should have successfully parsed!")
-	} else {
-		if m.Unit().Name() != "Millionaires" || m.Unit().Abbr() != "$$" {
-			t.Errorf("Unit should have been name=Millionaires, abbr=$$, was=%u", m)
-		}
+	}
+	if m.Unit().Name() != "Millionaires" || m.Unit().Abbr() != "$$" {
+		t.Errorf("Unit should have been name=Millionaires, abbr=$$, got name=%q abbr=%q", m.Unit().Name(), m.Unit().Abbr())
 	}
 }
 

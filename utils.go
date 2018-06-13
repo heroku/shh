@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/heroku/shh/Godeps/_workspace/src/github.com/freeformz/filechan"
-	"github.com/heroku/shh/Godeps/_workspace/src/github.com/heroku/slog"
+	"github.com/freeformz/filechan"
+	"github.com/heroku/slog"
 )
 
 var (

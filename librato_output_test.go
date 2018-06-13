@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"os"
+	"sync"
 	"testing"
 	"time"
 )
@@ -20,12 +21,15 @@ func (s *HappyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 }
 
 type SleepyHandler struct {
+	mu      sync.Mutex
 	Amt     time.Duration
 	ReqIncr time.Duration
 	times   int
 }
 
 func (s *SleepyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	s.times++
 	time.Sleep(s.Amt)
 	w.WriteHeader(http.StatusOK)
@@ -71,7 +75,7 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	}
 
 	if handler.times != 3 {
-		t.Errorf("Request should have been tried 3 times, instead it was tried: ", handler.times)
+		t.Error("Request should have been tried 3 times, instead it was tried: ", handler.times)
 	}
 }
 
