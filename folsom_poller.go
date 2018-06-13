@@ -46,6 +46,7 @@ type FolsomStatistics struct {
 	RunQueue          uint64                  `json:"run_queue"`
 	Runtime           FolsomRuntime           `json:"runtime"`
 	WallClock         FolsomWallClock         `json:"wall_clock"`
+	SchedUtil         uint64                  `json:"sched_util"`
 }
 
 type FolsomGarbageCollection struct {
@@ -176,7 +177,9 @@ func (poller FolsomPoller) doStatisticsPoll(ctx slog.Context, tick time.Time) {
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "run-queue"}, stats.RunQueue, Processes}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "runtime"}, stats.Runtime.SinceLast, MilliSeconds}
 	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "wall-clock"}, stats.WallClock.SinceLast, MilliSeconds}
+	poller.measurements <- GaugeMeasurement{tick, poller.Name(), []string{"stats", "sched-util"}, stats.SchedUtil, Percent}
 }
+
 func (poller FolsomPoller) doEtsPoll(ctx slog.Context, tick time.Time) {
 	tables := make(map[string]FolsomEts)
 
