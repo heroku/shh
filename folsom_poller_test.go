@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -103,5 +104,38 @@ func TestPollHistogram(t *testing.T) {
 	if p99.Name("") != "folsom.test.p99" || p99.StrValue() != "99.000000" {
 		t.Errorf("unexpected measurement: %v", p99)
 		return
+	}
+}
+
+var sampleETS1 = `{"57397":{"read_concurrency":"false","write_concurrency":"true","compressed":"false","memory":2065,"owner":"'<0.1076.0>'","heir":"none","name":"folsom_slide_uniform","size":83,"node":"node","named_table":"false","type":"set","keypos":1,"protection":"public"},"53300":{"read_concurrency":"false","write_concurrency":"true","compressed":"false","memory":2481,"owner":"'<0.1076.0>'","heir":"none","name":"folsom_slide_uniform","size":122,"node":"node","named_table":"false","type":"set","keypos":1,"protection":"public"}}`
+
+var sampleETS2 = `{"syslog_tab":{"read_concurrency":true,"write_concurrency":false,"compressed":false,"memory":385,"owner":"<0.826.0>","heir":"none","name":"syslog_tab","size":6,"node":"node","named_table":true,"type":"set","keypos":1,"protection":"public"},"49196":{"read_concurrency":false,"write_concurrency":false,"compressed":false,"memory":339,"owner":"<0.813.0>","heir":"<0.815.0>","name":"gr_manager","size":3,"node":"node","named_table":false,"type":"set","keypos":1,"protection":"private"}}`
+
+func TestDecodeBody(t *testing.T) {
+	var cases = []struct {
+		description string
+		value       string
+		err         error
+	}{
+		{
+			description: "decodes boolean",
+			value:       sampleETS1,
+			err:         nil,
+		},
+		{
+			description: "decodes boolean as string",
+			value:       sampleETS2,
+			err:         nil,
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.description, func(t *testing.T) {
+			tables := make(map[string]FolsomEts)
+			err := decodeBody(&tables, strings.NewReader(tt.value))
+			if err != tt.err {
+				t.Fatalf("want %v, got %v", tt.err, err)
+			}
+		})
 	}
 }

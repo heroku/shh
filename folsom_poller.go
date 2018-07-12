@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -13,17 +14,9 @@ import (
 )
 
 type FolsomEts struct {
-	Compressed bool   `json:"compressed"`
-	Memory     uint64 `json:"memory"`
-	Owner      string `json:"owner"`
-	Heir       string `json:"heir"`
-	Name       string `json:"name"`
-	Size       uint64 `json:"size"`
-	Node       string `json:"node"`
-	NamedTable bool   `json:"named_table"`
-	Type       string `json:"type"`
-	KeyPos     uint64 `json:"keyos"`
-	Protection string `json:"protection"`
+	Memory uint64 `json:"memory"`
+	Name   string `json:"name"`
+	Size   uint64 `json:"size"`
 }
 
 type FolsomMemory struct {
@@ -308,13 +301,12 @@ func (poller FolsomPoller) decodeReq(path string, v interface{}) error {
 	}
 
 	defer resp.Body.Close()
+	return decodeBody(v, resp.Body)
+}
 
-	decoder := json.NewDecoder(resp.Body)
-	if derr := decoder.Decode(v); derr != nil {
-		return derr
-	}
-
-	return nil
+func decodeBody(v interface{}, reader io.Reader) error {
+	decoder := json.NewDecoder(reader)
+	return decoder.Decode(v)
 }
 
 func (poller FolsomPoller) Name() string {
