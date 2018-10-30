@@ -3,6 +3,9 @@ go:
 - go1.10.2
 script:
 - make test
+- npm install snyk
+- snyk test --org=cedar
+- snyk monitor --org=cedar
 before_deploy:
 - make debs
 - export DEB_VERSION=$(git describe --tags --always | sed s/^v//)
