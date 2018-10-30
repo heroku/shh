@@ -3,7 +3,7 @@ go:
 - go1.10.2
 script:
 - make test
-- npm install snyk
+- npm install -g snyk
 - snyk test --org=cedar
 - snyk monitor --org=cedar
 before_deploy:
