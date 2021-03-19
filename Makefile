@@ -10,12 +10,6 @@ test:
 install: glv
 	go install -v ${LDFLAGS} ./...
 
-update-deps: govendor
-	godep save -r ./...
-
-govendor:
-	go get -u github.com/kardianos/govendor
-
 debs: tmp ldflags  ver
 	$(eval DEB_ROOT := ${TMP}/DEBIAN)
 	${GO_BUILD_ENV} go build -v -o ${TMP}/usr/bin/shh ${LDFLAGS} ./cmd/shh
