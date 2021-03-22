@@ -1,0 +1,6 @@
+github.com/freeformz/filechan v0.0.0-20130209214948-f0a3eeb53e2e h1:14PuHRWRpHib5gPyiDzqSk0p3CxKtlNyi3Kf5ejK660=
+github.com/freeformz/filechan v0.0.0-20130209214948-f0a3eeb53e2e/go.mod h1:vMwMooHwfGo18vuKWbOh0QAgd1bXmkfmayjp+TN/QN8=
+github.com/heroku/slog v0.0.0-20140402171358-7fea2d3038fa h1:udpqQXzEVyYxKVOfRKCfx8FyneqHrvYEtzXc0LHxgRs=
+github.com/heroku/slog v0.0.0-20140402171358-7fea2d3038fa/go.mod h1:qakOkduMaAhe2ypljIuLEinhnl5nCnyz7iXMZHwdr14=
+github.com/xuyu/goredis v0.0.0-20140820021013-517ef62abb23 h1:0+1EhmoODl7T8NbEJ7/9WgQNCW05HKI0y+/kDR9bECE=
+github.com/xuyu/goredis v0.0.0-20140820021013-517ef62abb23/go.mod h1:Ew+jSwVYyBT+GrKWGzlld2VGZqUy5cgGQATzqHpqGvg=
