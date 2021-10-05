@@ -1,0 +1,56 @@
+name: 'builder'
+description: 'Builds a slug for the app and pushes the slug to S3'
+inputs:
+  stack:
+    description: 'the stack image to use (e.g. heroku-20)'
+    required: true
+    default: 'heroku-20'
+  buildpack_url:
+    description: 'the URL for the buildpack to use'
+    required: false
+    default: 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz'
+  s3_bucket:
+    description: 'S3 bucket to push the slug to'
+    required: true
+  aws_region:
+    description: 'AWS region'
+    required: true
+    default: 'us-east-1'
+  aws_access_key_id:
+    description: 'AWS access key id'
+    required: true
+  aws_secret_access_key:
+    description: 'AWS secret access key'
+    required: true
+  github_ref:
+    description: 'The github ref context'
+    required: true
+    default: ${{ github.ref }}
+  github_sha:
+    description: 'The github sha context'
+    required: true
+    default: ${{ github.sha }}
+  github_token:
+    description: 'The github api token'
+    required: true
+    default: ${{ github.token }}
+  app_name:
+    description: 'Name of the app which is used to generate the s3 object key name'
+    required: true
+  use_buildpack:
+    description: 'Indicates whether the buildpack should be used to compile the source'
+    required: false
+    default: "true"
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.stack }}
+    - ${{ inputs.buildpack_url }}
+    - ${{ inputs.s3_bucket }}
+    - ${{ inputs.aws_region }}
+    - ${{ inputs.aws_access_key_id }}
+    - ${{ inputs.aws_secret_access_key }}
+    - ${{ inputs.github_ref }}
+    - ${{ inputs.app_name }}
+    - ${{ inputs.use_buildpack }}
