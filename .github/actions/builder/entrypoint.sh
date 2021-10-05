@@ -4,6 +4,7 @@ set -euo pipefail
 
 if [[ $INPUT_USE_BUILDPACK == "true" ]]; then
     export STACK=$INPUT_STACK
+    export GO_INSTALL_PACKAGE_SPEC="./cmd/*"
 
     # Fetch buildpack
     curl -o buildpack.tgz "$INPUT_BUILDPACK_URL"
