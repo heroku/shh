@@ -1,0 +1,21 @@
+name: build-on-push
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./.github/actions/builder
+        with:
+          stack: heroku-20
+          buildpack_url: https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/go.tgz
+          aws_region: us-east-1
+          s3_bucket: ${{ secrets.AWS_S3_BUCKET }}
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          github_ref: ${{ github.ref }}
+          github_sha: ${{ github.sha }}
+          github_token: ${{ github.token }}
+          app_name: shh
