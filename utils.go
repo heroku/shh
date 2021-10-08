@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/freeformz/filechan"
+	"github.com/heroku/shh/filechan"
 	"github.com/heroku/slog"
 )
 

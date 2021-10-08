@@ -1,8 +1,0 @@
-# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
-version: v1.10.1
-# ignores vulnerabilities until expiry date; change duration by modifying expiry date
-ignore:
-  snyk:lic:golang:github.com:heroku:shh:GPL-3.0:
-    - '*':
-        reason: We own this repository so flagging usage of the GPL-3.0 license is not necessary.
-        expires: 2021-012-01T00:00:00Z

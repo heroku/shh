@@ -1,6 +1,3 @@
-# github.com/freeformz/filechan v0.0.0-20130209214948-f0a3eeb53e2e
-## explicit
-github.com/freeformz/filechan
 # github.com/heroku/slog v0.0.0-20140402171358-7fea2d3038fa
 ## explicit
 github.com/heroku/slog

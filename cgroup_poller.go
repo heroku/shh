@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/freeformz/filechan"
+	"github.com/heroku/shh/filechan"
 )
 
 const (
