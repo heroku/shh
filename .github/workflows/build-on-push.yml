@@ -10,7 +10,7 @@ jobs:
       - uses: ./.github/actions/builder
         with:
           stack: heroku-20
-          buildpack_url: https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/go.tgz
+          buildpack_url: https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku/go.tgz
           aws_region: us-east-1
           s3_bucket: ${{ secrets.AWS_S3_BUCKET }}
           aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}

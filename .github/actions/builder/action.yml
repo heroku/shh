@@ -8,7 +8,7 @@ inputs:
   buildpack_url:
     description: 'the URL for the buildpack to use'
     required: false
-    default: 'https://codon-buildpacks.s3.amazonaws.com/buildpacks/heroku/ruby.tgz'
+    default: 'https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku/ruby.tgz'
   s3_bucket:
     description: 'S3 bucket to push the slug to'
     required: true
