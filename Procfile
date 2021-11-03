@@ -1,1 +1,2 @@
-web: make & python -m SimpleHTTPServer $PORT
+web: python -m http.server $PORT
+shh: bin/shh
