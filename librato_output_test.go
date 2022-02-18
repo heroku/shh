@@ -56,7 +56,7 @@ func (g *GrumpyHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 	handler := &SleepyHandler{
 		Amt:     2 * time.Second,
-		ReqIncr: -600 * time.Millisecond,
+		ReqIncr: -2000 * time.Millisecond,
 	}
 	server := httptest.NewServer(handler)
 	defer server.Close()
@@ -74,13 +74,13 @@ func TestLibrato_TimeToHeaderTimeout(t *testing.T) {
 		t.Errorf("Request should not have errored with a sleepy handler")
 	}
 
-	if handler.times != 3 {
-		t.Error("Request should have been tried 3 times, instead it was tried: ", handler.times)
+	if handler.times != 2 {
+		t.Error("Request should have been tried 2 times, instead it was tried: ", handler.times)
 	}
 }
 
 func TestLibrato_ServerErrorBackoff(t *testing.T) {
-	handler := &GrumpyHandler{ResponseCodes: []int{503, 500, 200}}
+	handler := &GrumpyHandler{ResponseCodes: []int{503, 200}}
 	server := httptest.NewServer(handler)
 	defer server.Close()
 

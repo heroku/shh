@@ -31,7 +31,7 @@ type LibratoPostBody struct {
 
 const (
 	LibratoBacklog         = 8 // No more than N pending batches in-flight
-	LibratoMaxAttempts     = 1 // Max attempts before dropping batch
+	LibratoMaxAttempts     = 2 // Max attempts before dropping batch
 	LibratoStartingBackoff = 500 * time.Millisecond
 )
 
