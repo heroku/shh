@@ -34,6 +34,7 @@ const (
 	DEFAULT_TICKS                    = 100                                                                // Default number of clock ticks per second (see _SC_CLK_TCK)
 	DEFAULT_PAGE_SIZE                = 4096                                                               // Default system page size (see getconf PAGESIZE)
 	DEFAULT_NAGIOS3_METRIC_NAMES     = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
+	DEFAULT_NAGIOS4_METRIC_NAMES     = "NUMSERVICES,NUMHOSTS,AVGACTSVCLAT,AVGACTHSTLAT,NUMHSTACTCHK5M,NUMSVCACTCHK5M,NUMHSTACTCHK1M,NUMSVCACTCHK1M"
 	DEFAULT_SPLUNK_PEERS_SKIP_VERIFY = false
 	DEFAULT_NETWORK_TIMEOUT          = "5s"
 	DEFAULT_REDIS_INFO               = "clients:connected_clients;memory:used_memory,used_memory_rss;stats:instantaneous_ops_per_sec;keyspace:db0.keys" // semi colon seperated section:keya,keyb list
@@ -83,6 +84,7 @@ type Config struct {
 	Ticks                 int
 	PageSize              int
 	Nagios3MetricNames    []string
+	Nagios4MetricNames    []string
 	SplunkPeersSkipVerify bool
 	SplunkPeersUrl        *url.URL
 	FolsomBaseUrl         *url.URL
@@ -123,6 +125,7 @@ func GetConfig() (config Config) {
 	config.Ticks = GetEnvWithDefaultInt("SHH_TICKS", DEFAULT_TICKS)                                                        // Number of ticks per CPU cycle. It's normally 100, but you can check with `getconf CLK_TCK`
 	config.PageSize = GetEnvWithDefaultInt("SHH_PAGE_SIZE", DEFAULT_PAGE_SIZE)                                             // System Page Size. It's usually 4096, but you can check with `getconf PAGESIZE`
 	config.Nagios3MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS3_METRIC_NAMES", DEFAULT_NAGIOS3_METRIC_NAMES)         // Which nagios3stats metrics names should we poll
+	config.Nagios4MetricNames = GetEnvWithDefaultStrings("SHH_NAGIOS4_METRIC_NAMES", DEFAULT_NAGIOS4_METRIC_NAMES)         // Which nagios4stats metrics names should we poll
 	config.SplunkPeersSkipVerify = GetEnvWithDefaultBool("SHH_SPLUNK_PEERS_SKIP_VERIFY", DEFAULT_SPLUNK_PEERS_SKIP_VERIFY) // If SHH_SPLUNK_PEERS_URL is https, do we need to skip verification?
 	config.SplunkPeersUrl = GetEnvWithDefaultURL("SHH_SPLUNK_PEERS_URL", DEFAULT_EMPTY_STRING)                             // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
 	config.FolsomBaseUrl = GetEnvWithDefaultURL("SHH_FOLSOM_BASE_URL", DEFAULT_EMPTY_STRING)                               // URL of splunk search peers api endpoint. Ex: https://user:pass@localhost:8089/services/search/distributed/peers?count=-1
