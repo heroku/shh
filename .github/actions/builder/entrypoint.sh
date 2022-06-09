@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+git config --global --add safe.directory /github/workspace
+
 if [[ $INPUT_USE_BUILDPACK == "true" ]]; then
     export STACK=$INPUT_STACK
     export GO_INSTALL_PACKAGE_SPEC="./cmd/*"
