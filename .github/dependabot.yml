@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: "bundler"
+    insecure-external-code-execution: allow
+    directory: "/"
+    registries:
+      - ruby-packagecloud
+    schedule:
+      interval: "daily"
+    vendor: true
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: daily
+registries:
+  ruby-packagecloud:
+    type: rubygems-server
+    url: https://packagecloud.io/heroku/gemgate
+    username: ${{secrets.PACKAGECLOUD_TOKEN}}
+    password: ""
+
