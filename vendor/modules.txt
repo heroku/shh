@@ -1,6 +1,21 @@
+# github.com/go-ole/go-ole v1.2.6
+github.com/go-ole/go-ole
+github.com/go-ole/go-ole/oleutil
 # github.com/heroku/slog v0.0.0-20140402171358-7fea2d3038fa
 ## explicit
 github.com/heroku/slog
+# github.com/shirou/gopsutil v3.21.11+incompatible
+## explicit
+github.com/shirou/gopsutil/internal/common
+github.com/shirou/gopsutil/net
 # github.com/xuyu/goredis v0.0.0-20140820021013-517ef62abb23
 ## explicit
 github.com/xuyu/goredis
+# github.com/yusufpapurcu/wmi v1.2.2
+## explicit
+github.com/yusufpapurcu/wmi
+# golang.org/x/sys v0.0.0-20220422013727-9388b58f7150
+## explicit
+golang.org/x/sys/internal/unsafeheader
+golang.org/x/sys/unix
+golang.org/x/sys/windows
