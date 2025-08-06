@@ -40,7 +40,7 @@ fi
 
 # Setup naming
 SHORT_SHA=$(git rev-parse --short "$INPUT_GITHUB_SHA")
-BRANCH_NAME=$(echo "$INPUT_GITHUB_REF" | sed "s/refs\/heads\///")
+BRANCH_NAME=$(echo "$INPUT_GITHUB_REF" | sed "s/refs\/heads\///" | sed "s/\//-/g")
 ARTIFACT_NAME="$BRANCH_NAME-artifact-sha-$SHORT_SHA"
 echo "ARTIFACT_NAME -- $ARTIFACT_NAME"
 
