@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/builder
         with:
-          stack: heroku-22
+          stack: heroku-20
           buildpack_url: https://buildpack-registry.s3.amazonaws.com/buildpacks/heroku/go.tgz
           aws_region: us-east-1
           s3_bucket: ${{ secrets.AWS_S3_BUCKET }}
