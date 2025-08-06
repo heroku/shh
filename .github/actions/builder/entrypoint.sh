@@ -48,10 +48,10 @@ echo "ARTIFACT_NAME -- $ARTIFACT_NAME"
 echo "$INPUT_APP_NAME:$ARTIFACT_NAME" > .build_artifact
 
 # Create tmp tar file
-tar -czf /tmp/"$ARTIFACT_NAME".tgz .
+tar -czf "$RUNNER_TEMP"/"$ARTIFACT_NAME".tgz .
 
 # Upload to s3
-aws s3 cp /tmp/"$ARTIFACT_NAME".tgz s3://"$INPUT_S3_BUCKET"/app/"$INPUT_APP_NAME"/"$ARTIFACT_NAME".tgz
+aws s3 cp "$RUNNER_TEMP"/"$ARTIFACT_NAME".tgz s3://"$INPUT_S3_BUCKET"/app/"$INPUT_APP_NAME"/"$ARTIFACT_NAME".tgz
 
 # Copy to `-latest`
 aws s3 cp s3://"$INPUT_S3_BUCKET"/app/"$INPUT_APP_NAME"/"$ARTIFACT_NAME".tgz s3://"$INPUT_S3_BUCKET"/app/"$INPUT_APP_NAME"/"$BRANCH_NAME-latest".tgz
