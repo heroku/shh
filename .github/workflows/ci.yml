@@ -2,7 +2,7 @@ name: actions/ci
 on: [ push ]
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: pub-hk-ubuntu-24.04-ip
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-go@v5
