@@ -4,8 +4,15 @@ on: [push]
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:20.04
     steps:
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y git
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/builder
         with:
