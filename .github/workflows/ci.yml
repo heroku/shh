@@ -1,18 +1,8 @@
 name: actions/ci
 on: [ push ]
 jobs:
-  snyk:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@master
-    - name: Run Snyk to check for vulnerabilities
-      uses: snyk/actions/golang@master
-      env:
-        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      with:
-        args: --org=runtime
   test:
-    runs-on: ubuntu-latest
+    runs-on: sfdc-hk-ubuntu-latest
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-go@v5
