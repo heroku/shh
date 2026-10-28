@@ -16,7 +16,7 @@ func ExampleFileLineChannel_noError() {
 	//Output: true
 }
 
-//FixUpName
+// FixUpName
 func ExampleFixUpName() {
 	fmt.Println(FixUpName("foo(bar)"))
 	fmt.Println(FixUpName("Foo(Bar)"))

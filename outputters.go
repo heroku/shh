@@ -8,7 +8,6 @@ type Outputter interface {
 	Start()
 }
 
-//
 // FIXME: Any way to do this with reflect and a map?
 func NewOutputter(name string, measurements <-chan Measurement, config Config) (Outputter, error) {
 	switch name {
