@@ -32,7 +32,7 @@ func getConnection(addr string) (net.Conn, error) {
 
 func die(msg string) {
 	if msg != "" {
-		fmt.Fprintf(os.Stderr, msg)
+		fmt.Fprint(os.Stderr, msg)
 	}
 	flag.Usage()
 	os.Exit(1)
@@ -117,7 +117,7 @@ func main() {
 	}
 	conn.SetDeadline(time.Now().Add(time.Second * 5))
 	line := formatLine(metric, value, mmType, unit)
-	fmt.Printf(line)
-	fmt.Fprintf(conn, line)
+	fmt.Print(line)
+	fmt.Fprint(conn, line)
 	conn.Close()
 }

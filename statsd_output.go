@@ -64,7 +64,7 @@ func (out *Statsd) Output() {
 
 	for mm := range out.measurements {
 		if ms := out.Encode(mm); ms != "" {
-			fmt.Fprintf(conn, ms)
+			fmt.Fprint(conn, ms)
 		}
 	}
 }
