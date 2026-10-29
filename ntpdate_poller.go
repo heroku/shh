@@ -22,7 +22,7 @@ func NewNtpdatePoller(measurements chan<- Measurement, config Config) Ntpdate {
 	}
 }
 
-//FIXME: Timeout
+// FIXME: Timeout
 func (poller Ntpdate) Poll(tick time.Time) {
 	ctx := slog.Context{"poller": poller.Name(), "fn": "Poll", "tick": tick}
 

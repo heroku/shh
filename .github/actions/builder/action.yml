@@ -2,9 +2,9 @@ name: 'builder'
 description: 'Builds a slug for the app and pushes the slug to S3'
 inputs:
   stack:
-    description: 'the stack image to use (e.g. heroku-20)'
+    description: 'the stack image to use (e.g. heroku-26)'
     required: true
-    default: 'heroku-20'
+    default: 'heroku-26'
   buildpack_url:
     description: 'the URL for the buildpack to use'
     required: false

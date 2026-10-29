@@ -7,16 +7,19 @@ git config --global --add safe.directory /github/workspace
 if [[ $INPUT_USE_BUILDPACK == "true" ]]; then
     export STACK=$INPUT_STACK
     export GO_INSTALL_PACKAGE_SPEC="./cmd/*"
+    export CGO_ENABLED=0
 
     # Fetch buildpack
     curl -o buildpack.tgz "$INPUT_BUILDPACK_URL"
     mkdir -p build/pack
     mkdir -p build/cache
+    mkdir -p build/env
     tar -xf buildpack.tgz -C build/pack
     rm buildpack.tgz
 
     # Run buildpack
-    ./build/pack/bin/compile . ./build/cache/
+    # The buildpack pushd's into the cache dir and then re-resolves paths, so they must be absolute.
+    ./build/pack/bin/compile "$PWD" "$PWD/build/cache" "$PWD/build/env"
     mkdir -p vendor/cache
     mv ./build/cache ./vendor/cache
     rm -rf build/

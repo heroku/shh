@@ -1,4 +1,6 @@
-FROM heroku/heroku:20-build
+FROM heroku/heroku:26-build
+
+USER root
 
 COPY entrypoint.sh /entrypoint.sh
 
